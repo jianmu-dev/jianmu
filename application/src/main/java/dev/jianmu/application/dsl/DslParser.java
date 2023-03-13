@@ -604,10 +604,10 @@ public class DslParser {
             if (cache instanceof List) {
                 ((List<?>) cache).forEach(v -> {
                     if (!(v instanceof String)) {
-                        throw new DslException("global段cache名称仅支持字符串类型");
+                        throw new DslException("cache名称仅支持字符串类型");
                     }
-                    if (((String) v).length() > 30) {
-                        throw new DslException("global段cache名称长度不能超过30个字符");
+                    if (!((String) v).matches("^[a-zA-Z][_a-zA-Z0-9]{0,29}$")) {
+                        throw new DslException("cache名称以英文字母或下划线开头，支持下划线、数字、英文字母，不超过30个字符");
                     }
                 });
             }
@@ -669,10 +669,21 @@ public class DslParser {
         if (!(cache instanceof Map)) {
             throw new DslException("节点\"" + nodeName + "\"缓存格式配置错误");
         }
+        var dirs = new HashSet<String>();
         ((Map<?, ?>) cache).forEach((k, v) -> {
             if (!this.caches.contains((String) k)) {
-                throw new DslException("global段未声明缓存：" + k);
+                throw new DslException("未声明缓存：" + k);
             }
+            if (!(v instanceof String)) {
+                throw new DslException("节点\"" + nodeName + "\"缓存配置错误，目录为以\"/\"开头的字符串");
+            }
+            if (!((String) v).matches("^[/].*")) {
+                throw new DslException("节点\"" + nodeName + "\"缓存配置错误，目录为以\"/\"开头的字符串");
+            }
+            if (dirs.contains((String) v)) {
+                throw new DslException("节点\"" + nodeName + "\"缓存配置错误，目录不能重复");
+            }
+            dirs.add((String) v);
         });
     }
 
