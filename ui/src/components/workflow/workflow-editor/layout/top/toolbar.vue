@@ -62,6 +62,7 @@ import { WorkflowValidator } from '../../model/workflow-validator';
 import { cloneDeep } from 'lodash';
 import { compare } from '../../model/util/object';
 import { Global } from '../../model/data/global';
+import { v4 as uuidv4 } from 'uuid';
 
 export default defineComponent({
   components: { ProjectPanel },
@@ -140,6 +141,9 @@ export default defineComponent({
 
     // 缓存校验图标
     const checkCache = async (): Promise<void> => {
+      if (workflowForm.value.global.caches && typeof workflowForm.value.global.caches === 'string') {
+        workflowForm.value.global.caches = [{ ref: workflowForm.value.global.caches, key: uuidv4() }];
+      }
       const { global } = workflowForm.value;
       // 如果没有值直接忽略
       if (global && (global.caches?.length === 0 || !global.caches)) {

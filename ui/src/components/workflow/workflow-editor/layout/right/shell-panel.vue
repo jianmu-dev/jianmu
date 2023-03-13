@@ -156,9 +156,13 @@ export default defineComponent({
     // 构造需要的数据
     const cachesInfo = ref<{ name: string; disable: boolean }[]>([]);
 
-    caches.value.forEach((item: any) => {
-      cachesInfo.value.push({ name: item.ref ? item.ref : item, disable: false });
-    });
+    if (typeof caches.value === 'string') {
+      cachesInfo.value.push({ name: caches.value, disable: false });
+    } else {
+      caches.value.forEach((item: any) => {
+        cachesInfo.value.push({ name: item.ref ? item.ref : item, disable: false });
+      });
+    }
 
     onMounted(async () => {
       // 将已有的缓存禁用
