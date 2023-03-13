@@ -179,10 +179,10 @@ export class WorkflowTool {
           concurrent: workflowData.global.concurrent,
           cache: undefined,
         };
-      } else if (workflowData.global.caches?.length === 1) {
+      } else if (workflowData.global.caches && typeof workflowData.global.caches === 'string') {
         return {
           concurrent: global.concurrent,
-          cache: workflowData.global.caches[0].ref,
+          cache: workflowData.global.caches,
         };
       } else {
         workflowData.global.caches?.forEach(item => {
