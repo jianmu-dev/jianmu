@@ -5,6 +5,7 @@
         <jm-input
           v-model="cacheVal"
           placeholder="请输入缓存唯一标识"
+          maxlength="30"
           @change="changeCacheVal"
           v-if="type === CacheTypeEnum.ADD"
         />
@@ -15,7 +16,13 @@
             </div>
             <i class="jm-icon-workflow-edit" @click="isEdit = false" />
           </div>
-          <jm-input v-model="cacheVal" placeholder="请输入缓存唯一标识" @change="changeCacheVal" v-else />
+          <jm-input
+            v-model="cacheVal"
+            maxlength="30"
+            placeholder="请输入缓存唯一标识"
+            @change="changeCacheVal"
+            v-else
+          />
         </div>
         <i class="jm-icon-button-delete" @click="handleDelete" />
       </div>
@@ -148,6 +155,7 @@ export default defineComponent({
           height: 24px;
           line-height: 24px;
           color: #526579;
+          text-align: center;
 
           &:hover {
             cursor: pointer;
