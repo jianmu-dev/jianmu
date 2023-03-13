@@ -53,9 +53,11 @@ public class Volume {
         this.available = false;
     }
 
-    public String getSimpleName() {
-        var arr = this.name.split("_");
-        return arr.length > 1 ? arr[1] : arr[0];
+    public String getMountName() {
+        if (this.workflowRef == null) {
+            return this.name;
+        }
+        return this.workflowRef + "_" + this.name;
     }
 
     public String getId() {
