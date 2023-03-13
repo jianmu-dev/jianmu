@@ -69,8 +69,8 @@ public class GlobalProperties {
         @Validated
         public static class K8s {
             private String namespace = "jianmu";
-            private String placeholder = "jianmudev/placeholder:0.3";
-            private String keepalive = "alpine:3.13.6";
+            private String placeholder = "docker.jianmuhub.com/jianmu/placeholder:0.3";
+            private String keepalive = "docker.jianmuhub.com/library/alpine:3.17.2";
         }
 
         @Data
