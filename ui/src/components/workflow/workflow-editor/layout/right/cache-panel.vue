@@ -32,8 +32,8 @@
         </div>
       </div>
     </jm-scrollbar>
-    <jm-dialog v-model="delDialogVisible" width="428px" title="确定清理当前缓存？">
-      旧的缓存数据将被清空
+    <jm-dialog v-model="delDialogVisible" width="428px" title="确定删除当前缓存？">
+      删除后节点中的缓存挂载会被一并删除
       <template #footer>
         <jm-button @click="delDialogVisible = false">取消</jm-button>
         <jm-button type="primary" @click="delCache">确定</jm-button>

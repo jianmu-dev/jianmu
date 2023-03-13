@@ -174,7 +174,7 @@ export class WorkflowTool {
     global.concurrent = workflowData.global.concurrent;
 
     const getGlobal = () => {
-      if (workflowData.global.caches?.length === 0) {
+      if (!workflowData.global.caches || workflowData.global.caches.length === 0) {
         return {
           concurrent: workflowData.global.concurrent,
           cache: undefined,
