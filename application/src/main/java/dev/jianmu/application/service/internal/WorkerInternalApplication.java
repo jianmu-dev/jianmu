@@ -364,8 +364,8 @@ public class WorkerInternalApplication {
     private Map<String, String> getParameterMap(List<InstanceParameter> instanceParameters, List<Parameter> parameters) {
         var parameterMap = instanceParameters.stream()
                 .map(instanceParameter -> Map.entry(
-                        instanceParameter.getRef(),
-                        instanceParameter.getParameterId()
+                                instanceParameter.getRef(),
+                                instanceParameter.getParameterId()
                         )
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -763,6 +763,7 @@ public class WorkerInternalApplication {
             }
             runner = builder.build();
         }
+        runner.setPull(this.globalProperties.getWorker().getImagePullPolicy());
         runner.setRegistryAddress(globalProperties.getWorker().getRegistry().getAddress());
         return runner;
 
@@ -785,6 +786,7 @@ public class WorkerInternalApplication {
                 .image(containerSpec.getImage())
                 .name(taskInstance.getAsyncTaskRef())
                 .placeholder(this.globalProperties.getWorker().getK8s().getPlaceholder())
+                .pull(this.globalProperties.getWorker().getImagePullPolicy())
                 .secrets(secrets)
                 .resultFile("/" + taskInstance.getTriggerId() + "/resultFile")
                 .build();
