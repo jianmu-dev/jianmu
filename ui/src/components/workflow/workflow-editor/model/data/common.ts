@@ -60,3 +60,5 @@ export interface IWorkflow {
 }
 
 export type ValidateParamFn = (value: string) => void;
+
+export type ValidateCacheFn = (name: string) => void;

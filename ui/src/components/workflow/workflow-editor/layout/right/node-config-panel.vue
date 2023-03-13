@@ -70,7 +70,7 @@ export default defineComponent({
     const node = graph.getNodes().find(({ id }) => props.nodeId === id)!;
     const proxy = new CustomX6NodeProxy(node);
     // 不能为ref，否则，表单内容的变化影响数据绑定
-    const nodeData = proxy.getData(graph);
+    const nodeData = proxy.getData(graph, props.workflowData);
     const formRef = ref();
     provide('getNode', (): Node => node);
 

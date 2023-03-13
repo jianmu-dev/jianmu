@@ -1,12 +1,7 @@
 <template>
   <div class="jm-workflow-editor">
     <template v-if="graph">
-      <toolbar
-        :workflow-data="workflowData"
-        @back="handleBack"
-        @save="handleSave"
-        @open-cache-panel="handleCachePanel"
-      />
+      <toolbar :workflow-data="workflowData" @back="handleBack" @save="handleSave" @open-cache-panel="openCachePanel" />
       <node-config-panel
         v-if="selectedNodeId"
         v-model="nodeConfigPanelVisible"
@@ -96,7 +91,7 @@ export default defineComponent({
         emit('save', back, dsl);
       },
       handleGraphCreated: (g: Graph) => {
-        workflowValidator = new WorkflowValidator(g, proxy);
+        workflowValidator = new WorkflowValidator(g, proxy, workflowData.value);
         graph.value = g;
       },
       handleNodeSelected,

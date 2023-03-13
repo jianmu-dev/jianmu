@@ -1,5 +1,5 @@
 import { Graph, Node } from '@antv/x6';
-import { IWorkflowNode } from './common';
+import { IWorkflow, IWorkflowNode } from './common';
 import { NodeTypeEnum } from './enumeration';
 import { Cron } from './node/cron';
 import { Webhook } from './node/webhook';
@@ -21,7 +21,7 @@ export class CustomX6NodeProxy {
     return [NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(type);
   }
 
-  getData(graph?: Graph): IWorkflowNode {
+  getData(graph?: Graph, workflowData?: IWorkflow): IWorkflowNode {
     const obj = JSON.parse(this.node.getData<string>());
     let nodeData: IWorkflowNode;
 
@@ -33,10 +33,18 @@ export class CustomX6NodeProxy {
         nodeData = Webhook.build(obj);
         break;
       case NodeTypeEnum.SHELL:
-        nodeData = Shell.build(obj, graph ? (value: string) => this.validateParam(graph, value) : undefined);
+        nodeData = Shell.build(
+          obj,
+          graph ? (value: string) => this.validateParam(graph, value) : undefined,
+          workflowData ? (name: string) => this.validateCache(workflowData, name) : undefined,
+        );
         break;
       case NodeTypeEnum.ASYNC_TASK:
-        nodeData = AsyncTask.build(obj, graph ? (value: string) => this.validateParam(graph, value) : undefined);
+        nodeData = AsyncTask.build(
+          obj,
+          graph ? (value: string) => this.validateParam(graph, value) : undefined,
+          workflowData ? (name: string) => this.validateCache(workflowData, name) : undefined,
+        );
         break;
     }
 
@@ -120,5 +128,13 @@ export class CustomX6NodeProxy {
         throw err;
       }
     }
+  }
+
+  private validateCache({ global: { caches } }: IWorkflow, name: string) {
+    if (caches?.map(item => (item.ref ? item.ref : item)).includes(name)) {
+      return;
+    }
+    // throw new Error(`cache不存在${name}`);
+    throw new Error('缓存不存在');
   }
 }

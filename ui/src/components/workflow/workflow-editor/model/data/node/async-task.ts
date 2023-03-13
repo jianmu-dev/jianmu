@@ -1,7 +1,7 @@
 import { BaseNode } from './base-node';
 import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum, RefTypeEnum } from '../enumeration';
 import defaultIcon from '../../../svgs/shape/async-task.svg';
-import { CustomRule, ValidateParamFn } from '../common';
+import { CustomRule, ValidateCacheFn, ValidateParamFn } from '../common';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 import { INNER_PARAM_LABEL, INNER_PARAM_TAG } from '../../../../workflow-expression-editor/model/const';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
@@ -55,6 +55,7 @@ export class AsyncTask extends BaseNode {
   caches: ICache[];
   failureMode: FailureModeEnum;
   private readonly validateParam?: ValidateParamFn;
+  private readonly validateCache?: ValidateCacheFn;
 
   constructor(
     ownerRef: string,
@@ -68,6 +69,7 @@ export class AsyncTask extends BaseNode {
     caches: ICache[] = [],
     failureMode: FailureModeEnum = FailureModeEnum.SUSPEND,
     validateParam?: ValidateParamFn,
+    validateCache?: ValidateCacheFn,
   ) {
     super(
       ref,
@@ -84,11 +86,13 @@ export class AsyncTask extends BaseNode {
     this.caches = caches;
     this.failureMode = failureMode;
     this.validateParam = validateParam;
+    this.validateCache = validateCache;
   }
 
   static build(
     { ownerRef, ref, name, icon, version, versionDescription, inputs, outputs, caches, failureMode }: any,
-    validateParam?: ValidateParamFn,
+    validateParam: ValidateParamFn | undefined,
+    validateCache: ValidateCacheFn | undefined,
   ): AsyncTask {
     return new AsyncTask(
       ownerRef,
@@ -102,6 +106,7 @@ export class AsyncTask extends BaseNode {
       caches,
       failureMode,
       validateParam,
+      validateCache,
     );
   }
 
@@ -185,7 +190,23 @@ export class AsyncTask extends BaseNode {
         type: 'object',
         required: true,
         fields: {
-          name: [{ required: true, message: '请选择缓存', trigger: 'change' }],
+          name: [
+            { required: true, message: '请选择缓存', trigger: 'change' },
+            {
+              validator: (rule: any, name: any, callback: any) => {
+                if (name && this.validateCache) {
+                  try {
+                    this.validateCache(name);
+                  } catch ({ message }) {
+                    callback(message);
+                    return;
+                  }
+                }
+                callback();
+              },
+              trigger: 'change',
+            },
+          ],
           value: [
             { required: true, message: '请输入目录', trigger: 'blur' },
             {
