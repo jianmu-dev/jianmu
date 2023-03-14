@@ -173,7 +173,7 @@ public class CacheApplication {
     }
 
     private String findVolumeName(String triggerId) {
-        var arr = triggerId.split("_");
+        var arr = triggerId.split("_", 2);
         return arr.length == 1 ? arr[0] : arr[1];
     }
 
