@@ -184,6 +184,11 @@ export class WorkflowTool {
           concurrent: global.concurrent,
           cache: workflowData.global.caches,
         };
+      } else if (typeof workflowData.global.caches === 'object' && workflowData.global.caches.length === 1) {
+        return {
+          concurrent: global.concurrent,
+          cache: workflowData.global.caches[0].ref ? workflowData.global.caches[0].ref : workflowData.global.caches,
+        };
       } else {
         workflowData.global.caches?.forEach(item => {
           // cache多个时为数组，typeof cache === 'object' 避免报错
