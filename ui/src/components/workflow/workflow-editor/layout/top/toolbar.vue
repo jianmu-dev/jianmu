@@ -147,6 +147,7 @@ export default defineComponent({
       const { global } = workflowForm.value;
       // 如果没有值直接忽略
       if (global && (global.caches?.length === 0 || !global.caches)) {
+        cacheIconVisible.value = false;
         return;
       }
       try {
