@@ -88,7 +88,11 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.16</version>
+                            <!--
+                                与springBoot2.7.0中Lombok版本保持一致
+                                fix: Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.8.1:compile (default-compile) on project api: Fatal error compiling: java.lang.IllegalAccessError: class lombok.javac.apt.LombokProcessor (in unnamed module @0xdffa7ce) cannot access class com.sun.tools.javac.processing.JavacProcessingEnvironment (in module jdk.compiler) because module jdk.compiler does not export com.sun.tools.javac.processing to unnamed module @0xdffa7ce
+                            -->
+                            <version>1.18.24</version>
                         </path>
                         <path>
                             <groupId>org.projectlombok</groupId>
