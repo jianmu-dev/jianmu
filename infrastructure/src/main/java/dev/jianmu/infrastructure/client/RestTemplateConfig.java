@@ -23,7 +23,7 @@ public class RestTemplateConfig {
                 .setRedirectStrategy(new LaxRedirectStrategy())
                 .build();
         factory.setConnectTimeout(15000);
-        factory.setReadTimeout(5000);
+        factory.setReadTimeout(15000);
         factory.setHttpClient(httpClient);
         return new RestTemplate(factory);
     }
