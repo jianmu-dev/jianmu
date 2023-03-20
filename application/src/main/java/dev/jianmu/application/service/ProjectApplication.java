@@ -397,7 +397,6 @@ public class ProjectApplication {
         project.setLastModifiedTime();
         project.setWorkflowVersion(workflow.getVersion());
 
-        this.pubTriggerEvent(parser, project);
         this.publishCacheEvent(workflow, lastWorkflowVersion);
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
