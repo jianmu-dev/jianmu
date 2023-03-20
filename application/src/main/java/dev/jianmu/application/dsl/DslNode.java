@@ -3,6 +3,7 @@ package dev.jianmu.application.dsl;
 import dev.jianmu.workflow.aggregate.definition.Branch;
 import lombok.Getter;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 @Getter
 public class DslNode {
     private String name;
+    private String alias;
     private String type;
     private String onFailure;
     //    private List<String> sources;
@@ -28,6 +30,7 @@ public class DslNode {
     private String image;
     private Map<String, String> environment;
     private List<String> script;
+    private Map<String, String> cache;
 
     public void setType(String type) {
         this.type = type;
@@ -36,6 +39,8 @@ public class DslNode {
     private static DslNode shellNode(String nodeName, Map<?, ?> nodeMap) {
         var node = new DslNode();
         node.name = nodeName;
+        var alias = (String) nodeMap.get("alias");
+        node.alias = alias == null ? nodeName : alias;
         setRelation(nodeMap, node);
         node.image = (String) nodeMap.get("image");
         node.onFailure = (String) nodeMap.get("on-failure");
@@ -58,12 +63,22 @@ public class DslNode {
         } else {
             node.script = List.of();
         }
+
+        var cache = nodeMap.get("cache");
+        if (cache instanceof Map) {
+            node.cache = ((Map<?, ?>) cache).entrySet().stream()
+                    .filter(entry -> entry.getValue() != null)
+                    .map(entry -> Map.entry((String) entry.getKey(), (String) entry.getValue()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,(k1, k2) -> k2, LinkedHashMap::new));
+        }
         return node;
     }
 
     private static DslNode normalNode(String nodeName, Map<?, ?> node) {
         var dslNode = new DslNode();
         dslNode.name = nodeName;
+        var alias = (String) node.get("alias");
+        dslNode.alias = alias == null ? nodeName : alias;
         dslNode.type = (String) node.get("task");
         dslNode.onFailure = (String) node.get("on-failure");
         setRelation(node, dslNode);
@@ -104,6 +119,14 @@ public class DslNode {
             dslNode.expression = (String) e;
         } else {
             dslNode.expression = "";
+        }
+
+        var cache = node.get("cache");
+        if (cache instanceof Map) {
+            dslNode.cache = ((Map<?, ?>) cache).entrySet().stream()
+                    .filter(entry -> entry.getValue() != null)
+                    .map(entry -> Map.entry((String) entry.getKey(), (String) entry.getValue()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
         return dslNode;
     }

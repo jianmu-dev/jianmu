@@ -10,6 +10,8 @@ public interface WorkflowRepository {
 
     Optional<Workflow> findByRefVersion(String refVersion);
 
+    List<Workflow> findByRefVersions(List<String> refVersions);
+
     List<Workflow> findByRef(String ref);
 
     Workflow add(Workflow workflow);

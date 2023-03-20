@@ -31,10 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -269,5 +266,13 @@ public class WorkflowInternalApplication {
                     .filter(t -> t.getAsyncTaskRef().equals(cmd.getNodeRef()))
                     .forEach(t -> this.doActivate(workflow, cmd.getNodeRef(), cmd.getTriggerId(), t.getVersion()));
         }
+    }
+
+    public List<Workflow> findByRefVersions(List<String> refVersions) {
+        return this.workflowRepository.findByRefVersions(refVersions);
+    }
+
+    public Optional<Workflow> findByRefAndVersion(String workflowRef, String workflowVersion) {
+        return this.workflowRepository.findByRefAndVersion(workflowRef, workflowVersion);
     }
 }

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author Ethan Liu
@@ -38,6 +39,8 @@ public class ProjectVo {
     private String name;
     @Schema(description = "项目描述")
     private String description;
+    @Schema(description = "ref")
+    private String workflowRef;
     @Schema(description = "项目来源")
     private Source source;
     @Schema(description = "DSL类型")
@@ -72,4 +75,6 @@ public class ProjectVo {
     private String status;
     @Schema(description = "分支")
     private String branch;
+    @Schema(description = "缓存")
+    private List<String> caches;
 }

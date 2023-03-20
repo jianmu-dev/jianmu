@@ -4,8 +4,10 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.*;
 import dev.jianmu.api.mapper.*;
 import dev.jianmu.api.vo.*;
+import dev.jianmu.application.dsl.DslParser;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
+import dev.jianmu.application.service.internal.WorkflowInternalApplication;
 import dev.jianmu.external_parameter.aggregate.ExternalParameter;
 import dev.jianmu.external_parameter.aggregate.ExternalParameterLabel;
 import dev.jianmu.git.repo.aggregate.Flow;
@@ -17,6 +19,8 @@ import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
+import dev.jianmu.task.aggregate.Volume;
+import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.parameter.NodeOutputDefinitionEnum;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
@@ -66,6 +70,8 @@ public class ViewController {
     private final ExternalParameterApplication externalParameterApplication;
     private final ExternalParameterLabelApplication externalParameterLabelApplication;
     private final WorkflowInstanceStatusSubscribeService workflowInstanceStatusSubscribeService;
+    private final CacheApplication cacheApplication;
+    private final WorkflowInternalApplication workflowInternalApplication;
 
     public ViewController(
             ProjectApplication projectApplication,
@@ -82,7 +88,9 @@ public class ViewController {
             UserSessionHolder userSessionHolder,
             ExternalParameterApplication externalParameterApplication,
             ExternalParameterLabelApplication externalParameterLabelApplication,
-            WorkflowInstanceStatusSubscribeService workflowInstanceStatusSubscribeService
+            WorkflowInstanceStatusSubscribeService workflowInstanceStatusSubscribeService,
+            CacheApplication cacheApplication,
+            WorkflowInternalApplication workflowInternalApplication
     ) {
         this.projectApplication = projectApplication;
         this.triggerApplication = triggerApplication;
@@ -99,6 +107,8 @@ public class ViewController {
         this.externalParameterApplication = externalParameterApplication;
         this.externalParameterLabelApplication = externalParameterLabelApplication;
         this.workflowInstanceStatusSubscribeService = workflowInstanceStatusSubscribeService;
+        this.cacheApplication = cacheApplication;
+        this.workflowInternalApplication = workflowInternalApplication;
     }
 
     @GetMapping("/parameters/types")
@@ -378,16 +388,38 @@ public class ViewController {
     @GetMapping("/async_task_instances/{triggerId}")
     @Operation(summary = "异步任务实例列表接口", description = "异步任务实例列表接口")
     public List<AsyncTaskInstanceVo> findAsyncTasksByTriggerId(@PathVariable String triggerId) {
-        return this.asyncTaskInstanceApplication.findByTriggerId(triggerId).stream()
-                .map(AsyncTaskInstanceMapper.INSTANCE::toAsyncTaskInstanceVo)
+        var asyncTaskInstances = this.asyncTaskInstanceApplication.findByTriggerId(triggerId);
+        if (asyncTaskInstances.isEmpty()) {
+            return List.of();
+        }
+        var asyncTaskInstance = asyncTaskInstances.get(0);
+        var workflow = this.workflowInternalApplication.findByRefAndVersion(asyncTaskInstance.getWorkflowRef(), asyncTaskInstance.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程：" + asyncTaskInstance.getWorkflowRef() + asyncTaskInstance.getWorkflowVersion()));
+        return asyncTaskInstances.stream()
+                .map(instance -> {
+                    var instanceVo = AsyncTaskInstanceMapper.INSTANCE.toAsyncTaskInstanceVo(instance);
+                    instanceVo.setTaskCaches(workflow.findNode(instance.getAsyncTaskRef()).getTaskCaches());
+                    return instanceVo;
+                })
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/v2/task_instances/{businessId}")
     @Operation(summary = "任务实例列表接口", description = "根据异步任务实例ID查询")
     public List<TaskInstanceVo> findByBusinessId(@PathVariable String businessId) {
-        return this.taskInstanceApplication.findByBusinessId(businessId).stream()
-                .map(TaskInstanceMapper.INSTANCE::toTaskInstanceVo)
+        var taskInstances = this.taskInstanceApplication.findByBusinessId(businessId);
+        if (taskInstances.isEmpty()) {
+            return List.of();
+        }
+        var taskInstance = taskInstances.get(0);
+        var workflow = this.workflowInternalApplication.findByRefAndVersion(taskInstance.getWorkflowRef(), taskInstance.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程：" + taskInstance.getWorkflowRef() + taskInstance.getWorkflowVersion()));
+        return taskInstances.stream()
+                .map(instance -> {
+                    var taskInstanceVo = TaskInstanceMapper.INSTANCE.toTaskInstanceVo(instance);
+                    taskInstanceVo.setTaskCaches(workflow.findNode(instance.getAsyncTaskRef()).getTaskCaches());
+                    return taskInstanceVo;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -521,9 +553,19 @@ public class ViewController {
     public PageInfo<ProjectVo> findProjectPage(@Valid ProjectViewingDto dto) {
         var session = this.userSessionHolder.getSession();
         var projects = this.projectApplication.findPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId(), dto.getName(), dto.getSortTypeName(), session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
+        var refVersions = projects.getList().stream()
+                .map(t -> t.getWorkflowRef() + t.getWorkflowVersion())
+                .collect(Collectors.toList());
+        var workflows = this.workflowInternalApplication.findByRefVersions(refVersions);
         var projectVos = projects.getList().stream().map(project -> {
             var projectVo = ProjectVoMapper.INSTANCE.toProjectVo(project);
             projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
+            projectVo.setCaches(workflows.stream()
+                    .filter(workflow -> workflow.getRef().equals(projectVo.getWorkflowRef()))
+                    .findFirst()
+                    .map(Workflow::getCaches)
+                    .orElse(null)
+            );
             if (project.getStatus() == null) {
                 return projectVo;
             }
@@ -546,6 +588,65 @@ public class ViewController {
         PageInfo<ProjectVo> pageInfo = PageUtils.pageInfo2PageInfoVo(projects);
         pageInfo.setList(projectVos);
         return pageInfo;
+    }
+
+    @PostMapping("/caches/{workflowRef}")
+    @Operation(summary = "获取项目缓存", description = "获取项目缓存")
+    public List<ProjectCacheVo> getProjectCache(@PathVariable String workflowRef) {
+        var volumes = this.cacheApplication.findByWorkflowRefAndScope(workflowRef, Volume.Scope.PROJECT);
+        var workflow = this.projectApplication.findLastWorkflowByRef(workflowRef);
+        if (workflow.getCaches() == null) {
+            return List.of();
+        }
+        var parse = DslParser.parse(workflow.getDslText());
+        return workflow.getCaches().stream()
+                .map(cache -> {
+                    var volume = volumes.stream()
+                            .filter(t -> t.getName().equals(cache))
+                            .findFirst()
+                            .orElse(Volume.Builder.aVolume().build());
+                    var name = volume.getName();
+                    return ProjectCacheVo.builder()
+                            .id(volume.getId())
+                            .name(name)
+                            .available(volume.isAvailable())
+                            .workerId(volume.getWorkerId())
+                            .nodeCaches(parse.getDslNodes().stream()
+                                    .filter(node -> node.getCache() != null && node.getCache().containsKey(name))
+                                    .map(node -> ProjectCacheVo.ProjectNodeCacheVo.builder()
+                                            .name(node.getAlias())
+                                            .metadata(workflow.findNode(node.getName()).getMetadata())
+                                            .path(node.getCache().get(name))
+                                            .build()
+                                    ).collect(Collectors.toList())
+                            )
+                            .build();
+                }).collect(Collectors.toList());
+    }
+
+    @PostMapping("/caches/async_task_instances/{asyncTaskId}")
+    @Operation(summary = "获取任务缓存", description = "获取任务缓存")
+    public List<NodeCacheVo> getAsyncTaskCache(@PathVariable String asyncTaskId) {
+        var asyncTaskInstance = this.asyncTaskInstanceApplication.findById(asyncTaskId)
+                .orElseThrow(() -> new DataNotFoundException("未找到异步任务实例：" + asyncTaskId));
+        var workflow = this.workflowInternalApplication.findByRefAndVersion(asyncTaskInstance.getWorkflowRef(), asyncTaskInstance.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到workflow: " + asyncTaskInstance.getWorkflowRef() + asyncTaskInstance.getWorkflowVersion()));
+        var node = workflow.findNode(asyncTaskInstance.getAsyncTaskRef());
+        if (node.getTaskCaches() == null) {
+            return List.of();
+        }
+        var volumes = this.cacheApplication.findByWorkflowRefAndScope(asyncTaskInstance.getWorkflowRef(), Volume.Scope.PROJECT);
+        return node.getTaskCaches().stream()
+                .map(cache -> NodeCacheVo.builder()
+                        .name(cache.getSource())
+                        .path(cache.getTarget())
+                        .available(volumes.stream()
+                                .filter(volume -> cache.getSource().equals(volume.getName()))
+                                .findFirst()
+                                .map(Volume::isAvailable)
+                                .orElse(false))
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/v2/projects/ids")
