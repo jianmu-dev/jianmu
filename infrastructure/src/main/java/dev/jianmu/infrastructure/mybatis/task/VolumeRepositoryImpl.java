@@ -5,6 +5,7 @@ import dev.jianmu.task.aggregate.Volume;
 import dev.jianmu.task.repository.VolumeRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -30,8 +31,18 @@ public class VolumeRepositoryImpl implements VolumeRepository {
     }
 
     @Override
-    public Optional<Volume> findByName(String name) {
-        return this.volumeMapper.findByName(name);
+    public Optional<Volume> findByNameAndWorkflowRef(String name, String workflowRef) {
+        return this.volumeMapper.findByNameAndWorkflowRef(name, workflowRef);
+    }
+
+    @Override
+    public List<Volume> findByWorkflowRef(String workflowRef) {
+        return this.volumeMapper.findByWorkflowRef(workflowRef);
+    }
+
+    @Override
+    public List<Volume> findByWorkflowRefAndScope(String workflowRef, Volume.Scope scope) {
+        return this.volumeMapper.findByWorkflowRefAndScope(workflowRef, scope);
     }
 
     @Override
@@ -45,12 +56,17 @@ public class VolumeRepositoryImpl implements VolumeRepository {
     }
 
     @Override
+    public void clean(Volume volume) {
+        this.volumeMapper.clean(volume);
+    }
+
+    @Override
     public void deleteById(String id) {
         this.volumeMapper.deleteById(id);
     }
 
     @Override
-    public void deleteByName(String name) {
-        this.volumeMapper.deleteByName(name);
+    public void deleteByNameAndWorkflowRef(String name, String workflowRef) {
+        this.volumeMapper.deleteByNameAndWorkflowRef(name, workflowRef);
     }
 }

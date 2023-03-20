@@ -3,28 +3,14 @@
     <template #title>
       <div class="creator-title">
         <div class="edit-icon">
-          <img src="~@/assets/svgs/btn/edit.svg" alt=""/>
+          <img src="~@/assets/svgs/btn/edit.svg" alt="" />
         </div>
         <span>添加项目</span>
       </div>
     </template>
-    <jm-form
-      :model="createForm"
-      :rules="editorRule"
-      ref="createFormRef"
-      @submit.prevent
-    >
-      <jm-form-item
-        label="选择项目组"
-        label-position="top"
-        class="project-group"
-        prop="projectGroupId"
-      >
-        <jm-select
-          @change="selectChange"
-          v-model="createForm.projectGroupId"
-          placeholder="请选择项目组"
-        >
+    <jm-form :model="createForm" :rules="editorRule" ref="createFormRef" @submit.prevent>
+      <jm-form-item label="选择项目组" label-position="top" class="project-group" prop="projectGroupId">
+        <jm-select @change="selectChange" v-model="createForm.projectGroupId" placeholder="请选择项目组">
           <jm-option
             v-for="item in projectGroupList"
             :disabled="id === item.id"
@@ -38,13 +24,9 @@
       <div class="selected-list">
         <div class="title">已选项目</div>
         <div class="selected-list-wrapper">
-          <div
-            class="selected-item"
-            v-for="(i, index) in compSelectedList"
-            :key="i.id"
-          >
+          <div class="selected-item" v-for="(i, index) in compSelectedList" :key="i.id">
             <!--            <span class="item-name">{{ i.name }}</span>-->
-            <jm-text-viewer :value="i.name" class="item-name"/>
+            <jm-text-viewer :value="i.name" class="item-name" />
             <span class="close" @click="removeItem(index)"></span>
           </div>
         </div>
@@ -61,19 +43,18 @@
         </template>
       </jm-input>
       <div class="card-wrapper">
-        <jm-empty v-if="projectList?.list.length === 0"/>
+        <jm-empty v-if="projectList?.list.length === 0" />
         <div
           v-else
-          :class="[
-            'card-item',
-            compSelectedList.some(item => i.id === item.id) ? 'active' : '',
-          ]"
+          :class="['card-item', compSelectedList.some(item => i.id === item.id) ? 'active' : '']"
           v-for="i in projectList?.list"
           :key="i.id"
           @click="selectProject(i)"
         >
           <!--          <div class="project-name">{{ i.name }}</div>-->
-          <jm-text-viewer :value="i.name" class="project-name"/>
+          <div class="project-name">
+            <jm-text-viewer :value="i.name" />
+          </div>
           <div class="project-desc">
             {{ i.description || '无' }}
           </div>
@@ -93,18 +74,8 @@
     </jm-form>
     <template #footer>
       <span>
-        <jm-button
-          size="small"
-          @click="dialogVisible = false"
-        >取消</jm-button
-        >
-        <jm-button
-          size="small"
-          type="primary"
-          @click="create"
-          :loading="loading"
-        >确定</jm-button
-        >
+        <jm-button size="small" @click="dialogVisible = false">取消</jm-button>
+        <jm-button size="small" type="primary" @click="create" :loading="loading">确定</jm-button>
       </span>
     </template>
   </jm-dialog>
@@ -117,13 +88,7 @@ import { IProjectGroupVo } from '@/api/dto/project-group';
 import { listProjectGroup, queryProject } from '@/api/view-no-auth';
 import { IProjectGroupAddingForm } from '@/model/modules/project-group';
 import { Mutable } from '@/utils/lib';
-import {
-  defineComponent,
-  ref,
-  onMounted,
-  getCurrentInstance,
-  computed,
-} from 'vue';
+import { defineComponent, ref, onMounted, getCurrentInstance, computed } from 'vue';
 import { addProject } from '@/api/project-group';
 import { START_PAGE_NUM } from '@/utils/constants';
 
@@ -147,18 +112,14 @@ export default defineComponent({
     // 被选中的项目
     const selectedList = ref<Mutable<IProjectVo[]>>([]);
     const compSelectedList = computed(() => selectedList.value);
-    const editorRule = ref<object>({
-      projectGroupId: [
-        { required: true, message: '请选择项目组', trigger: 'change' },
-      ],
+    const editorRule = ref<Record<string, any>>({
+      projectGroupId: [{ required: true, message: '请选择项目组', trigger: 'change' }],
     });
     const projectGroupList = ref<IProjectGroupVo[]>([]);
     // 已选择的项目数组
     const selectProject = (item: IProjectVo) => {
       selectedList.value.some(i => i.id === item.id)
-        ? (selectedList.value = selectedList.value.filter(
-          i => i.id !== item.id,
-        ))
+        ? (selectedList.value = selectedList.value.filter(i => i.id !== item.id))
         : selectedList.value.push(item);
     };
     const projectList = ref<IPageVo<IProjectVo>>();
@@ -440,7 +401,7 @@ export default defineComponent({
               height: 24px;
 
               &.active {
-                border: 1px solid #096DD9;
+                border: 1px solid #096dd9;
               }
             }
           }
