@@ -105,6 +105,8 @@ export interface IProjectVo
       workflowInstanceId: string;
       serialNo: number;
       occurredTime: string;
+      workflowRef: string;
+      caches?: string[];
     }
   > {}
 

@@ -1,11 +1,11 @@
 @font-face {
   font-family: 'jm-icon-workflow';
-  src: url('../font/jm-icon-workflow.eot?62985443');
-  src: url('../font/jm-icon-workflow.eot?62985443#iefix') format('embedded-opentype'),
-       url('../font/jm-icon-workflow.woff2?62985443') format('woff2'),
-       url('../font/jm-icon-workflow.woff?62985443') format('woff'),
-       url('../font/jm-icon-workflow.ttf?62985443') format('truetype'),
-       url('../font/jm-icon-workflow.svg?62985443#jm-icon-workflow') format('svg');
+  src: url('../font/jm-icon-workflow.eot?65796221');
+  src: url('../font/jm-icon-workflow.eot?65796221#iefix') format('embedded-opentype'),
+    url('../font/jm-icon-workflow.woff2?65796221') format('woff2'),
+    url('../font/jm-icon-workflow.woff?65796221') format('woff'),
+    url('../font/jm-icon-workflow.ttf?65796221') format('truetype'),
+    url('../font/jm-icon-workflow.svg?65796221#jm-icon-workflow') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -15,12 +15,13 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'jm-icon-workflow';
-    src: url('../font/jm-icon-workflow.svg?62985443#jm-icon-workflow') format('svg');
+    src: url('../font/jm-icon-workflow.svg?65796221#jm-icon-workflow') format('svg');
   }
 }
 */
-[class^="jm-icon-workflow-"]:before, [class*=" jm-icon-workflow-"]:before {
-  font-family: "jm-icon-workflow";
+[class^='jm-icon-workflow-']:before,
+[class*=' jm-icon-workflow-']:before {
+  font-family: 'jm-icon-workflow';
   font-style: normal;
   font-weight: normal;
   speak: never;
@@ -28,7 +29,7 @@
   display: inline-block;
   text-decoration: inherit;
   width: 1em;
-  margin-right: .2em;
+  margin-right: 0.2em;
   text-align: center;
   /* opacity: .8; */
 
@@ -41,7 +42,7 @@
 
   /* Animation center compensation - margins should be symmetric */
   /* remove if not needed */
-  margin-left: .2em;
+  margin-left: 0.2em;
 
   /* you can be more comfortable with increased icons size */
   /* font-size: 120%; */
@@ -54,24 +55,54 @@
   /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
 }
 
-.jm-icon-workflow-edit:before { content: '\e800'; } /* '' */
-.jm-icon-workflow-zoom-in:before { content: '\e801'; } /* '' */
-.jm-icon-workflow-zoom-out:before { content: '\e802'; } /* '' */
-.jm-icon-workflow-contraction:before { content: '\e803'; } /* '' */
-.jm-icon-workflow-zoom-center:before { content: '\e804'; } /* '' */
-.jm-icon-workflow-expansion:before { content: '\e805'; } /* '' */
-.jm-icon-workflow-full:before { content: '\e806'; } /* '' */
-.jm-icon-workflow-ignore:before { content: '\e807'; } /* '' */
-.jm-icon-workflow-normal:before { content: '\e808'; } /* '' */
-.jm-icon-workflow-retry:before { content: '\e809'; } /* '' */
-.jm-icon-workflow-rotate:before { content: '\e80a'; } /* '' */
-.jm-icon-workflow-screen-full:before { content: '\e80b'; } /* '' */
-.jm-icon-workflow-screen-normal:before { content: '\e80c'; } /* '' */
-.jm-icon-workflow-view-log:before { content: '\e80d'; } /* '' */
-.jm-icon-workflow-view-params:before { content: '\e80e'; } /* '' */
-.jm-icon-workflow-group:before { content: '\e80f'; } /* '' */
-.jm-icon-workflow-param:before { content: '\e810'; } /* '' */
-.jm-icon-workflow-param-type:before { content: '\e822'; } /* '' */
-.jm-icon-workflow-edit-mode:before { content: '\e824'; } /* '' */
-.jm-icon-workflow-select-mode:before { content: '\e825'; } /* '' */
-.jm-icon-workflow-branch:before { content: '\e826'; } /* '' */
+.jm-icon-workflow-edit:before {
+  content: '\e800';
+} /* '' */
+.jm-icon-workflow-zoom-in:before {
+  content: '\e801';
+} /* '' */
+.jm-icon-workflow-zoom-out:before {
+  content: '\e802';
+} /* '' */
+.jm-icon-workflow-contraction:before {
+  content: '\e803';
+} /* '' */
+.jm-icon-workflow-zoom-center:before {
+  content: '\e804';
+} /* '' */
+.jm-icon-workflow-expansion:before {
+  content: '\e805';
+} /* '' */
+.jm-icon-workflow-full:before {
+  content: '\e806';
+} /* '' */
+.jm-icon-workflow-ignore:before {
+  content: '\e807';
+} /* '' */
+.jm-icon-workflow-normal:before {
+  content: '\e808';
+} /* '' */
+.jm-icon-workflow-retry:before {
+  content: '\e809';
+} /* '' */
+.jm-icon-workflow-rotate:before {
+  content: '\e80a';
+} /* '' */
+.jm-icon-workflow-screen-full:before {
+  content: '\e80b';
+} /* '' */
+.jm-icon-workflow-screen-normal:before {
+  content: '\e80c';
+} /* '' */
+.jm-icon-workflow-view-log:before {
+  content: '\e80d';
+} /* '' */
+.jm-icon-workflow-view-params:before {
+  content: '\e80e';
+} /* '' */
+.jm-icon-workflow-group:before {
+  content: '\e80f';
+} /* '' */
+.jm-icon-workflow-cache:before {
+  content: '\e821';
+} /* '' */
