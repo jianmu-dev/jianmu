@@ -42,7 +42,7 @@ export const baseUrl = {
   triggerEvent: `${API_PREFIX}/view/trigger_events`,
   trigger: `${API_PREFIX}/view/trigger`,
   version: 'https://jianmu.dev/versions/ci',
-  cache: '/view/caches',
+  cache: `${API_PREFIX}/view/caches`,
 };
 const hubUrl = import.meta.env.VITE_JIANMUHUB_API_BASE_URL;
 const baseHubUrl = {

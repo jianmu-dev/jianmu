@@ -477,10 +477,17 @@ export default defineComponent({
 
       await loadData(func, id, retry);
     };
-
+    const loadNodeCaches = async () => {
+      try {
+        nodeCaches.value = await fetchNodeCache(props.businessId);
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      }
+    };
     // 初始化任务
     onBeforeMount(async () => {
       taskInstances.value = sortTasks(await listTaskInstance(props.businessId), true);
+      await loadNodeCaches();
       if (taskInstances.value.length > 0) {
         const initialize = (id: string) => {
           taskInstanceId.value = id;
