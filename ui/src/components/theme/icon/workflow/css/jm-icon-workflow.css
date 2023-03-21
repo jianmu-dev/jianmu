@@ -1,11 +1,11 @@
 @font-face {
   font-family: 'jm-icon-workflow';
-  src: url('../font/jm-icon-workflow.eot?65796221');
-  src: url('../font/jm-icon-workflow.eot?65796221#iefix') format('embedded-opentype'),
-    url('../font/jm-icon-workflow.woff2?65796221') format('woff2'),
-    url('../font/jm-icon-workflow.woff?65796221') format('woff'),
-    url('../font/jm-icon-workflow.ttf?65796221') format('truetype'),
-    url('../font/jm-icon-workflow.svg?65796221#jm-icon-workflow') format('svg');
+  src: url('../font/jm-icon-workflow.eot?62985443');
+  src: url('../font/jm-icon-workflow.eot?62985443#iefix') format('embedded-opentype'),
+    url('../font/jm-icon-workflow.woff2?62985443') format('woff2'),
+    url('../font/jm-icon-workflow.woff?62985443') format('woff'),
+    url('../font/jm-icon-workflow.ttf?62985443') format('truetype'),
+    url('../font/jm-icon-workflow.svg?62985443#jm-icon-workflow') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -15,7 +15,7 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'jm-icon-workflow';
-    src: url('../font/jm-icon-workflow.svg?65796221#jm-icon-workflow') format('svg');
+    src: url('../font/jm-icon-workflow.svg?62985443#jm-icon-workflow') format('svg');
   }
 }
 */
@@ -103,6 +103,18 @@
 .jm-icon-workflow-group:before {
   content: '\e80f';
 } /* '' */
-.jm-icon-workflow-cache:before {
-  content: '\e821';
-} /* '' */
+.jm-icon-workflow-param:before {
+  content: '\e810';
+} /* '' */
+.jm-icon-workflow-param-type:before {
+  content: '\e822';
+} /* '' */
+.jm-icon-workflow-edit-mode:before {
+  content: '\e824';
+} /* '' */
+.jm-icon-workflow-select-mode:before {
+  content: '\e825';
+} /* '' */
+.jm-icon-workflow-branch:before {
+  content: '\e826';
+} /* '' */

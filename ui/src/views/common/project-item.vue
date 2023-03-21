@@ -276,14 +276,6 @@
             </span>
             <template #dropdown>
               <jm-dropdown-menu>
-                <jm-dropdown-item v-if="project.caches && !entry" @click="() => (cacheDrawerFlag = true)">
-                  <a
-                    href="javascript: void(0)"
-                    class="jm-icon-workflow-cache"
-                    style="width: 90px; display: inline-block"
-                    >缓存</a
-                  >
-                </jm-dropdown-item>
                 <jm-dropdown-item :disabled="abling" @click="able(project.id)" v-if="!entry">
                   <a
                     href="javascript: void(0)"
@@ -308,12 +300,6 @@
       :current-project-name="project.name"
       v-model:webhookVisible="webhookDrawerFlag"
     ></webhook-drawer>
-    <cache-drawer
-      v-if="cacheDrawerFlag"
-      v-model="cacheDrawerFlag"
-      :current-project-name="project.name"
-      :current-project-workflow-ref="project.workflowRef"
-    ></cache-drawer>
     <div class="cover"></div>
   </div>
 </template>
@@ -325,14 +311,13 @@ import { IProjectVo } from '@/api/dto/project';
 import { active, del, executeImmediately, synchronize } from '@/api/project';
 import { datetimeFormatter } from '@/utils/formatter';
 import WebhookDrawer from './webhook-drawer.vue';
-import CacheDrawer from '@/views/common/cache-drawer.vue';
 import { useRouter } from 'vue-router';
 import { pushTop } from '@/utils/jump-address';
 import { terminate } from '@/api/workflow-execution-record';
 import dayjs from 'dayjs';
 
 export default defineComponent({
-  components: { WebhookDrawer, CacheDrawer },
+  components: { WebhookDrawer },
   props: {
     project: {
       type: Object as PropType<IProjectVo>,
@@ -376,7 +361,6 @@ export default defineComponent({
     const deleting = ref<boolean>(false);
     const enabled = ref<boolean>(props.project.enabled);
     const webhookDrawerFlag = ref<boolean>(false);
-    const cacheDrawerFlag = ref<boolean>(false);
     const concurrentVal = computed(() => {
       if (typeof props.concurrent === 'number') {
         return props.concurrent !== 1;
@@ -472,7 +456,6 @@ export default defineComponent({
       deleting,
       enabled,
       webhookDrawerFlag,
-      cacheDrawerFlag,
       concurrentVal,
       clickProject,
       execute: (id: string) => {

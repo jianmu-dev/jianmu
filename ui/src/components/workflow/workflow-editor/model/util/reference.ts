@@ -17,7 +17,10 @@ export function checkDuplicate(refs: string[], type: RefTypeEnum): void {
   }, {});
   for (const ref in countObj) {
     if (countObj[ref] > 1 && ref !== '') {
-      throw new RefDuplicateError(ref, `${type!=='节点'?type:''}唯一标识 "${ref}" 重复`);
+      throw new RefDuplicateError(
+        ref,
+        `${type !== '节点' ? type : ''}${type !== '目录' ? '唯一标识' : ''}"${ref}" 重复`,
+      );
     }
   }
 }
