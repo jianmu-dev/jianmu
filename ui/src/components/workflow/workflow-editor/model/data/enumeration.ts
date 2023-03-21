@@ -59,7 +59,7 @@ export enum NodeGroupEnum {
   INNER = 'inner',
   LOCAL = 'local',
   OFFICIAL = 'official',
-  COMMUNITY = 'community'
+  COMMUNITY = 'community',
 }
 
 /**
@@ -71,6 +71,8 @@ export enum RefTypeEnum {
   NODE = '节点',
   SHELL_ENV = 'Shell节点环境变量',
   SHELL_OUTPUT = 'Shell节点输出参数',
+  CACHE = '缓存',
+  DIR = '目录',
 }
 
 /**

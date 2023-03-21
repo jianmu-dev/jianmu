@@ -38,8 +38,17 @@ export class CustomWebhook extends BaseNode {
   readonly eventInstances: ICustomWebhookEventInstance[];
   dslText: string;
 
-  constructor(ref: string, nodeRef: string, name: string, icon: string, ownerRef: string, version: string = '', dslText: string = '',
-    events: ICustomWebhookEvent[] = [], eventInstances: ICustomWebhookEventInstance[] = []) {
+  constructor(
+    ref: string,
+    nodeRef: string,
+    name: string,
+    icon: string,
+    ownerRef: string,
+    version = '',
+    dslText = '',
+    events: ICustomWebhookEvent[] = [],
+    eventInstances: ICustomWebhookEventInstance[] = [],
+  ) {
     super(NodeRefEnum.WEBHOOK, name, NodeTypeEnum.WEBHOOK, icon, '');
     this.ownerRef = ownerRef;
     this.nodeRef = nodeRef;
@@ -69,7 +78,8 @@ export class CustomWebhook extends BaseNode {
         }
         arr.push(item);
         refArr.push(item.ref);
-      }));
+      }),
+    );
 
     return {
       value: CUSTOM_PARAM_SCOPE,
@@ -121,33 +131,37 @@ export class CustomWebhook extends BaseNode {
     });
     return {
       ...rules,
-      version: [{
-        required: true,
-        validator: (rule: any, value: any, callback: any) => {
-          if (value) {
+      version: [
+        {
+          required: true,
+          validator: (rule: any, value: any, callback: any) => {
+            if (value) {
+              callback();
+            }
+            if (!this.version) {
+              callback('请选择版本');
+              return;
+            }
             callback();
-          }
-          if (!this.version) {
-            callback('请选择版本');
-            return;
-          }
-          callback();
+          },
+          trigger: 'change',
         },
-        trigger: 'change',
-      }],
-      selectedReference: [{
-        validator: (rule: any, value: any, callback: any) => {
-          if (value) {
+      ],
+      selectedReference: [
+        {
+          validator: (rule: any, value: any, callback: any) => {
+            if (value) {
+              callback();
+            }
+            if (this.eventInstances.length === 0) {
+              callback('请选择一类触发事件');
+              return;
+            }
             callback();
-          }
-          if (this.eventInstances.length === 0) {
-            callback('请选择一类触发事件');
-            return;
-          }
-          callback();
+          },
+          trigger: 'change',
         },
-        trigger: 'change',
-      }],
+      ],
       eventInstances: {
         type: 'array',
         required: false,
@@ -161,21 +175,27 @@ export class CustomWebhook extends BaseNode {
     const { ownerRef, nodeRef, version, eventInstances } = this;
     return {
       webhook: `${ownerRef === OFFICIAL_NODE_OWNER_REF ? '' : `${ownerRef}/`}${nodeRef}@${version}`,
-      event: eventInstances.length === 0 ? undefined : eventInstances.map(param => {
-        const customEvent: any = {
-          ref: param.ref,
-          ruleset: param.ruleset.length === 0 ? undefined : param.ruleset.map(item => {
-            const rule: any = {
-              'param-ref': item.paramRef,
-              operator: item.operator,
-              value: item.matchingValue,
+      event:
+        eventInstances.length === 0
+          ? undefined
+          : eventInstances.map(param => {
+            const customEvent: any = {
+              ref: param.ref,
+              ruleset:
+                  param.ruleset.length === 0
+                    ? undefined
+                    : param.ruleset.map(item => {
+                      const rule: any = {
+                        'param-ref': item.paramRef,
+                        operator: item.operator,
+                        value: item.matchingValue,
+                      };
+                      return rule;
+                    }),
+              'ruleset-operator': param.rulesetOperator,
             };
-            return rule;
+            return customEvent;
           }),
-          'ruleset-operator': param.rulesetOperator,
-        };
-        return customEvent;
-      }),
     };
   }
 }
@@ -208,7 +228,7 @@ export function buildSelectableOption(uiEvent: any, ref: string): ISelectablePar
   return {
     value: '',
     label: '动作参数',
-    children: options.map(({ value, name }: { value: string | number, name: string }) => {
+    children: options.map(({ value, name }: { value: string | number; name: string }) => {
       return {
         value: value,
         label: name || value,

@@ -44,6 +44,34 @@
       <jm-form-item label="脚本" class="script-container">
         <jm-input type="textarea" placeholder="请输入shell脚本" v-model="form.script" />
       </jm-form-item>
+      <div class="cache-item">
+        <div class="cache-label">
+          缓存挂载
+          <jm-tooltip placement="top" :append-to-body="false" content="在顶部缓存模块中添加缓存后，在此挂载">
+            <i class="jm-icon-button-help"></i>
+          </jm-tooltip>
+        </div>
+        <cache-selector
+          v-for="(item, index) in form.caches"
+          :key="item.key"
+          :index="index"
+          v-model:cache-info="cachesInfo"
+          v-model:name="item.name"
+          v-model:value="item.value"
+          :form-model-name="'caches'"
+          :rules="form.getFormRules().caches.fields[index].fields"
+          @update-disable="updateDisable"
+          @update-cache="updateCache"
+          @change-dir="changeDir"
+          @delete-selected="deleteCacheSelector"
+        />
+        <div class="add-select-cache-btn">
+          <span class="add-link" @click="addSelector">
+            <i class="jm-icon-button-add" />
+            <span>添加</span>
+          </span>
+        </div>
+      </div>
       <jm-form-item
         label="执行失败时"
         class="node-item"
@@ -64,15 +92,19 @@
 import { defineComponent, onMounted, PropType, ref } from 'vue';
 import { Shell } from '../../model/data/node/shell';
 import ShellEnv from './form/shell-env.vue';
+import CacheSelector from './form/cache-selector.vue';
 import { v4 as uuidv4 } from 'uuid';
 import { ParamTypeEnum } from '../../model/data/enumeration';
 
 export default defineComponent({
-  components: { ShellEnv },
+  components: { ShellEnv, CacheSelector },
   props: {
     nodeData: {
       type: Object as PropType<Shell>,
       required: true,
+    },
+    caches: {
+      type: [Array, String],
     },
   },
   emits: ['form-created'],
@@ -108,6 +140,59 @@ export default defineComponent({
     };
     onMounted(() => emit('form-created', formRef.value));
 
+    // 模拟缓存列表
+    const caches = ref<any>(props.caches || []);
+    // 构造需要的数据
+    const cachesInfo = ref<{ name: string; disable: boolean }[]>([]);
+
+    if (typeof caches.value === 'string') {
+      cachesInfo.value.push({ name: caches.value, disable: false });
+    } else {
+      caches.value.forEach((item: any) => {
+        cachesInfo.value.push({ name: item.ref ? item.ref : item, disable: false });
+      });
+    }
+
+    onMounted(async () => {
+      // 将已有的缓存禁用
+      form.value.caches.forEach(item => {
+        cachesInfo.value.forEach(_item => {
+          if (item.name === _item.name) {
+            _item.disable = true;
+          }
+        });
+      });
+    });
+
+    const initSelect = () => {
+      // 通过已选择的索引和未选择的索引进行禁用管理
+      const cacheNameList = cachesInfo.value.map(({ name }) => name);
+      const selectNameList = form.value.caches.map(({ name }) => name);
+      const selectedIndex: any = [];
+      selectNameList.forEach(item => {
+        if (cacheNameList.indexOf(item) === -1) {
+          return;
+        }
+        selectedIndex.push(cacheNameList.indexOf(item));
+      });
+      const totalIndex = [];
+      for (let i = 0; i < cachesInfo.value.length; i++) {
+        totalIndex.push(i);
+      }
+      const notSelect: any = [];
+      cachesInfo.value.forEach((item, index) => {
+        if (selectNameList.indexOf(item.name) === -1) {
+          notSelect.push(index);
+        }
+      });
+      selectedIndex.forEach((item: any) => {
+        cachesInfo.value[item].disable = true;
+      });
+      notSelect.forEach((item: any) => {
+        cachesInfo.value[item].disable = false;
+      });
+    };
+
     return {
       imageSelectRef,
       enterSelect,
@@ -128,6 +213,40 @@ export default defineComponent({
             return;
           }
           formRef.value.validateField(`${formModelName}.${idx}.name`);
+        });
+      },
+      cachesInfo,
+      addSelector: () => form.value.caches.push({ key: uuidv4(), name: '', value: '' }),
+      // 更新选择框状态
+      updateDisable: (val: string, index: number) => {
+        form.value.caches[index].name = val;
+        initSelect();
+      },
+      updateCache: (_index: number, cacheVal: string, dirVal: string) => {
+        form.value.caches.forEach((item, index) => {
+          if (_index === index) {
+            item.name = cacheVal;
+            item.value = dirVal;
+          }
+        });
+      },
+      changeDir: () => {
+        form.value.caches.forEach((item, idx) => {
+          formRef.value?.validateField(`caches.${idx}.value`);
+        });
+      },
+      deleteCacheSelector: (_name: string, index: number) => {
+        // 删除
+        form.value.caches.splice(index, 1);
+        // 还原列表
+        cachesInfo.value.forEach(item => {
+          if (item.name === _name) {
+            item.disable = false;
+          }
+        });
+        // 删除后校验
+        form.value.caches.forEach((item, idx) => {
+          formRef.value?.validateField(`caches.${idx}.value`);
         });
       },
     };
@@ -167,6 +286,33 @@ export default defineComponent({
         .jm-icon-button-add::before {
           font-weight: 700;
         }
+      }
+    }
+  }
+
+  .cache-item {
+    .cache-label {
+      line-height: 20px;
+      margin-bottom: 16px;
+      padding-top: 10px;
+      color: #3f536e;
+      font-size: 14px;
+    }
+
+    ::v-deep(.cache-selector) {
+      margin-bottom: 20px;
+    }
+
+    .add-select-cache-btn {
+      height: 24px;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 24px;
+      color: #096dd9;
+      margin-bottom: 26px;
+
+      .add-link {
+        cursor: pointer;
       }
     }
   }

@@ -1,5 +1,5 @@
 import { RuleItem } from 'async-validator';
-import { NodeTypeEnum } from './enumeration';
+import { NodeTypeEnum, ParamTypeEnum } from './enumeration';
 import { ISelectableParam } from '../../../workflow-expression-editor/model/data';
 import { Global } from './global';
 
@@ -42,6 +42,27 @@ export interface IWorkflowNode {
   toDsl(): object;
 }
 
+export interface ICache {
+  ref: string;
+  key: string;
+}
+
+export interface IGlobalParam {
+  ref: string;
+  key: string;
+  name: string;
+  type: ParamTypeEnum;
+  required: boolean;
+  value: string;
+  hidden: boolean;
+}
+
+export interface IGlobal {
+  concurrent: number | boolean;
+  caches?: ICache[];
+  params?: IGlobalParam[];
+}
+
 export interface IAssociation {
   branch?: string;
   entry: boolean;
@@ -56,8 +77,10 @@ export interface IWorkflow {
   description?: string;
   groupId: string;
   association: IAssociation;
-  global: Global;
+  global: IGlobal;
   data: string;
 }
 
 export type ValidateParamFn = (value: string) => void;
+
+export type ValidateCacheFn = (name: string) => void;

@@ -85,6 +85,10 @@ public class TaskInstance extends AggregateRoot {
         return this.defKey.equals("end");
     }
 
+    public boolean isCache() {
+        return this.asyncTaskRef.equals("cache");
+    }
+
     public void setWorkerId(String workerId) {
         this.workerId = workerId;
     }

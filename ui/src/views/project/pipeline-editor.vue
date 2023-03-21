@@ -55,7 +55,11 @@ export default defineComponent({
             entry: entry.value,
             branch,
           },
-          global: new Global(global?.concurrent, global?.param),
+          global: {
+            concurrent: global ? global.concurrent : 1,
+            caches: global.cache ? global.cache : undefined,
+            params: global.param ? global.param : undefined,
+          },
           data: rawData,
         };
         loaded.value = false;
@@ -79,7 +83,11 @@ export default defineComponent({
               entry: entry.value,
               branch: b,
             },
-            global: new Global(g?.concurrent, g?.param),
+            global: {
+              concurrent: g ? g.concurrent : 1,
+              caches: g.cache ? g.cache : undefined,
+              params: g.param ? g.param : undefined,
+            },
             data: rawDslData,
           };
         } catch (err) {
@@ -108,7 +116,9 @@ export default defineComponent({
             entry: entry.value,
             branch: branchData,
           },
-          global: new Global(),
+          global: {
+            concurrent: 1,
+          },
           data: '',
         };
         loaded.value = true;

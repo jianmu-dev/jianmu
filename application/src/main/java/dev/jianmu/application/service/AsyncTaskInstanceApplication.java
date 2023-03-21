@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Ethan Liu
@@ -24,5 +25,9 @@ public class AsyncTaskInstanceApplication {
 
     public List<AsyncTaskInstance> findByTriggerId(String triggerId) {
         return this.asyncTaskInstanceRepository.findByTriggerId(triggerId);
+    }
+
+    public Optional<AsyncTaskInstance> findById(String asyncTaskId) {
+        return this.asyncTaskInstanceRepository.findById(asyncTaskId);
     }
 }
