@@ -63,6 +63,19 @@ export enum NodeGroupEnum {
 }
 
 /**
+ * 唯一标识类型枚举
+ */
+export enum RefTypeEnum {
+  TRIGGER_PARAM = '触发器参数',
+  GLOBAL_PARAM = '全局参数',
+  NODE = '节点',
+  SHELL_ENV = 'Shell节点环境变量',
+  SHELL_OUTPUT = 'Shell节点输出参数',
+  CACHE = '缓存',
+  DIR = '目录',
+}
+
+/**
  * 表达式类型
  */
 export enum ExpressionTypeEnum {
