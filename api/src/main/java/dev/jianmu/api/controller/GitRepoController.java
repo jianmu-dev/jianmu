@@ -7,8 +7,10 @@ import dev.jianmu.api.vo.GitRepoVo;
 import dev.jianmu.api.vo.ProjectVo;
 import dev.jianmu.application.service.GitRepoApplication;
 import dev.jianmu.application.service.TriggerApplication;
+import dev.jianmu.application.service.internal.WorkflowInternalApplication;
 import dev.jianmu.git.repo.aggregate.Flow;
 import dev.jianmu.jianmu_user_context.holder.UserSessionHolder;
+import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -33,13 +35,18 @@ public class GitRepoController {
     private final GitRepoApplication gitRepoApplication;
     private final TriggerApplication triggerApplication;
     private final UserSessionHolder userSessionHolder;
+    private final WorkflowInternalApplication workflowInternalApplication;
 
-    public GitRepoController(GitRepoApplication gitRepoApplication,
-                             TriggerApplication triggerApplication,
-                             UserSessionHolder userSessionHolder) {
+    public GitRepoController(
+            GitRepoApplication gitRepoApplication,
+            TriggerApplication triggerApplication,
+            UserSessionHolder userSessionHolder,
+            WorkflowInternalApplication workflowInternalApplication
+    ) {
         this.gitRepoApplication = gitRepoApplication;
         this.triggerApplication = triggerApplication;
         this.userSessionHolder = userSessionHolder;
+        this.workflowInternalApplication = workflowInternalApplication;
     }
 
     @PutMapping("/sync")
@@ -73,8 +80,12 @@ public class GitRepoController {
     @Operation(summary = "查询流水线列表", description = "查询流水线列表")
     public List<ProjectVo> findFlows() {
         var gitRepo = this.gitRepoApplication.findById(this.userSessionHolder.getSession().getAssociationId());
-        return this.gitRepoApplication.findFlows(gitRepo)
-                .stream()
+        var flows = this.gitRepoApplication.findFlows(gitRepo);
+        var refVersions = flows.stream()
+                .map(t -> t.getWorkflowRef() + t.getWorkflowVersion())
+                .collect(Collectors.toList());
+        var workflows = this.workflowInternalApplication.findByRefVersions(refVersions);
+        return flows.stream()
                 .map(project -> {
                     var projectVo = ProjectVoMapper.INSTANCE.toProjectVo(project);
                     projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
@@ -83,6 +94,12 @@ public class GitRepoController {
                             .findFirst()
                             .map(Flow::getBranchName)
                             .orElse(null));
+                    projectVo.setCaches(workflows.stream()
+                            .filter(workflow -> workflow.getRef().equals(projectVo.getWorkflowRef()))
+                            .findFirst()
+                            .map(Workflow::getCaches)
+                            .orElse(null)
+                    );
                     if (project.getStatus() == null) {
                         return projectVo;
                     }
