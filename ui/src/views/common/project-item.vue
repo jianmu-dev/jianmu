@@ -276,7 +276,7 @@
             </span>
             <template #dropdown>
               <jm-dropdown-menu>
-                <jm-dropdown-item v-if="project.caches && !entry" @click="() => (cacheDrawerFlag = true)">
+                <jm-dropdown-item v-if="project.caches" @click="() => (cacheDrawerFlag = true)">
                   <a
                     href="javascript: void(0)"
                     class="jm-icon-workflow-cache"
