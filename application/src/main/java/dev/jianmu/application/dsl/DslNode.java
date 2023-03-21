@@ -39,7 +39,7 @@ public class DslNode {
     private static DslNode shellNode(String nodeName, Map<?, ?> nodeMap) {
         var node = new DslNode();
         node.name = nodeName;
-        var alias = (String) nodeMap.get("alias");
+        var alias = (String) nodeMap.get("name");
         node.alias = alias == null ? nodeName : alias;
         setRelation(nodeMap, node);
         node.image = (String) nodeMap.get("image");
@@ -77,7 +77,7 @@ public class DslNode {
     private static DslNode normalNode(String nodeName, Map<?, ?> node) {
         var dslNode = new DslNode();
         dslNode.name = nodeName;
-        var alias = (String) node.get("alias");
+        var alias = (String) node.get("name");
         dslNode.alias = alias == null ? nodeName : alias;
         dslNode.type = (String) node.get("task");
         dslNode.onFailure = (String) node.get("on-failure");
