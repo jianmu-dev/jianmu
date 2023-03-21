@@ -24,7 +24,7 @@ export enum NodeTypeEnum {
   CONDITION = 'condition',
   ASYNC_TASK = 'async-task',
   WEBHOOK = 'webhook',
-  FLOW_NODE = 'flow-node'
+  FLOW_NODE = 'flow-node',
 }
 
 /**
@@ -35,4 +35,5 @@ export enum NodeToolbarTabTypeEnum {
   IGNORE = 'ignore',
   LOG = 'log',
   PARAMS = 'params',
+  CACHE = 'cache',
 }

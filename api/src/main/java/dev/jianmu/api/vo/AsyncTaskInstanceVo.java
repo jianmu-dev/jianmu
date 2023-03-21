@@ -1,5 +1,6 @@
 package dev.jianmu.api.vo;
 
+import dev.jianmu.workflow.aggregate.definition.TaskCache;
 import dev.jianmu.workflow.aggregate.process.FailureMode;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -8,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author Ethan Liu
@@ -48,4 +50,6 @@ public class AsyncTaskInstanceVo {
     private LocalDateTime startTime;
     // 结束时间
     private LocalDateTime endTime;
+    // 任务缓存
+    private List<TaskCache> taskCaches;
 }

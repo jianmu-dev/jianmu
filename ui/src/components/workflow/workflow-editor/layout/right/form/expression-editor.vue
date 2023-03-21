@@ -1,15 +1,15 @@
 <template>
-  <jm-workflow-expression-editor :selectable-params="selectableParams" :param-type="paramType" @change="handleChange"/>
+  <jm-workflow-expression-editor :selectable-params="selectableParams" :param-type="paramType" @change="handleChange" />
 </template>
 
-<script lang='ts'>
+<script lang="ts">
 import { defineComponent, inject, nextTick, onMounted, PropType, ref } from 'vue';
 import { ElFormItemContext, elFormItemKey } from 'element-plus/es/el-form';
+// eslint-disable-next-line no-redeclare
 import { Graph, Node } from '@antv/x6';
 import { CustomX6NodeProxy } from '../../../model/data/custom-x6-node-proxy';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 import { ExpressionTypeEnum, NodeTypeEnum, ParamTypeEnum } from '../../../model/data/enumeration';
-import { buildSelectableOption } from '../../../model/data/node/custom-webhook';
 
 export default defineComponent({
   props: {
@@ -54,7 +54,8 @@ export default defineComponent({
 
       let proxy: CustomX6NodeProxy | undefined;
       if (props.type === ExpressionTypeEnum.GLOBAL_PARAM) {
-        proxy = graph.getNodes()
+        proxy = graph
+          .getNodes()
           .map(node => new CustomX6NodeProxy(node))
           .find(proxy => proxy.getData().getType() === NodeTypeEnum.WEBHOOK);
       } else {
@@ -65,7 +66,7 @@ export default defineComponent({
         return;
       }
       // 级联选择器选项
-      selectableParams.value.push(...await proxy.getSelectableParams(graph, props.type, buildSelectableGlobalParam));
+      selectableParams.value.push(...(await proxy.getSelectableParams(graph, props.type, buildSelectableGlobalParam)));
     });
     emit('editor-created', (params: ISelectableParam[]) => {
       selectableParams.value = [];

@@ -237,7 +237,10 @@ public class TaskInstanceInternalApplication {
                             .triggerId(triggerId)
                             .build());
                     // 创建Volume记录
-                    var volume = Volume.Builder.aVolume().name(triggerId).scope(Volume.Scope.WORKFLOW).build();
+                    var volume = Volume.Builder.aVolume().name(triggerId)
+                            .scope(Volume.Scope.WORKFLOW)
+                            .workflowRef(startAsyncTaskInstance.getWorkflowRef())
+                            .build();
                     this.volumeRepository.create(volume);
                     log.info("创建Volume: {}", volume.getName());
                 });
@@ -301,22 +304,9 @@ public class TaskInstanceInternalApplication {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
         MDC.put("triggerId", taskInstance.getTriggerId());
-        if (taskInstance.isDeletionVolume()) {
-            // 成功删除Volume
-            this.volumeRepository.deleteByName(taskInstance.getTriggerId());
-            log.info("删除Volume: {}", taskInstance.getTriggerId());
-            this.monitoringFileService.clearCallbackByLogId(taskInstance.getTriggerId());
-        }
+        taskInstance.executeSucceeded();
         if (taskInstance.isVolume()) {
-            taskInstance.executeSucceeded();
             this.taskInstanceRepository.saveSucceeded(taskInstance);
-            // 查找Volume并激活
-            // TODO 为兼容老数据有可能存在未存储的Volume记录
-            this.volumeRepository.findByName(taskInstance.getTriggerId())
-                    .ifPresent(volume -> {
-                        volume.activate(taskInstance.getWorkerId());
-                        this.volumeRepository.activate(volume);
-                    });
             return;
         }
         var workflow = this.workflowRepository.findByRefAndVersion(taskInstance.getWorkflowRef(), taskInstance.getWorkflowVersion())
@@ -334,7 +324,6 @@ public class TaskInstanceInternalApplication {
                 return;
             }
         }
-        taskInstance.executeSucceeded();
         outputParameters.putAll(this.createInnerOutputParameters(taskInstance, workflow.getType().name()));
         // 保存任务实例输出参数
         this.instanceParameterRepository.addAll(outputParameters.keySet());
@@ -353,25 +342,6 @@ public class TaskInstanceInternalApplication {
         taskInstance.executeFailed();
         // 开始结束任务
         if (taskInstance.isVolume()) {
-            if (taskInstance.isCreationVolume()) {
-                log.error("创建Volume失败");
-                var workflowInstance = this.workflowInstanceRepository.findByTriggerId(taskInstance.getTriggerId())
-                        .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
-                workflowInstance.terminateInStart();
-                this.workflowInstanceRepository.save(workflowInstance);
-                // 创建Volume失败，删除Volume记录
-                this.volumeRepository.deleteByName(taskInstance.getTriggerId());
-                log.info("删除Volume: {}", taskInstance.getTriggerId());
-            } else {
-                log.error("清除Volume失败");
-                // 清除Volume失败，标记Volume记录
-                this.volumeRepository.findByName(taskInstance.getTriggerId())
-                        .ifPresent(volume -> {
-                            volume.taint();
-                            this.volumeRepository.taint(volume);
-                        });
-                this.monitoringFileService.clearCallbackByLogId(taskInstance.getTriggerId());
-            }
             this.taskInstanceRepository.updateStatus(taskInstance);
             return;
         }

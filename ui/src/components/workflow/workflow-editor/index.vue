@@ -3,28 +3,45 @@
     <template v-if="graph">
       <toolbar
         :workflow-data="workflowData"
-        @back="handleBack" @save="handleSave"
-        @open-global-drawer="handleGlobalParamPanelClosed"/>
+        @back="handleBack"
+        @save="handleSave"
+        @open-cache-panel="openCachePanel"
+        @open-global-drawer="handleGlobalParamPanelClosed"
+      />
       <node-config-panel
         v-if="selectedNodeId"
         v-model="nodeConfigPanelVisible"
         :node-id="selectedNodeId"
         :node-waring-clicked="nodeWaringClicked"
+        :workflow-data="workflowData"
         modal-class="node-config-panel-overlay"
-        @closed="handleNodeConfigPanelClosed"/>
+        @closed="handleNodeConfigPanelClosed"
+      />
       <global-param-panel
         v-if="globalDrawerVisible"
         v-model="globalDrawerVisible"
         :workflow-data="workflowData"
         modal-class="node-config-panel-overlay"
-        @closed="handleGlobalParamPanelClosed"/>
+        @closed="handleGlobalParamPanelClosed"
+      />
+      <cache-panel
+        modal-class="node-config-panel-overlay"
+        v-model="cachePanelVisible"
+        :workflow-data="workflowData"
+        @closed="handleCachePanel"
+      />
     </template>
     <div class="main">
-      <node-panel v-if="graph" :entry="workflowData.association.entry"
-                  @node-selected="nodeId => handleNodeSelected(nodeId, true)"/>
-      <graph-panel :workflow-data="workflowData"
-                   @graph-created="handleGraphCreated"
-                   @node-selected="(nodeId, waringClicked) => handleNodeSelected(nodeId, waringClicked)"/>
+      <node-panel
+        v-if="graph"
+        :entry="workflowData.association.entry"
+        @node-selected="nodeId => handleNodeSelected(nodeId, true)"
+      />
+      <graph-panel
+        :workflow-data="workflowData"
+        @graph-created="handleGraphCreated"
+        @node-selected="(nodeId, waringClicked) => handleNodeSelected(nodeId, waringClicked)"
+      />
     </div>
   </div>
 </template>
@@ -35,9 +52,11 @@ import { cloneDeep } from 'lodash';
 import Toolbar from './layout/top/toolbar.vue';
 import NodePanel from './layout/left/node-panel.vue';
 import NodeConfigPanel from './layout/right/node-config-panel.vue';
+import CachePanel from './layout/right/cache-panel.vue';
 import GraphPanel from './layout/main/graph-panel.vue';
 import GlobalParamPanel from './layout/right/global-param-panel.vue';
 import { IWorkflow } from './model/data/common';
+// eslint-disable-next-line no-redeclare
 import { Graph, Node } from '@antv/x6';
 import registerCustomVueShape from './shape/custom-vue-shape';
 import { WorkflowValidator } from './model/workflow-validator';
@@ -45,13 +64,14 @@ import { ISelectableParam } from '../workflow-expression-editor/model/data';
 import { buildSelectableExtParam, buildSelectableGlobalParam } from './model/data/global';
 import { getExtParamList } from '@/api/ext-param';
 import { IExternalParameterVo } from '@/api/dto/ext-param';
+import { CustomX6NodeProxy } from '@/components/workflow/workflow-editor/model/data/custom-x6-node-proxy';
 
 // 注册自定义x6元素
 registerCustomVueShape();
 
 export default defineComponent({
   name: 'jm-workflow-editor',
-  components: { Toolbar, NodePanel, NodeConfigPanel, GraphPanel, GlobalParamPanel },
+  components: { Toolbar, NodePanel, NodeConfigPanel, GraphPanel, GlobalParamPanel, CachePanel },
   props: {
     modelValue: {
       type: Object as PropType<IWorkflow>,
@@ -65,15 +85,19 @@ export default defineComponent({
     const graph = ref<Graph>();
     const nodeConfigPanelVisible = ref<boolean>(false);
     const selectedNodeId = ref<string>('');
+    let checkCache: () => Promise<void>;
     const nodeWaringClicked = ref<boolean>(false);
     const globalDrawerVisible = ref<boolean>(false);
+    const cachePanelVisible = ref<boolean>(false);
     let workflowValidator: WorkflowValidator;
     let checkGlobalParams: () => Promise<void>;
     let extParams: IExternalParameterVo[];
 
     provide('getGraph', (): Graph => graph.value!);
     provide('getWorkflowValidator', (): WorkflowValidator => workflowValidator!);
-    provide('buildSelectableGlobalParam', (): ISelectableParam | undefined => buildSelectableGlobalParam(workflowData.value.global.params));
+    provide('buildSelectableGlobalParam', (): ISelectableParam | undefined =>
+      buildSelectableGlobalParam(workflowData.value.global.params),
+    );
     provide('buildSelectableExtParam', (): ISelectableParam | undefined => buildSelectableExtParam(extParams!));
     onMounted(async () => (extParams = await getExtParamList()));
     const handleNodeSelected = async (nodeId: string, waringClicked: boolean) => {
@@ -125,6 +149,26 @@ export default defineComponent({
         }
         checkGlobalParams = _checkGlobalParams;
       },
+      cachePanelVisible,
+      handleCachePanel: async () => {
+        await checkCache();
+        const nodes = graph.value!.getNodes();
+        for (const node of nodes) {
+          const workflowNode = new CustomX6NodeProxy(node).getData(graph.value, workflowData.value);
+          try {
+            await workflowNode.validate();
+            workflowValidator.removeWarning(node);
+          } catch ({ errors }) {
+            workflowValidator.addWarning(node, nodeId => {
+              handleNodeSelected(nodeId, true);
+            });
+          }
+        }
+      },
+      openCachePanel: (_checkCache: () => Promise<void>) => {
+        checkCache = _checkCache;
+        cachePanelVisible.value = true;
+      },
     };
   },
 });
@@ -141,7 +185,7 @@ export default defineComponent({
   height: 100%;
   display: flex;
   flex-direction: column;
-  background-color: #F0F2F5;
+  background-color: #f0f2f5;
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;

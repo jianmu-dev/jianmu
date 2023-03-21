@@ -5,6 +5,7 @@ import { NODE } from '../shape/gengral-config';
 import { IWorkflow } from './data/common';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import { DSL_CURRENT_VERSION } from '@/components/workflow/version';
+import { IGlobalParam } from './data/common';
 
 const { selectedBorderWidth } = NODE;
 
@@ -96,16 +97,15 @@ export class WorkflowTool {
   optimizeSelectionBoxStyle(): void {
     const factor = this.graph.zoom();
 
-    Array.from(this.graph.container.querySelectorAll<SVGElement>('.x6-widget-transform'))
-      .forEach(el => {
-        const t = selectedBorderWidth * factor;
-        el.style.borderWidth = `${t}px`;
-        el.style.marginLeft = `-${t}px`;
-        el.style.marginTop = `-${t}px`;
-      });
+    Array.from(this.graph.container.querySelectorAll<SVGElement>('.x6-widget-transform')).forEach(el => {
+      const t = selectedBorderWidth * factor;
+      el.style.borderWidth = `${t}px`;
+      el.style.marginLeft = `-${t}px`;
+      el.style.marginTop = `-${t}px`;
+    });
   }
 
-  slimGraphData({ cells }: { cells?: Cell.Properties[]; }): void {
+  slimGraphData({ cells }: { cells?: Cell.Properties[] }): void {
     if (!cells) {
       return;
     }
@@ -142,17 +142,61 @@ export class WorkflowTool {
     let trigger;
     if (triggerNodeProxies.length > 0) {
       // TODO 待扩展多个触发器
+      // eslint-disable-next-line prefer-const
       trigger = triggerNodeProxies[0].toDsl(this.graph);
     }
     const workflow: object[] = [];
     // TODO 优化顺序
     nodeProxies.forEach(nodeProxy => workflow.push(nodeProxy.toDsl(this.graph)));
 
+    // 构造global
+    const global: {
+      concurrent: boolean | number;
+      param: any[];
+      cache: string[] | string;
+    } = { concurrent: false, param: [], cache: [] };
+
+    global.concurrent = workflowData.global.concurrent;
+
+    workflowData.global.params?.forEach(({ ref, name, value, required, type, hidden }) => {
+      global.param.push({ ref, name, value, required, type, hidden });
+    });
+    const getGlobal = () => {
+      if (!workflowData.global.caches || workflowData.global.caches.length === 0) {
+        return {
+          concurrent: workflowData.global.concurrent,
+          param: global.param,
+          cache: undefined,
+        };
+      } else if (workflowData.global.caches && typeof workflowData.global.caches === 'string') {
+        return {
+          concurrent: global.concurrent,
+          param: global.param,
+          cache: workflowData.global.caches,
+        };
+      } else if (typeof workflowData.global.caches === 'object' && workflowData.global.caches.length === 1) {
+        return {
+          concurrent: global.concurrent,
+          param: global.param,
+          cache: workflowData.global.caches[0].ref ? workflowData.global.caches[0].ref : workflowData.global.caches,
+        };
+      } else {
+        workflowData.global.caches?.forEach(item => {
+          // cache多个时为数组，typeof cache === 'object' 避免报错
+          if (typeof global.cache !== 'object') {
+            return;
+          }
+          global.cache.push(item.ref ? item.ref : <any>item);
+        });
+        return global;
+      }
+    };
+
     let dsl = yaml.stringify({
       version: DSL_CURRENT_VERSION,
       name: workflowData.name,
       description: workflowData.description,
-      global: workflowData.global.toDsl(),
+      global: getGlobal(),
       trigger,
       workflow,
     });

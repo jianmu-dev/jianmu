@@ -1,9 +1,10 @@
 import { BaseNode, buildSelectableInnerOutputParam } from './base-node';
-import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
+import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum, RefTypeEnum } from '../enumeration';
 import defaultIcon from '../../../svgs/shape/async-task.svg';
-import { CustomRule, ParamValueType, ValidateParamFn } from '../common';
+import { CustomRule, ParamValueType, ValidateParamFn, ValidateCacheFn } from '../common';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
+import { checkDuplicate } from '../../util/reference';
 
 const OFFICIAL_NODE_OWNER_REF = '_';
 
@@ -38,6 +39,15 @@ export function checkDefaultIcon(icon: string) {
   return false;
 }
 
+/**
+ * 模拟缓存定义
+ */
+export interface ICache {
+  key: string;
+  name: string;
+  value: string;
+}
+
 export class AsyncTask extends BaseNode {
   readonly ownerRef: string;
   readonly nodeRef: string;
@@ -45,8 +55,10 @@ export class AsyncTask extends BaseNode {
   versionDescription: string;
   readonly inputs: IAsyncTaskParam[];
   readonly outputs: IAsyncTaskParam[];
+  caches: ICache[];
   failureMode: FailureModeEnum;
   private readonly validateParam?: ValidateParamFn;
+  private readonly validateCache?: ValidateCacheFn;
 
   constructor(
     ownerRef: string,
@@ -58,8 +70,10 @@ export class AsyncTask extends BaseNode {
     versionDescription = '',
     inputs: IAsyncTaskParam[] = [],
     outputs: IAsyncTaskParam[] = [],
+    caches: ICache[] = [],
     failureMode: FailureModeEnum = FailureModeEnum.SUSPEND,
     validateParam?: ValidateParamFn,
+    validateCache?: ValidateCacheFn,
   ) {
     super(
       ref,
@@ -74,13 +88,16 @@ export class AsyncTask extends BaseNode {
     this.versionDescription = versionDescription;
     this.inputs = inputs;
     this.outputs = outputs;
+    this.caches = caches;
     this.failureMode = failureMode;
     this.validateParam = validateParam;
+    this.validateCache = validateCache;
   }
 
   static build(
-    { ownerRef, nodeRef, ref, name, icon, version, versionDescription, inputs, outputs, failureMode }: any,
+    { ownerRef, nodeRef, ref, name, icon, version, versionDescription, inputs, outputs, caches, failureMode }: any,
     validateParam?: ValidateParamFn,
+    validateCache?: ValidateCacheFn,
   ): AsyncTask {
     return new AsyncTask(
       ownerRef,
@@ -92,8 +109,10 @@ export class AsyncTask extends BaseNode {
       versionDescription,
       inputs,
       outputs,
+      caches,
       failureMode,
       validateParam,
+      validateCache,
     );
   }
 
@@ -157,6 +176,61 @@ export class AsyncTask extends BaseNode {
       };
     });
 
+    const shellCacheFields: Record<string, CustomRule> = {};
+    this.caches.forEach((_, index) => {
+      shellCacheFields[index] = {
+        type: 'object',
+        required: true,
+        fields: {
+          name: [
+            { required: true, message: '请选择缓存', trigger: 'change' },
+            {
+              validator: (rule: any, name: any, callback: any) => {
+                if (name && this.validateCache) {
+                  try {
+                    this.validateCache(name);
+                  } catch ({ message }) {
+                    callback(message);
+                    return;
+                  }
+                }
+                callback();
+              },
+              trigger: 'change',
+            },
+          ],
+          value: [
+            { required: true, message: '请输入目录', trigger: 'blur' },
+            {
+              pattern: /^\//,
+              message: '请输入以/开头的目录',
+              trigger: 'blur',
+            },
+            {
+              validator: (rule: any, _value: any, callback: any) => {
+                if (!_value) {
+                  callback();
+                  return;
+                }
+                try {
+                  checkDuplicate(
+                    this.caches.map(({ value }) => value),
+                    RefTypeEnum.DIR,
+                  );
+                } catch ({ message, ref }) {
+                  if (ref === _value) {
+                    callback(message);
+                    return;
+                  }
+                }
+                callback();
+              },
+              trigger: 'blur',
+            },
+          ],
+        } as Record<string, CustomRule>,
+      };
+    });
     return {
       ...rules,
       version: [{ required: true, message: '请选择节点版本', trigger: 'change' }],
@@ -166,13 +240,19 @@ export class AsyncTask extends BaseNode {
         len: this.inputs.length,
         fields,
       },
+      caches: {
+        type: 'array',
+        required: false,
+        len: this.caches.length,
+        fields: shellCacheFields,
+      },
       failureMode: [{ required: true }],
     };
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
   toDsl(): object {
-    const { ownerRef, nodeRef, ref, name, version, inputs, failureMode } = this;
+    const { ownerRef, nodeRef, ref, name, version, inputs, caches, failureMode } = this;
     const param: {
       [key: string]: ParamValueType;
     } = {};
@@ -208,10 +288,16 @@ export class AsyncTask extends BaseNode {
       }
     });
 
+    const _cache: {
+      [key: string]: string;
+    } = {};
+    caches.forEach(({ name, value }) => (_cache[name] = value));
+
     return {
       ref,
       name,
       'on-failure': failureMode === FailureModeEnum.SUSPEND ? undefined : failureMode,
+      cache: caches.length === 0 ? undefined : _cache,
       task: `${ownerRef === OFFICIAL_NODE_OWNER_REF ? '' : `${ownerRef}/`}${nodeRef}@${version}`,
       input: inputs.length === 0 ? undefined : param,
     };

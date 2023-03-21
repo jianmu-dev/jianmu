@@ -1,5 +1,5 @@
 import { Graph, Node } from '@antv/x6';
-import { IWorkflowNode } from './common';
+import { IWorkflowNode, IWorkflow } from './common';
 import { ExpressionTypeEnum, NodeTypeEnum } from './enumeration';
 import { Cron } from './node/cron';
 import { Webhook } from './node/webhook';
@@ -41,7 +41,7 @@ export class CustomX6NodeProxy {
     return [NodeTypeEnum.ASYNC_TASK, NodeTypeEnum.SHELL].includes(type);
   }
 
-  getData(graph?: Graph): IWorkflowNode {
+  getData(graph?: Graph, workflowData?: IWorkflow): IWorkflowNode {
     const obj = JSON.parse(this.node.getData<string>());
     let nodeData: IWorkflowNode;
 
@@ -53,10 +53,18 @@ export class CustomX6NodeProxy {
         nodeData = obj.events ? CustomWebhook.build(obj) : Webhook.build(obj);
         break;
       case NodeTypeEnum.SHELL:
-        nodeData = Shell.build(obj);
+        nodeData = Shell.build(
+          obj,
+          undefined,
+          workflowData ? (name: string) => this.validateCache(workflowData, name) : undefined,
+        );
         break;
       case NodeTypeEnum.ASYNC_TASK:
-        nodeData = AsyncTask.build(obj);
+        nodeData = AsyncTask.build(
+          obj,
+          undefined,
+          workflowData ? (name: string) => this.validateCache(workflowData, name) : undefined,
+        );
         break;
       case NodeTypeEnum.START:
         nodeData = Start.build();
@@ -78,8 +86,11 @@ export class CustomX6NodeProxy {
     // TODO 校验节点，同步节点警告状态
   }
 
-  async getSelectableParams(graph: Graph, expType: ExpressionTypeEnum,
-    buildSelectableGlobalParam: () => ISelectableParam | undefined): Promise<ISelectableParam[]> {
+  async getSelectableParams(
+    graph: Graph,
+    expType: ExpressionTypeEnum,
+    buildSelectableGlobalParam: () => ISelectableParam | undefined,
+  ): Promise<ISelectableParam[]> {
     const graphNode = this.node;
     const workflowNode = new CustomX6NodeProxy(graphNode).getData();
     const params: ISelectableParam[] = [];
@@ -123,9 +134,13 @@ export class CustomX6NodeProxy {
       const sourceNode = edge.getSourceNode()!;
       const param = await new CustomX6NodeProxy(sourceNode).getData().buildSelectableParam(sourceNode.id);
 
-      if (param && param.children && param.children.length > 0 &&
+      if (
+        param &&
+        param.children &&
+        param.children.length > 0 &&
         // 去重上游可选重复节点参数
-        !params.find(({ value }) => value === param.value)) {
+        !params.find(({ value }) => value === param.value)
+      ) {
         params.push(param);
       }
       await this.buildSelectableParams(graph, edge.getSourceNode()!, params);
@@ -155,5 +170,16 @@ export class CustomX6NodeProxy {
       ...this.getData().toDsl(),
       needs: needs.length > 0 ? needs : undefined,
     };
+  }
+
+  private validateCache({ global: { caches } }: IWorkflow, name: string) {
+    if (caches && typeof caches === 'string' && caches === name) {
+      return;
+    }
+    if (caches?.map(item => (item.ref ? item.ref : item)).includes(name)) {
+      return;
+    }
+    // throw new Error(`cache不存在${name}`);
+    throw new Error('缓存不存在');
   }
 }

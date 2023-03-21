@@ -10,8 +10,8 @@
       <i class="jm-icon-button-help"></i>
     </jm-tooltip>
     <div v-if="eventInstanceVal && rules">
-      <Rule
-        v-for="(rule,idx) in eventInstanceVal.ruleset"
+      <custom-webhook-rule
+        v-for="(rule, idx) in eventInstanceVal.ruleset"
         :key="rule.key"
         v-model:paramRef="rule.paramRef"
         v-model:operator="rule.operator"
@@ -21,20 +21,24 @@
         :rules="rules.ruleset.fields[idx].fields"
         :model-name="`${formModelName}.${index}.ruleset`"
         :ui-event="uiEvent"
-        @update:paramRef="val=>updateParamRef(val,idx)"
-        @update:operator="val=>updateOperator(val,idx)"
-        @update:matchingValue="val=>updateMatchingValue(val,idx)"
+        @update:paramRef="val => updateParamRef(val, idx)"
+        @update:operator="val => updateOperator(val, idx)"
+        @update:matchingValue="val => updateMatchingValue(val, idx)"
         @delete="del"
       />
       <div class="add" @click="add">
-        <i class="jm-icon-button-add"/>
+        <i class="jm-icon-button-add" />
         添加匹配规则
       </div>
       <div class="ruleset-operator-container">
-        <jm-form-item :prop="`${formModelName}.${index}.rulesetOperator`" :rules="rules.rulesetOperator"
-                      class="ruleset-operator" v-if="rulesetOperatorsVisible">
+        <jm-form-item
+          :prop="`${formModelName}.${index}.rulesetOperator`"
+          :rules="rules.rulesetOperator"
+          class="ruleset-operator"
+          v-if="rulesetOperatorsVisible"
+        >
           <jm-radio-group v-model="eventInstanceVal.rulesetOperator" @change="changeRulesetOperatorVal">
-            <jm-radio v-for="{ref,name} in rulesetOperators" :key="ref" :label="ref">{{ name }}</jm-radio>
+            <jm-radio v-for="{ ref, name } in rulesetOperators" :key="ref" :label="ref">{{ name }}</jm-radio>
           </jm-radio-group>
         </jm-form-item>
       </div>
@@ -44,7 +48,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, onUpdated, PropType, ref } from 'vue';
-import Rule from './custom-webhook-rule.vue';
+import CustomWebhookRule from './custom-webhook-rule.vue';
 import { getWebhookOperator, ICustomWebhookEventInstance } from '../../../model/data/node/custom-webhook';
 import { IWebhookParam } from '../../../model/data/node/webhook';
 import { v4 as uuidv4 } from 'uuid';
@@ -52,7 +56,7 @@ import { IWebhookEventOperatorVo } from '@/api/dto/custom-webhook';
 import { CustomRule } from '../../../model/data/common';
 
 export default defineComponent({
-  components: { Rule },
+  components: { CustomWebhookRule },
   props: {
     selectedReference: {
       type: String,
@@ -102,11 +106,13 @@ export default defineComponent({
     }
 
     const changeReference = async (val: boolean) => {
-      eventInstanceVal.value = val ? props.eventInstance || {
-        ref: props.reference,
-        ruleset: [],
-        rulesetOperator: (await getWebhookOperator()).rulesetOperators[0].ref,
-      } : undefined;
+      eventInstanceVal.value = val
+        ? props.eventInstance || {
+          ref: props.reference,
+          ruleset: [],
+          rulesetOperator: (await getWebhookOperator()).rulesetOperators[0].ref,
+        }
+        : undefined;
       rulesetOperatorsVisible.value = (eventInstanceVal.value && eventInstanceVal.value.ruleset.length >= 2)!;
       emit('update:eventInstance', eventInstanceVal.value);
     };
@@ -162,9 +168,9 @@ export default defineComponent({
 
 <style scoped lang="less">
 .custom-webhook-event {
-  color: #3F536E;
+  color: #3f536e;
   font-size: 14px;
-  border-bottom: 1px solid #E6EBF2;
+  border-bottom: 1px solid #e6ebf2;
   margin-bottom: 20px;
   padding-bottom: 20px;
   box-sizing: border-box;
@@ -207,7 +213,6 @@ export default defineComponent({
     margin-left: 0;
   }
 
-
   .check-event {
     display: flex;
     // 文字换行
@@ -222,10 +227,10 @@ export default defineComponent({
 
   .add {
     font-size: 14px;
-    color: #096DD9;
+    color: #096dd9;
     cursor: pointer;
     padding: 14px 20px;
-    border: 1px solid #E6EBF2;
+    border: 1px solid #e6ebf2;
     box-sizing: border-box;
     margin-top: 20px;
 
