@@ -59,18 +59,7 @@ export enum NodeGroupEnum {
   INNER = 'inner',
   LOCAL = 'local',
   OFFICIAL = 'official',
-  COMMUNITY = 'community'
-}
-
-/**
- * 唯一标识类型枚举
- */
-export enum RefTypeEnum {
-  TRIGGER_PARAM = '触发器参数',
-  GLOBAL_PARAM = '全局参数',
-  NODE = '节点',
-  SHELL_ENV = 'Shell节点环境变量',
-  SHELL_OUTPUT = 'Shell节点输出参数',
+  COMMUNITY = 'community',
 }
 
 /**

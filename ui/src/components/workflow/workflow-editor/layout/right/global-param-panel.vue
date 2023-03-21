@@ -6,10 +6,10 @@
     <div class="drawer-content">
       <jm-scrollbar class="global-scroll">
         <div class="param-container">
-          <jm-form label-position="top" :model="workflowForm.global.params" ref="globalFormRef" @submit.prevent>
+          <jm-form label-position="top" :model="globalParams.params" ref="globalFormRef" @submit.prevent>
             <global-param
-              v-for="(param, index) in workflowForm.global.params"
-              :key="paramKeys[index]"
+              v-for="(param, index) in globalParams.params"
+              :key="param.ref"
               v-model:reference="param.ref"
               v-model:name="param.name"
               v-model:type="param.type"
@@ -17,7 +17,7 @@
               v-model:value="param.value"
               v-model:hidden="param.hidden"
               :index="index"
-              :rules="workflowForm.global.getFormRules().params.fields[index].fields"
+              :rules="globalParams.getFormRules().params.fields[index].fields"
               @change-reference="(newVal, oldVal) => changeReference(index, oldVal)"
               @delete="deleteParam"
             />
@@ -38,6 +38,7 @@ import { ParamTypeEnum } from '../../model/data/enumeration';
 import GlobalParam from './form/global-param.vue';
 import { IWorkflow } from '../../model/data/common';
 import { v4 as uuidv4 } from 'uuid';
+import { Global } from '@/components/workflow/workflow-editor/model/data/global';
 
 export default defineComponent({
   components: { GlobalParam },
@@ -55,8 +56,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const visible = ref<boolean>(props.modelValue);
     const workflowForm = ref<IWorkflow>(props.workflowData);
-    const paramKeys = ref<string[]>([]);
-    workflowForm.value.global.params.forEach(() => paramKeys.value.push(uuidv4()));
+    const globalParams = ref<Global>(new Global(workflowForm.value.global));
     const globalFormRef = ref<HTMLFormElement>();
 
     onUpdated(async () => {
@@ -67,7 +67,7 @@ export default defineComponent({
     });
     onMounted(async () => {
       // 抽屉打开并且params有值的时候触发表单校验
-      if (visible.value && workflowForm.value.global.params.length > 0) {
+      if (visible.value && workflowForm.value.global.params && workflowForm.value.global.params.length > 0) {
         await nextTick();
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         globalFormRef.value!.validate().catch(() => {});
@@ -76,35 +76,30 @@ export default defineComponent({
     return {
       visible,
       workflowForm,
-      paramKeys,
       globalFormRef,
+      globalParams,
       close: () => {
-        workflowForm.value.global.params.forEach(param => {
-          if (!param.name) {
-            param.name = param.ref;
-          }
-        });
+        workflowForm.value.global.params = globalParams.value.params;
         visible.value = false;
         emit('closed', visible.value);
       },
       deleteParam: (index: number) => {
-        workflowForm.value.global.params.splice(index, 1);
-        paramKeys.value.splice(index, 1);
+        globalParams.value.params.splice(index, 1);
       },
       addParam: () => {
         // 解构params参数
-        workflowForm.value.global.params.push({
+        globalParams.value.params.push({
           ref: '',
+          key: uuidv4(),
           name: '',
           type: ParamTypeEnum.STRING,
           required: false,
           value: '',
           hidden: false,
         });
-        paramKeys.value.push(uuidv4());
       },
       changeReference: (index: number, oldVal: string) => {
-        workflowForm.value.global.params.forEach(({ ref }, idx) => {
+        globalParams.value.params?.forEach(({ ref }, idx) => {
           if (index === idx || oldVal !== ref) {
             return;
           }

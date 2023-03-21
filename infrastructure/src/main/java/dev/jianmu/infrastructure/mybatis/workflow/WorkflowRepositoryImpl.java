@@ -36,6 +36,14 @@ public class WorkflowRepositoryImpl implements WorkflowRepository {
     }
 
     @Override
+    public List<Workflow> findByRefVersions(List<String> refVersions) {
+        if (refVersions.isEmpty()) {
+            return List.of();
+        }
+        return this.workflowMapper.findByRefAndVersions(refVersions);
+    }
+
+    @Override
     public List<Workflow> findByRef(String ref) {
         return this.workflowMapper.findByRef(ref);
     }

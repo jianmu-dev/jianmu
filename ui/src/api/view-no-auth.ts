@@ -19,6 +19,7 @@ import { INodeVo } from '@/api/dto/node-library';
 import { ITriggerEventVo, ITriggerWebhookVo } from '@/api/dto/trigger';
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { INodeDefinitionSearchingDto, INodeDefinitionVo } from '@/api/dto/node-definitions';
+import { IProjectCacheVo, INodeCacheVo } from '@/api/dto/cache';
 import { API_PREFIX } from '@/utils/constants';
 
 export const baseUrl = {
@@ -41,6 +42,7 @@ export const baseUrl = {
   triggerEvent: `${API_PREFIX}/view/trigger_events`,
   trigger: `${API_PREFIX}/view/trigger`,
   version: 'https://jianmu.dev/versions/ci',
+  cache: `${API_PREFIX}/view/caches`,
 };
 const hubUrl = import.meta.env.VITE_JIANMUHUB_API_BASE_URL;
 const baseHubUrl = {
@@ -287,5 +289,26 @@ export function fetchNodeLibrary(ownerRef: string, ref: string): Promise<INodeVo
   return restProxy<INodeVo>({
     url: `${baseUrl.library}/${ownerRef}/${ref}`,
     method: 'get',
+  });
+}
+
+/**
+ * 获取项目缓存
+ */
+
+export function fetchProjectCache(workflowRef: string) {
+  return restProxy<IProjectCacheVo>({
+    url: `${baseUrl.cache}/${workflowRef}`,
+    method: 'post',
+  });
+}
+
+/**
+ * 获取节点缓存
+ */
+export function fetchNodeCache(asyncTaskId: string) {
+  return restProxy<INodeCacheVo[]>({
+    url: `${baseUrl.cache}/async_task_instances/${asyncTaskId}`,
+    method: 'post',
   });
 }

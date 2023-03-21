@@ -5,11 +5,17 @@ import { IWorkflow } from './data/common';
 import { checkDuplicate } from './util/reference';
 import { NodeGroupEnum, NodeTypeEnum, RefTypeEnum } from './data/enumeration';
 import { AsyncTask } from './data/node/async-task';
-import { getLocalNodeParams, getLocalVersionList, getOfficialNodeParams, getOfficialVersionList } from '@/api/node-library';
+import {
+  getLocalNodeParams,
+  getLocalVersionList,
+  getOfficialNodeParams,
+  getOfficialVersionList,
+} from '@/api/node-library';
 import { pushCustomEvents, pushParams } from './workflow-node';
 import { RefDuplicateError } from './data/error';
 import { CustomWebhook } from './data/node/custom-webhook';
 import { getWebhookVersionList, getWebhookVersionParams } from '@/api/custom-webhook';
+import { Global } from '@/components/workflow/workflow-editor/model/data/global';
 
 export type ClickNodeWarningCallbackFnType = (nodeId: string) => void;
 
@@ -50,7 +56,7 @@ export class WorkflowValidator {
         x: '100%',
         y: 0,
         offset: { x: -13, y: -11 },
-        onClick: ({ cell: { id } }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) =>
+        onClick: ({ cell: { id } }: { e: JQuery.MouseDownEvent; cell: Cell; view: CellView }) =>
           clickNodeWarningCallback(id),
       },
     });
@@ -64,10 +70,14 @@ export class WorkflowValidator {
     node.removeTool('button');
   }
 
-  async checkInitializingNode(node: Node, copied: boolean, clickNodeWarningCallback: ClickNodeWarningCallbackFnType): Promise<void> {
+  async checkInitializingNode(
+    node: Node,
+    copied: boolean,
+    clickNodeWarningCallback: ClickNodeWarningCallbackFnType,
+  ): Promise<void> {
     const proxy = new CustomX6NodeProxy(node);
     const _data = proxy.getData();
-    if (_data.getType() !== NodeTypeEnum.ASYNC_TASK && !(_data instanceof CustomWebhook) || copied) {
+    if ((_data.getType() !== NodeTypeEnum.ASYNC_TASK && !(_data instanceof CustomWebhook)) || copied) {
       _data
         .validate()
         // 校验节点有误时，加警告
@@ -128,7 +138,7 @@ export class WorkflowValidator {
    */
   private async checkGlobal(): Promise<void> {
     try {
-      await this.workflowData.global.validate();
+      await new Global(this.workflowData.global).validate();
     } catch ({ errors }) {
       throw new Error(`${errors[0].message}`);
     }
@@ -222,8 +232,7 @@ export class WorkflowValidator {
     const maxX = x + width;
     const maxY = y + height;
 
-    if (mousePosX >= x && mousePosX <= maxX &&
-      mousePosY >= y && mousePosY <= maxY) {
+    if (mousePosX >= x && mousePosX <= maxX && mousePosY >= y && mousePosY <= maxY) {
       // 在节点面板中拖放时，失败
       return false;
     }
@@ -239,9 +248,12 @@ export class WorkflowValidator {
     }
     // 表示当前拖放的节点为trigger或单个节点
     const isTrigger = droppingNodeProxy.isTrigger();
-    const currentSingleNodeProxy = this.graph.getNodes()
+    const currentSingleNodeProxy = this.graph
+      .getNodes()
       .map(node => new CustomX6NodeProxy(node))
-      .find(proxy => isTrigger ? proxy.isTrigger() : (droppingNodeProxy.getData().getType() === proxy.getData().getType()));
+      .find(proxy =>
+        isTrigger ? proxy.isTrigger() : droppingNodeProxy.getData().getType() === proxy.getData().getType(),
+      );
 
     if (currentSingleNodeProxy) {
       const nodeName = isTrigger ? '触发器' : currentSingleNodeProxy.getData().getName();

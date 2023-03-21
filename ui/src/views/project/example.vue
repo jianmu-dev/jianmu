@@ -1,7 +1,6 @@
 <template>
   <div class="example">
-    <jm-workflow-editor v-model="workflow"
-                        v-if="!loaded"/>
+    <jm-workflow-editor v-model="workflow" v-if="!loaded" />
   </div>
 </template>
 
@@ -23,7 +22,9 @@ export default defineComponent({
     const workflow = ref<IWorkflow>({
       name: '未命名项目',
       groupId: '1',
-      global: new Global(),
+      global: {
+        concurrent: 1,
+      },
       data: '',
       association: {
         entry: false,
@@ -31,7 +32,8 @@ export default defineComponent({
     });
     onMounted(async () => {
       loaded.value = true;
-      const dslText = 'name: 建木前端CDN CD（图形化）\n' +
+      const dslText =
+        'name: 建木前端CDN CD（图形化）\n' +
         'global:\n' +
         '  concurrent: false\n' +
         'workflow:\n' +
@@ -131,7 +133,9 @@ export default defineComponent({
       workflow.value = {
         name,
         groupId: '1',
-        global: new Global(global?.concurrent, global?.param),
+        global: {
+          concurrent: global ? global.concurrent : 1,
+        },
         data: rawData,
         association: {
           entry: false,
@@ -165,14 +169,14 @@ export default defineComponent({
 
           &.save-return {
             &:hover {
-              background-color: #F5F5F5;
+              background-color: #f5f5f5;
               color: #082340;
             }
           }
 
           &.el-button--primary {
-            background-color: #096DD9;
-            border-color: #096DD9;
+            background-color: #096dd9;
+            border-color: #096dd9;
           }
         }
       }
@@ -186,7 +190,6 @@ export default defineComponent({
           color: inherit;
         }
       }
-
     }
   }
 }

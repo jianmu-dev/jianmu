@@ -1,47 +1,52 @@
 <template>
-  <jm-drawer
-    title="节点配置面板"
-    :size="410"
-    direction="rtl"
-    destroy-on-close
-    @closed="save"
-  >
+  <jm-drawer title="节点配置面板" :size="410" direction="rtl" destroy-on-close @closed="save">
     <template #title>
       <div>
         <span>{{ nodeData.getDisplayName() }}</span>
-        <a v-if="nodeData.getDocUrl()" :href="nodeData.getDocUrl()" target="_blank" class="jm-icon-button-help"/>
+        <a v-if="nodeData.getDocUrl()" :href="nodeData.getDocUrl()" target="_blank" class="jm-icon-button-help" />
       </div>
     </template>
     <div class="jm-workflow-editor-node-config-panel">
       <jm-scrollbar v-if="drawerOpening" class="panel-container">
-        <cron-panel v-if="nodeData.getType() === NodeTypeEnum.CRON"
-                    :node-data="nodeData" @form-created="handleFormCreated"/>
+        <cron-panel
+          v-if="nodeData.getType() === NodeTypeEnum.CRON"
+          :node-data="nodeData"
+          @form-created="handleFormCreated"
+        />
         <template v-else-if="nodeData.getType() === NodeTypeEnum.WEBHOOK">
-          <custom-webhook-panel v-if="isCustomWebhook"
-                                :node-data="nodeData" @form-created="handleFormCreated"/>
-          <webhook-panel v-else
-                         :node-data="nodeData" @form-created="handleFormCreated"/>
+          <custom-webhook-panel v-if="isCustomWebhook" :node-data="nodeData" @form-created="handleFormCreated" />
+          <webhook-panel v-else :node-data="nodeData" @form-created="handleFormCreated" />
         </template>
-        <shell-panel v-else-if="nodeData.getType() === NodeTypeEnum.SHELL"
-                     :node-data="nodeData" @form-created="handleFormCreated"/>
-        <async-task-panel v-else-if="nodeData.getType() === NodeTypeEnum.ASYNC_TASK"
-                          :node-data="nodeData" @form-created="handleFormCreated"/>
+        <shell-panel
+          v-else-if="nodeData.getType() === NodeTypeEnum.SHELL"
+          :caches="workflowData.global.caches"
+          :node-data="nodeData"
+          @form-created="handleFormCreated"
+        />
+        <async-task-panel
+          v-else-if="nodeData.getType() === NodeTypeEnum.ASYNC_TASK"
+          :caches="workflowData.global.caches"
+          :node-data="nodeData"
+          @form-created="handleFormCreated"
+        />
       </jm-scrollbar>
     </div>
   </jm-drawer>
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, nextTick, provide, ref } from 'vue';
+import { defineComponent, inject, nextTick, PropType, provide, ref } from 'vue';
 import { NodeTypeEnum } from '../../model/data/enumeration';
 import CronPanel from './cron-panel.vue';
 import WebhookPanel from './webhook-panel.vue';
 import CustomWebhookPanel from './custom-webhook-panel.vue';
 import ShellPanel from './shell-panel.vue';
 import AsyncTaskPanel from './async-task-panel.vue';
+// eslint-disable-next-line no-redeclare
 import { Graph, Node } from '@antv/x6';
 import { CustomX6NodeProxy } from '../../model/data/custom-x6-node-proxy';
 import { CustomWebhook } from '../../model/data/node/custom-webhook';
+import { IWorkflow } from '../../model/data/common';
 
 export default defineComponent({
   components: { CronPanel, WebhookPanel, ShellPanel, AsyncTaskPanel, CustomWebhookPanel },
@@ -54,6 +59,10 @@ export default defineComponent({
       type: Boolean,
       required: true,
     },
+    workflowData: {
+      type: Object as PropType<IWorkflow>,
+      required: true,
+    },
   },
   setup(props, { emit }) {
     const getGraph = inject('getGraph') as () => Graph;
@@ -62,7 +71,7 @@ export default defineComponent({
     const node = graph.getNodes().find(({ id }) => props.nodeId === id)!;
     const proxy = new CustomX6NodeProxy(node);
     // 不能为ref，否则，表单内容的变化影响数据绑定
-    const nodeData = proxy.getData(graph);
+    const nodeData = proxy.getData(graph, props.workflowData);
     const formRef = ref();
     provide('getNode', (): Node => node);
 
@@ -83,8 +92,8 @@ export default defineComponent({
           return;
         }
         // 点击节点警告按钮打开配置面板时，自动校验一次表单，实现自动展示错误信息
-        formRef.value.validate().catch(() => {
-        });
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        formRef.value.validate().catch(() => {});
       },
       save: () => {
         formRef.value?.validate((valid: boolean) => {
@@ -109,8 +118,8 @@ export default defineComponent({
     margin-left: 2px;
 
     &:hover {
-      background: #EFF7FF;
-      color: #086CD8;
+      background: #eff7ff;
+      color: #086cd8;
     }
   }
 
@@ -128,23 +137,22 @@ export default defineComponent({
       width: 100%;
       height: 63px;
       display: flex;
-      border-top: 1px solid #E6EBF2;
+      border-top: 1px solid #e6ebf2;
       justify-content: center;
       align-items: center;
     }
 
     .cancel {
-      background: #F5F5F5;
+      background: #f5f5f5;
       color: #082340;
       border-radius: 2px;
       border: none;
       box-shadow: none;
 
       &:hover {
-        background: #D9D9D9;
+        background: #d9d9d9;
       }
     }
-
   }
 }
 </style>

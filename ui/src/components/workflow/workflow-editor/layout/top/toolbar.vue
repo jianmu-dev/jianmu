@@ -31,6 +31,11 @@
         全局参数
         <i v-if="globalTip" class="global-icon" @click="openGlobalDrawer" />
       </div>
+      <div class="cache" @click="openCachePanel">
+        <i class="jm-icon-workflow-cache" />
+        <span>缓存</span>
+        <i class="cache-icon" v-if="cacheIconVisible" />
+      </div>
       <div class="configs">
         最大并发数
         <i class="jm-icon-button-help" @mouseover="tooltipVisible = true" @mouseout="tooltipVisible = false"></i>
@@ -69,6 +74,8 @@ import { IWorkflow } from '../../model/data/common';
 import { WorkflowValidator } from '../../model/workflow-validator';
 import { cloneDeep } from 'lodash';
 import { compare } from '../../model/util/object';
+import { Global } from '../../model/data/global';
+import { v4 as uuidv4 } from 'uuid';
 
 export default defineComponent({
   components: { ProjectPanel },
@@ -78,7 +85,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['back', 'save', 'open-global-drawer'],
+  emits: ['back', 'save', 'open-global-drawer', 'open-cache-panel'],
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
     let workflowBackUp = cloneDeep(props.workflowData);
@@ -89,6 +96,7 @@ export default defineComponent({
     const getWorkflowValidator = inject('getWorkflowValidator') as () => WorkflowValidator;
     const workflowValidator = getWorkflowValidator();
     const zoomVal = ref<number>(graph.zoom());
+    const cacheIconVisible = ref<boolean>(false);
     const options = ref([
       {
         value: '1',
@@ -119,7 +127,7 @@ export default defineComponent({
     const checkGlobalParams = async (): Promise<void> => {
       // 表单验证
       try {
-        await workflowForm.value.global.validateParams();
+        await new Global(workflowForm.value.global).validateParams();
         globalTip.value = false;
       } catch (err) {
         globalTip.value = true;
@@ -153,6 +161,26 @@ export default defineComponent({
         workflowForm.value.global.concurrent = Number(concurrentVal.value);
       }
     };
+
+    // 缓存校验图标
+    const checkCache = async (): Promise<void> => {
+      if (workflowForm.value.global.caches && typeof workflowForm.value.global.caches === 'string') {
+        workflowForm.value.global.caches = [{ ref: workflowForm.value.global.caches, key: uuidv4() }];
+      }
+      const { global } = workflowForm.value;
+      // 如果没有值直接忽略
+      if (global && (global.caches?.length === 0 || !global.caches)) {
+        cacheIconVisible.value = false;
+        return;
+      }
+      try {
+        await new Global(global).validateCache();
+        cacheIconVisible.value = false;
+      } catch (err) {
+        cacheIconVisible.value = true;
+      }
+    };
+
     return {
       ZoomTypeEnum,
       workflowForm,
@@ -223,6 +251,11 @@ export default defineComponent({
       openGlobalDrawer: () => {
         emit('open-global-drawer', true, checkGlobalParams);
       },
+      openCachePanel: () => {
+        checkCache();
+        emit('open-cache-panel', checkCache);
+      },
+      cacheIconVisible,
       tooltipVisible,
       options,
       concurrentVal,
@@ -326,6 +359,7 @@ export default defineComponent({
   .right {
     display: flex;
     justify-content: right;
+    align-items: center;
 
     .tools {
       display: flex;
@@ -377,6 +411,37 @@ export default defineComponent({
         background: #eff7ff;
         color: #096dd9;
         cursor: pointer;
+      }
+    }
+
+    .cache {
+      height: 20px;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 20px;
+      color: #042749;
+      display: flex;
+      align-items: center;
+      margin: 0 0 0 50px;
+      cursor: pointer;
+      position: relative;
+
+      .jm-icon-workflow-cache {
+        margin-right: 6px;
+
+        &::before {
+          color: #6b7b8d;
+        }
+      }
+
+      .cache-icon {
+        display: flex;
+        width: 12px;
+        height: 12px;
+        background: url('../../svgs/cache-waring.svg');
+        position: absolute;
+        right: -8px;
+        top: -4px;
       }
     }
 
