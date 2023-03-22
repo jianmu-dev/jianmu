@@ -42,14 +42,8 @@ export interface IWorkflowNode {
   toDsl(): object;
 }
 
-export interface ICache {
-  ref: string;
-  key: string;
-}
-
 export interface IGlobalParam {
   ref: string;
-  key: string;
   name: string;
   type: ParamTypeEnum;
   required: boolean;
@@ -59,8 +53,8 @@ export interface IGlobalParam {
 
 export interface IGlobal {
   concurrent: number | boolean;
-  caches?: ICache[];
-  params?: IGlobalParam[];
+  caches: string[];
+  params: IGlobalParam[];
 }
 
 export interface IAssociation {
