@@ -14,7 +14,6 @@ const MAX_ZOOM = 500;
 // 缩放间隔
 const ZOOM_INTERVAL = 10;
 
-// TODO 缺少param的处理
 /**
  * 处理cache个数不同时的返回
  */
