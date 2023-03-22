@@ -44,7 +44,6 @@ export interface IWorkflowNode {
 
 export interface IGlobalParam {
   ref: string;
-  key: string;
   name: string;
   type: ParamTypeEnum;
   required: boolean;
@@ -55,7 +54,7 @@ export interface IGlobalParam {
 export interface IGlobal {
   concurrent: number | boolean;
   caches: string[];
-  params?: IGlobalParam[];
+  params: IGlobalParam[];
 }
 
 export interface IAssociation {

@@ -21,22 +21,38 @@ const ZOOM_INTERVAL = 10;
 function buildGlobal(global: IGlobal): {
   concurrent: boolean | number;
   cache: string[] | string | undefined;
+  param: IGlobalParam[] | undefined;
 } {
+  const param =
+    !global.params || global.params.length === 0
+      ? undefined
+      : global.params.map(({ ref, name, value, required, type, hidden }) => ({
+        ref,
+        name,
+        value,
+        required,
+        type,
+        hidden,
+      }));
+
   if (!global.caches || global.caches.length === 0) {
     return {
       concurrent: global.concurrent,
       cache: undefined,
+      param,
     };
   }
   if (global.caches.length === 1) {
     return {
       concurrent: global.concurrent,
       cache: global.caches[0],
+      param,
     };
   }
   return {
     concurrent: global.concurrent,
     cache: global.caches,
+    param,
   };
 }
 

@@ -1,5 +1,5 @@
 import Schema, { Value } from 'async-validator';
-import { CustomRule, IGlobal } from './common';
+import { CustomRule, IGlobal, IGlobalParam } from './common';
 import { checkDuplicate } from '../util/reference';
 import { ParamTypeEnum, RefTypeEnum } from './enumeration';
 import { IExternalParameterVo } from '@/api/dto/ext-param';
@@ -14,7 +14,7 @@ interface ICache {
   key: string;
 }
 
-interface IGlobalParam {
+interface IGlobalParams {
   ref: string;
   key: string;
   name: string;
@@ -38,6 +38,17 @@ const buildCaches = (cache: string[]): ICache[] => {
   return caches;
 };
 
+/**
+ * 转换param
+ * @param params
+ */
+const buildParams = (params: IGlobalParam[]): IGlobalParams[] => {
+  if (!params) {
+    return [];
+  }
+  return params.map(item => ({ ...item, key: uuidv4() }));
+};
+
 export class Global {
   concurrent: boolean | number;
   readonly params: IGlobalParam[];
@@ -45,7 +56,7 @@ export class Global {
 
   constructor(global: IGlobal) {
     this.concurrent = global.concurrent;
-    this.params = global.params || [];
+    this.params = buildParams(global.params);
     this.caches = buildCaches(global.caches);
   }
 
