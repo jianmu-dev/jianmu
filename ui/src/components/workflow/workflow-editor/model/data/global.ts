@@ -1,7 +1,7 @@
 import Schema, { Value } from 'async-validator';
-import { CustomRule, IGlobal, IGlobalParam } from './common';
+import { CustomRule, IGlobal, IGlobalParam as _IGlobalParam } from './common';
 import { checkDuplicate } from '../util/reference';
-import { ParamTypeEnum, RefTypeEnum } from './enumeration';
+import { RefTypeEnum } from './enumeration';
 import { IExternalParameterVo } from '@/api/dto/ext-param';
 import { ISelectableParam } from '@/components/workflow/workflow-expression-editor/model/data';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,14 +14,8 @@ interface ICache {
   key: string;
 }
 
-interface IGlobalParams {
-  ref: string;
+interface IGlobalParam extends _IGlobalParam {
   key: string;
-  name: string;
-  type: ParamTypeEnum;
-  required: boolean;
-  value: string;
-  hidden: boolean;
 }
 /**
  * 转换cache
@@ -42,7 +36,7 @@ const buildCaches = (cache: string[]): ICache[] => {
  * 转换param
  * @param params
  */
-const buildParams = (params: IGlobalParam[]): IGlobalParams[] => {
+const buildParams = (params: _IGlobalParam[]): IGlobalParam[] => {
   if (!params) {
     return [];
   }
