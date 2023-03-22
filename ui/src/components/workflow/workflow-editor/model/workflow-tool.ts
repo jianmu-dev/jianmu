@@ -2,7 +2,7 @@ import { Cell, Graph } from '@antv/x6';
 import yaml from 'yaml';
 import { ZoomTypeEnum } from './data/enumeration';
 import { NODE } from '../shape/gengral-config';
-import { IWorkflow } from './data/common';
+import { IGlobal, IWorkflow } from './data/common';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import { AsyncTask } from './data/node/async-task';
 
@@ -12,6 +12,31 @@ const MIN_ZOOM = 20;
 const MAX_ZOOM = 500;
 // 缩放间隔
 const ZOOM_INTERVAL = 10;
+
+/**
+ * 处理cache个数不同时的返回
+ */
+function buildGlobal(global: IGlobal): {
+  concurrent: boolean | number;
+  cache: string[] | string | undefined;
+} {
+  if (!global.caches || global.caches.length === 0) {
+    return {
+      concurrent: global.concurrent,
+      cache: undefined,
+    };
+  }
+  if (global.caches.length === 1) {
+    return {
+      concurrent: global.concurrent,
+      cache: global.caches[0],
+    };
+  }
+  return {
+    concurrent: global.concurrent,
+    cache: global.caches,
+  };
+}
 
 export class WorkflowTool {
   private readonly graph: Graph;
@@ -165,46 +190,10 @@ export class WorkflowTool {
       pipeline[ref] = nodeData.toDsl();
     });
 
-    // 构造global
-    const global: {
-      concurrent: boolean | number;
-      cache: string[] | string;
-    } = { concurrent: false, cache: [] };
-
-    global.concurrent = workflowData.global.concurrent;
-
-    const getGlobal = () => {
-      if (!workflowData.global.caches || workflowData.global.caches.length === 0) {
-        return {
-          concurrent: workflowData.global.concurrent,
-          cache: undefined,
-        };
-      } else if (workflowData.global.caches && typeof workflowData.global.caches === 'string') {
-        return {
-          concurrent: global.concurrent,
-          cache: workflowData.global.caches,
-        };
-      } else if (typeof workflowData.global.caches === 'object' && workflowData.global.caches.length === 1) {
-        return {
-          concurrent: global.concurrent,
-          cache: workflowData.global.caches[0].ref ? workflowData.global.caches[0].ref : workflowData.global.caches,
-        };
-      } else {
-        workflowData.global.caches?.forEach(item => {
-          // cache多个时为数组，typeof cache === 'object' 避免报错
-          if (typeof global.cache !== 'object') {
-            return;
-          }
-          global.cache.push(item.ref ? item.ref : <any>item);
-        });
-        return global;
-      }
-    };
-
     let dsl = yaml.stringify({
       name: workflowData.name,
       description: workflowData.description,
-      global: getGlobal(),
+      global: buildGlobal(workflowData.global),
       trigger,
       pipeline,
     });

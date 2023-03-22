@@ -100,7 +100,7 @@ export default defineComponent({
       delDialogVisible,
       cacheTypes,
       closeDrawer: async () => {
-        workflowForm.value.global.caches = globalForm.value.caches;
+        workflowForm.value.global.caches = globalForm.value.caches.map(({ ref }) => ref);
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         cacheFormRef.value!.validate().catch(() => {});
         emit('closed');

@@ -72,8 +72,8 @@ export default defineComponent({
             groupId: projectGroupId,
             description,
             global: {
-              concurrent: global ? global.concurrent : 1,
-              caches: global.cache ? global.cache : undefined,
+              concurrent: global && global.concurrent ? global.concurrent : 1,
+              caches: global && global.cache ? (typeof global.cache === 'string' ? [global.cache] : global.cache) : [],
             },
             data: rawData,
           };

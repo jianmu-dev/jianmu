@@ -38,14 +38,9 @@ export interface IWorkflowNode {
   toDsl(): object;
 }
 
-export interface ICache {
-  ref: string;
-  key: string;
-}
-
 export interface IGlobal {
   concurrent: number | boolean;
-  caches?: ICache[];
+  caches: string[];
 }
 
 /**
