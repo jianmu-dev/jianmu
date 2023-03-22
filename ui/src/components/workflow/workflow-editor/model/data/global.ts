@@ -1,12 +1,18 @@
 import Schema, { Value } from 'async-validator';
-import { CustomRule, ICache, IGlobal } from './common';
+import { CustomRule, IGlobal } from './common';
 import { checkDuplicate } from '../util/reference';
 import { ParamTypeEnum, RefTypeEnum } from './enumeration';
 import { IExternalParameterVo } from '@/api/dto/ext-param';
 import { ISelectableParam } from '@/components/workflow/workflow-expression-editor/model/data';
+import { v4 as uuidv4 } from 'uuid';
 
 export const GLOBAL_PARAM_SCOPE = 'global';
 export const EXT_PARAM_SCOPE = 'ext';
+
+interface ICache {
+  ref: string;
+  key: string;
+}
 
 interface IGlobalParam {
   ref: string;
@@ -17,6 +23,20 @@ interface IGlobalParam {
   value: string;
   hidden: boolean;
 }
+/**
+ * 转换cache
+ * @param cache
+ */
+const buildCaches = (cache: string[]): ICache[] => {
+  if (!cache) {
+    return [];
+  }
+  const caches: ICache[] = [];
+  cache.forEach(item => {
+    caches.push({ ref: item, key: uuidv4() });
+  });
+  return caches;
+};
 
 export class Global {
   concurrent: boolean | number;
@@ -26,7 +46,7 @@ export class Global {
   constructor(global: IGlobal) {
     this.concurrent = global.concurrent;
     this.params = global.params || [];
-    this.caches = global.caches || [];
+    this.caches = buildCaches(global.caches);
   }
 
   /**
