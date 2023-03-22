@@ -1,7 +1,28 @@
 import Schema, { Value } from 'async-validator';
-import { CustomRule, ICache, IGlobal } from './common';
+import { CustomRule, IGlobal } from './common';
 import { checkDuplicate } from '../util/reference';
 import { RefTypeEnum } from './enumeration';
+import { v4 as uuidv4 } from 'uuid';
+
+interface ICache {
+  ref: string;
+  key: string;
+}
+
+/**
+ * 转换cache
+ * @param cache
+ */
+const buildCaches = (cache: string[]): ICache[] => {
+  if (!cache) {
+    return [];
+  }
+  const caches: ICache[] = [];
+  cache.forEach(item => {
+    caches.push({ ref: item, key: uuidv4() });
+  });
+  return caches;
+};
 
 export class Global {
   concurrent: boolean | number;
@@ -9,7 +30,7 @@ export class Global {
 
   constructor(global: IGlobal) {
     this.concurrent = global.concurrent;
-    this.caches = global.caches || [];
+    this.caches = buildCaches(global.caches);
   }
 
   /**
