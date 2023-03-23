@@ -213,4 +213,23 @@ public interface WorkflowInstanceMapper {
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
     List<WorkflowInstance> findByWorkflowAndRunningStatusOffset(@Param("workflowRef") String workflowRef, @Param("offset") Long offset);
+
+    @Select("<script>" +
+            "SELECT * FROM jm_workflow_instance " +
+            "<where>" +
+            "   id IN <foreach collection='ids' item='item' open='(' separator=',' close=')'> #{item}" +
+            "   </foreach>" +
+            "</where>" +
+            "</script>")
+    @Result(column = "serial_no", property = "serialNo")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "trigger_type", property = "triggerType")
+    @Result(column = "run_mode", property = "runMode")
+    @Result(column = "occurred_time", property = "occurredTime")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "suspended_time", property = "suspendedTime")
+    @Result(column = "end_time", property = "endTime")
+    List<WorkflowInstance> findByIdIn(@Param("ids") List<String> ids);
 }

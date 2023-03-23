@@ -50,4 +50,8 @@ public class WorkflowInstanceApplication {
     public Optional<WorkflowInstance> findByTriggerId(String triggerId) {
         return this.workflowInstanceRepository.findByTriggerId(triggerId);
     }
+
+    public List<WorkflowInstance> findByIdIn(List<String> ids) {
+        return this.workflowInstanceRepository.findByIdIn(ids);
+    }
 }

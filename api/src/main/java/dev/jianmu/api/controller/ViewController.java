@@ -328,6 +328,14 @@ public class ViewController {
         return WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVoList(instances);
     }
 
+    @GetMapping("/workflow_instances/ids")
+    @Operation(summary = "通过id查询流程实例列表", description = "通过id查询流程实例列表")
+    public List<WorkflowInstanceVo> findWorkflowInstancesByIds(@Valid WorkflowInstanceViewingIdsDto dto) {
+        return this.instanceApplication.findByIdIn(dto.getIds()).stream()
+                .map(WorkflowInstanceMapper.INSTANCE::toWorkflowInstanceVo)
+                .collect(Collectors.toList());
+    }
+
     @GetMapping("/workflow_instances/pages/{workflowRef}")
     @Operation(summary = "根据workflowRef分页查询流程实例列表", description = "根据workflowRef分页查询流程实例列表")
     public PageInfo<WorkflowInstanceVo> findPageByWorkflowRef(@PathVariable String workflowRef, PageDto pageDto) {
