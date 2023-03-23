@@ -68,9 +68,6 @@ public class AssociationUtil {
                 }
                 break;
             case PERSONAL:
-                if ("UI_SPEC".equals(project.getAssociationPlatform())) {
-                    return;
-                }
                 try {
                     this.userPermissionHolder.getPermission().checkUserRef(project.getAssociationId());
                 } catch (UserRefIllegalException e) {
