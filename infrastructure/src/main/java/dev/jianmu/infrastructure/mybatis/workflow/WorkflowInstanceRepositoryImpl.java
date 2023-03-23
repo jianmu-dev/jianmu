@@ -131,6 +131,11 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
     }
 
     @Override
+    public List<WorkflowInstance> findByIdIn(List<String> ids) {
+        return this.workflowInstanceMapper.findByIdIn(ids);
+    }
+
+    @Override
     public List<WorkflowInstance> findByRefOffset(String workflowRef, long offset) {
         return this.workflowInstanceMapper.findByRefOffset(workflowRef, offset);
     }
