@@ -68,7 +68,7 @@ public class AssociationUtil {
                 }
                 break;
             case PERSONAL:
-                if ("UI_SPEC".equals(associationPlatform)) {
+                if ("UI_SPEC".equals(project.getAssociationPlatform())) {
                     return;
                 }
                 try {

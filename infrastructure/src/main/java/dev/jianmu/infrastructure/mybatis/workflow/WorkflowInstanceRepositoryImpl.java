@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -132,6 +133,9 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
 
     @Override
     public List<WorkflowInstance> findByIdIn(List<String> ids) {
+        if (ObjectUtils.isEmpty(ids)) {
+            return List.of();
+        }
         return this.workflowInstanceMapper.findByIdIn(ids);
     }
 
