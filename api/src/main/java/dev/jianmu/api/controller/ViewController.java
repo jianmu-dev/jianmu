@@ -328,10 +328,10 @@ public class ViewController {
         return WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVoList(instances);
     }
 
-    @GetMapping("/workflow_instances/ids")
-    @Operation(summary = "通过id查询流程实例列表", description = "通过id查询流程实例列表")
+    @GetMapping("/workflow_instances/trigger_ids")
+    @Operation(summary = "通过triggerIds查询流程实例列表", description = "通过triggerIds查询流程实例列表")
     public List<WorkflowInstanceVo> findWorkflowInstancesByIds(@Valid WorkflowInstanceViewingIdsDto dto) {
-        return this.instanceApplication.findByIdIn(dto.getIds()).stream()
+        return this.instanceApplication.findByTriggerIdIn(dto.getIds()).stream()
                 .map(WorkflowInstanceMapper.INSTANCE::toWorkflowInstanceVo)
                 .collect(Collectors.toList());
     }
