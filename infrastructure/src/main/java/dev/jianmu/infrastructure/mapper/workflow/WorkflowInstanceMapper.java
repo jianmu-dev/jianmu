@@ -217,7 +217,7 @@ public interface WorkflowInstanceMapper {
     @Select("<script>" +
             "SELECT * FROM jm_workflow_instance " +
             "<where>" +
-            "   id IN <foreach collection='ids' item='item' open='(' separator=',' close=')'> #{item}" +
+            "   trigger_id IN <foreach collection='ids' item='item' open='(' separator=',' close=')'> #{item}" +
             "   </foreach>" +
             "</where>" +
             "</script>")
@@ -231,5 +231,5 @@ public interface WorkflowInstanceMapper {
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
-    List<WorkflowInstance> findByIdIn(@Param("ids") List<String> ids);
+    List<WorkflowInstance> findByTriggerIdIn(@Param("ids") List<String> ids);
 }

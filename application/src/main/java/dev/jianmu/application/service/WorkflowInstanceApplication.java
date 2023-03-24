@@ -51,7 +51,7 @@ public class WorkflowInstanceApplication {
         return this.workflowInstanceRepository.findByTriggerId(triggerId);
     }
 
-    public List<WorkflowInstance> findByIdIn(List<String> ids) {
-        return this.workflowInstanceRepository.findByIdIn(ids);
+    public List<WorkflowInstance> findByTriggerIdIn(List<String> ids) {
+        return this.workflowInstanceRepository.findByTriggerIdIn(ids);
     }
 }

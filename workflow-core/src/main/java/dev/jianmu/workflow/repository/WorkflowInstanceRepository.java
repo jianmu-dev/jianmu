@@ -40,5 +40,5 @@ public interface WorkflowInstanceRepository {
 
     List<WorkflowInstance> findByWorkflowAndRunningStatusOffset(String workflowRef, Long offset);
 
-    List<WorkflowInstance> findByIdIn(List<String> ids);
+    List<WorkflowInstance> findByTriggerIdIn(List<String> ids);
 }

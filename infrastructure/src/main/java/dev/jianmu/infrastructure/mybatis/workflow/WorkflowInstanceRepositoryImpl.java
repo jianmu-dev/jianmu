@@ -132,11 +132,11 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
     }
 
     @Override
-    public List<WorkflowInstance> findByIdIn(List<String> ids) {
+    public List<WorkflowInstance> findByTriggerIdIn(List<String> ids) {
         if (ObjectUtils.isEmpty(ids)) {
             return List.of();
         }
-        return this.workflowInstanceMapper.findByIdIn(ids);
+        return this.workflowInstanceMapper.findByTriggerIdIn(ids);
     }
 
     @Override
