@@ -257,7 +257,7 @@ export default defineComponent({
     align-items: center;
     justify-content: space-between;
     background-color: transparent;
-    padding: 20px 0;
+    padding: 0 0 20px 0;
 
     .left-top-param {
       color: #082340;
