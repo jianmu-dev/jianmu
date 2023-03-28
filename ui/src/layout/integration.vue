@@ -118,7 +118,7 @@ export default defineComponent({
 <style lang="less" scoped>
 .integration {
   width: 1158px;
-  padding: 0 20px 20px 20px;
+  padding: 20px;
   margin: 0 auto;
   position: relative;
 
