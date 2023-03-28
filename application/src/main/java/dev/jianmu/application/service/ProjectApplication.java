@@ -247,6 +247,7 @@ public class ProjectApplication {
         logger.info("开始同步Git仓库中的DSL");
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目，项目id: " + projectId));
+        var lastWorkflowVersion = project.getWorkflowVersion();
         var concurrent = project.getConcurrent();
         var gitRepo = this.gitRepoRepository.findById(project.getGitRepoId())
                 .orElseThrow(() -> new DataNotFoundException("未找到Git仓库，git仓库id: " + project.getGitRepoId()));
@@ -269,6 +270,7 @@ public class ProjectApplication {
         project.setTriggerType(parser.getTriggerType());
 
         this.pubTriggerEvent(parser, project);
+        this.publishCacheEvent(workflow, lastWorkflowVersion);
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
         this.jgitService.cleanUp(gitRepo.getId());
