@@ -671,7 +671,7 @@ public class DslParser {
         }
         var dirs = new HashSet<String>();
         ((Map<?, ?>) cache).forEach((k, v) -> {
-            if (!this.caches.contains((String) k)) {
+            if (this.caches == null || !this.caches.contains((String) k)) {
                 throw new DslException("未声明缓存：" + k);
             }
             if (!(v instanceof String)) {
