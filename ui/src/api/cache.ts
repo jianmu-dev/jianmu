@@ -1,4 +1,5 @@
-export const baseUrl = '/caches';
+import { API_PREFIX } from '@/utils/constants';
+export const baseUrl = `${API_PREFIX}/caches`;
 import { restProxy } from '@/api/index';
 
 /**

@@ -1,22 +1,47 @@
 import Schema, { Value } from 'async-validator';
-import { CustomRule, ICache, IGlobal } from './common';
+import { CustomRule, IGlobal, IGlobalParam as _IGlobalParam } from './common';
 import { checkDuplicate } from '../util/reference';
-import { ParamTypeEnum, RefTypeEnum } from './enumeration';
+import { RefTypeEnum } from './enumeration';
 import { IExternalParameterVo } from '@/api/dto/ext-param';
 import { ISelectableParam } from '@/components/workflow/workflow-expression-editor/model/data';
+import { v4 as uuidv4 } from 'uuid';
 
 export const GLOBAL_PARAM_SCOPE = 'global';
 export const EXT_PARAM_SCOPE = 'ext';
 
-interface IGlobalParam {
+interface ICache {
   ref: string;
   key: string;
-  name: string;
-  type: ParamTypeEnum;
-  required: boolean;
-  value: string;
-  hidden: boolean;
 }
+
+interface IGlobalParam extends _IGlobalParam {
+  key: string;
+}
+/**
+ * 转换cache
+ * @param cache
+ */
+const buildCaches = (cache: string[]): ICache[] => {
+  if (!cache) {
+    return [];
+  }
+  const caches: ICache[] = [];
+  cache.forEach(item => {
+    caches.push({ ref: item, key: uuidv4() });
+  });
+  return caches;
+};
+
+/**
+ * 转换param
+ * @param params
+ */
+const buildParams = (params: _IGlobalParam[]): IGlobalParam[] => {
+  if (!params) {
+    return [];
+  }
+  return params.map(item => ({ ...item, key: uuidv4() }));
+};
 
 export class Global {
   concurrent: boolean | number;
@@ -25,8 +50,8 @@ export class Global {
 
   constructor(global: IGlobal) {
     this.concurrent = global.concurrent;
-    this.params = global.params || [];
-    this.caches = global.caches || [];
+    this.params = buildParams(global.params);
+    this.caches = buildCaches(global.caches);
   }
 
   /**

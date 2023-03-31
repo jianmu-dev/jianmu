@@ -56,9 +56,9 @@ export default defineComponent({
             branch,
           },
           global: {
-            concurrent: global ? global.concurrent : 1,
-            caches: global.cache ? global.cache : undefined,
-            params: global.param ? global.param : undefined,
+            concurrent: global && global.concurrent ? global.concurrent : 1,
+            caches: global && global.cache ? (typeof global.cache === 'string' ? [global.cache] : global.cache) : [],
+            params: global && global.param ? global.param : [],
           },
           data: rawData,
         };
@@ -84,9 +84,9 @@ export default defineComponent({
               branch: b,
             },
             global: {
-              concurrent: g ? g.concurrent : 1,
-              caches: g.cache ? g.cache : undefined,
-              params: g.param ? g.param : undefined,
+              concurrent: g && g.concurrent ? g.concurrent : 1,
+              caches: g && g.cache ? (typeof g.cache === 'string' ? [g.cache] : g.cache) : [],
+              params: g && g.param ? g.param : [],
             },
             data: rawDslData,
           };

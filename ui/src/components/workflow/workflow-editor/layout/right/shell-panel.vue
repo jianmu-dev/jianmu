@@ -104,7 +104,7 @@ export default defineComponent({
       required: true,
     },
     caches: {
-      type: [Array, String],
+      type: Array as PropType<string[]>,
     },
   },
   emits: ['form-created'],
@@ -141,17 +141,11 @@ export default defineComponent({
     onMounted(() => emit('form-created', formRef.value));
 
     // 模拟缓存列表
-    const caches = ref<any>(props.caches || []);
+    const caches = ref<string[]>(props.caches || []);
     // 构造需要的数据
-    const cachesInfo = ref<{ name: string; disable: boolean }[]>([]);
-
-    if (typeof caches.value === 'string') {
-      cachesInfo.value.push({ name: caches.value, disable: false });
-    } else {
-      caches.value.forEach((item: any) => {
-        cachesInfo.value.push({ name: item.ref ? item.ref : item, disable: false });
-      });
-    }
+    const cachesInfo = ref<{ name: string; disable: boolean }[]>(
+      caches.value.map((name: string) => ({ name, disable: false })),
+    );
 
     onMounted(async () => {
       // 将已有的缓存禁用

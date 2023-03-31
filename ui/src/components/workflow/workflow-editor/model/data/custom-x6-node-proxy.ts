@@ -173,10 +173,7 @@ export class CustomX6NodeProxy {
   }
 
   private validateCache({ global: { caches } }: IWorkflow, name: string) {
-    if (caches && typeof caches === 'string' && caches === name) {
-      return;
-    }
-    if (caches?.map(item => (item.ref ? item.ref : item)).includes(name)) {
+    if (caches.map(item => item).includes(name)) {
       return;
     }
     // throw new Error(`cache不存在${name}`);

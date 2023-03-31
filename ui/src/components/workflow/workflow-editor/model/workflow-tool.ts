@@ -2,7 +2,7 @@ import { Cell, Graph } from '@antv/x6';
 import yaml from 'yaml';
 import { ZoomTypeEnum } from './data/enumeration';
 import { NODE } from '../shape/gengral-config';
-import { IWorkflow } from './data/common';
+import { IGlobal, IWorkflow } from './data/common';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import { DSL_CURRENT_VERSION } from '@/components/workflow/version';
 import { IGlobalParam } from './data/common';
@@ -13,6 +13,47 @@ const MIN_ZOOM = 20;
 const MAX_ZOOM = 500;
 // 缩放间隔
 const ZOOM_INTERVAL = 10;
+
+/**
+ * 处理cache个数不同时的返回
+ */
+function buildGlobal(global: IGlobal): {
+  concurrent: boolean | number;
+  cache: string[] | string | undefined;
+  param: IGlobalParam[] | undefined;
+} {
+  const param =
+    !global.params || global.params.length === 0
+      ? undefined
+      : global.params.map(({ ref, name, value, required, type, hidden }) => ({
+        ref,
+        name,
+        value,
+        required,
+        type,
+        hidden,
+      }));
+
+  if (!global.caches || global.caches.length === 0) {
+    return {
+      concurrent: global.concurrent,
+      cache: undefined,
+      param,
+    };
+  }
+  if (global.caches.length === 1) {
+    return {
+      concurrent: global.concurrent,
+      cache: global.caches[0],
+      param,
+    };
+  }
+  return {
+    concurrent: global.concurrent,
+    cache: global.caches,
+    param,
+  };
+}
 
 export class WorkflowTool {
   private readonly graph: Graph;
@@ -149,54 +190,11 @@ export class WorkflowTool {
     // TODO 优化顺序
     nodeProxies.forEach(nodeProxy => workflow.push(nodeProxy.toDsl(this.graph)));
 
-    // 构造global
-    const global: {
-      concurrent: boolean | number;
-      param: any[];
-      cache: string[] | string;
-    } = { concurrent: false, param: [], cache: [] };
-
-    global.concurrent = workflowData.global.concurrent;
-
-    workflowData.global.params?.forEach(({ ref, name, value, required, type, hidden }) => {
-      global.param.push({ ref, name, value, required, type, hidden });
-    });
-    const getGlobal = () => {
-      if (!workflowData.global.caches || workflowData.global.caches.length === 0) {
-        return {
-          concurrent: workflowData.global.concurrent,
-          param: global.param,
-          cache: undefined,
-        };
-      } else if (workflowData.global.caches && typeof workflowData.global.caches === 'string') {
-        return {
-          concurrent: global.concurrent,
-          param: global.param,
-          cache: workflowData.global.caches,
-        };
-      } else if (typeof workflowData.global.caches === 'object' && workflowData.global.caches.length === 1) {
-        return {
-          concurrent: global.concurrent,
-          param: global.param,
-          cache: workflowData.global.caches[0].ref ? workflowData.global.caches[0].ref : workflowData.global.caches,
-        };
-      } else {
-        workflowData.global.caches?.forEach(item => {
-          // cache多个时为数组，typeof cache === 'object' 避免报错
-          if (typeof global.cache !== 'object') {
-            return;
-          }
-          global.cache.push(item.ref ? item.ref : <any>item);
-        });
-        return global;
-      }
-    };
-
     let dsl = yaml.stringify({
       version: DSL_CURRENT_VERSION,
       name: workflowData.name,
       description: workflowData.description,
-      global: getGlobal(),
+      global: buildGlobal(workflowData.global),
       trigger,
       workflow,
     });
