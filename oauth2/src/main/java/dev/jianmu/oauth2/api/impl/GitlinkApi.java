@@ -644,7 +644,6 @@ public class GitlinkApi implements OAuth2Api {
 
     @Override
     public IFileVo getFile(String accessToken, String owner, String repo, String filepath, String ref) {
-        filepath = URLEncoder.encode(filepath, StandardCharsets.UTF_8);
         String getFileUrl = this.oAuth2Properties.getGitlink().getApiUrl()
                 + owner + "/" + repo + "/sub_entries" + ".json"
                 + "?ref=" + ref + "&filepath=" + filepath;
