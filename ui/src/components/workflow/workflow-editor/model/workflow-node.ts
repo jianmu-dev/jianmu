@@ -61,13 +61,13 @@ export class WorkflowNode {
   loadInnerTriggers(keyword?: string): IWorkflowNode[] {
     const arr: IWorkflowNode[] = [new Cron(), new Webhook()];
 
-    return keyword ? arr.filter(item => item.getName().includes(keyword)) : arr;
+    return keyword ? arr.filter(item => item.getName().toLowerCase().includes(keyword.toLowerCase())) : arr;
   }
 
   loadInnerNodes(keyword?: string): IWorkflowNode[] {
     const arr: IWorkflowNode[] = [new Shell()];
 
-    return keyword ? arr.filter(item => item.getName().includes(keyword)) : arr;
+    return keyword ? arr.filter(item => item.getName().toLowerCase().includes(keyword.toLowerCase())) : arr;
   }
 
   async loadLocalNodes(pageNum: number, pageSize: number, keyword?: string): Promise<IPageInfo> {
