@@ -21,7 +21,12 @@ interface IPageInfo {
  * @param outputs
  * @param versionDescription
  */
-export const pushParams = (data: AsyncTask, inputs: INodeParameterVo[], outputs: INodeParameterVo[], versionDescription: string) => {
+export const pushParams = (
+  data: AsyncTask,
+  inputs: INodeParameterVo[],
+  outputs: INodeParameterVo[],
+  versionDescription: string,
+) => {
   data.versionDescription = versionDescription;
   if (inputs) {
     inputs.forEach(item => {
@@ -50,9 +55,8 @@ export const pushParams = (data: AsyncTask, inputs: INodeParameterVo[], outputs:
 };
 
 export class WorkflowNode {
-
-  constructor() {
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  constructor() {}
 
   loadInnerTriggers(keyword?: string): IWorkflowNode[] {
     const arr: IWorkflowNode[] = [new Cron(), new Webhook()];
@@ -64,11 +68,14 @@ export class WorkflowNode {
     const arr: IWorkflowNode[] = [new Shell()];
 
     return keyword ? arr.filter(item => item.getName().includes(keyword)) : arr;
-
   }
 
   async loadLocalNodes(pageNum: number, pageSize: number, keyword?: string): Promise<IPageInfo> {
-    const { list, pageNum: currentPageNum, pages: totalPages } = await fetchNodeLibraryList({
+    const {
+      list,
+      pageNum: currentPageNum,
+      pages: totalPages,
+    } = await fetchNodeLibraryList({
       pageNum,
       pageSize,
       type: NodeTypeEnum.LOCAL,
@@ -78,12 +85,16 @@ export class WorkflowNode {
     return {
       pageNum: currentPageNum,
       totalPages,
-      content: keyword ? arr.filter(item => item.getName().includes(keyword)) : arr,
+      content: arr,
     };
   }
 
   async loadOfficialNodes(pageNum: number, pageSize: number, keyword?: string): Promise<IPageInfo> {
-    const { content, pageNum: currentPageNum, totalPages } = await getOfficialNodes({
+    const {
+      content,
+      pageNum: currentPageNum,
+      totalPages,
+    } = await getOfficialNodes({
       pageNum,
       pageSize,
       name: keyword,
@@ -92,12 +103,16 @@ export class WorkflowNode {
     return {
       pageNum: currentPageNum,
       totalPages,
-      content: keyword ? arr.filter(item => item.getName().includes(keyword)) : arr,
+      content: arr,
     };
   }
 
   async loadCommunityNodes(pageNum: number, pageSize: number, keyword?: string): Promise<IPageInfo> {
-    const { content, pageNum: currentPageNum, totalPages } = await getOfficialNodes({
+    const {
+      content,
+      pageNum: currentPageNum,
+      totalPages,
+    } = await getOfficialNodes({
       pageNum,
       pageSize,
       name: keyword,
@@ -107,7 +122,7 @@ export class WorkflowNode {
     return {
       pageNum: currentPageNum,
       totalPages,
-      content: keyword ? arr.filter(item => item.getName().includes(keyword)) : arr,
+      content: arr,
     };
   }
 }
