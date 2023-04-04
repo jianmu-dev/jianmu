@@ -108,7 +108,7 @@ export class WorkflowNode {
     } else {
       arr.push(new Webhook());
     }
-    return keyword ? arr.filter(item => item.getName().includes(keyword)) : arr;
+    return keyword ? arr.filter(item => item.getName().toLowerCase().includes(keyword.toLowerCase())) : arr;
   }
 
   loadInnerNodes(keyword?: string): IWorkflowNode[] {
