@@ -888,8 +888,8 @@ public class DslParser {
         }
         var dirs = new HashSet<String>();
         ((Map<?, ?>) cache).forEach((k, v) -> {
-            if (!this.caches.contains((String) k)) {
-                throw new DslException("未声明缓存：" + k);
+            if (this.caches == null || !this.caches.contains((String) k)) {
+                throw new DslException("未定义缓存：" + k);
             }
             if (!(v instanceof String)) {
                 throw new DslException("节点\"" + nodeName + "\"缓存配置错误，目录为以\"/\"开头的字符串");

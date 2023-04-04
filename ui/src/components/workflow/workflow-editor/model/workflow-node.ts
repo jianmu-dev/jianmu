@@ -14,7 +14,6 @@ import { IEventVo, IWebhookDefinitionVo } from '@/api/dto/custom-webhook';
 import { getWebhookList } from '@/api/custom-webhook';
 import { v4 as uuidv4 } from 'uuid';
 
-
 interface IPageInfo {
   pageNum: number;
   totalPages: number;
@@ -28,7 +27,12 @@ interface IPageInfo {
  * @param outputs
  * @param versionDescription
  */
-export const pushParams = (data: AsyncTask, inputs: INodeParameterVo[], outputs: INodeParameterVo[], versionDescription: string) => {
+export const pushParams = (
+  data: AsyncTask,
+  inputs: INodeParameterVo[],
+  outputs: INodeParameterVo[],
+  versionDescription: string,
+) => {
   data.versionDescription = versionDescription;
   if (inputs) {
     inputs.forEach(item => {
@@ -60,7 +64,6 @@ export const pushParams = (data: AsyncTask, inputs: INodeParameterVo[], outputs:
     });
   }
 };
-
 
 /**
  * push自定义触发事件
@@ -105,57 +108,74 @@ export class WorkflowNode {
     } else {
       arr.push(new Webhook());
     }
-    return keyword ? arr.filter(item => item.getName().includes(keyword)) : arr;
+    return keyword ? arr.filter(item => item.getName().toLowerCase().includes(keyword.toLowerCase())) : arr;
   }
 
   loadInnerNodes(keyword?: string): IWorkflowNode[] {
     const arr: IWorkflowNode[] = [new Shell(), new Start(), new End()];
 
-    return keyword ? arr.filter(item => item.getName().includes(keyword)) : arr;
-
+    return keyword ? arr.filter(item => item.getName().toLowerCase().includes(keyword.toLowerCase())) : arr;
   }
 
   async loadLocalNodes(pageNum: number, pageSize: number, keyword?: string): Promise<IPageInfo> {
-    const { list, pageNum: currentPageNum, pages: totalPages } = await fetchNodeLibraryList({
+    const {
+      list,
+      pageNum: currentPageNum,
+      pages: totalPages,
+    } = await fetchNodeLibraryList({
       pageNum,
       pageSize,
       type: NodeCategoryEnum.LOCAL,
       name: keyword,
     });
-    const arr: IWorkflowNode[] = list.map(item => new AsyncTask(item.ownerRef, item.ref, item.ref, item.name, item.icon));
+    const arr: IWorkflowNode[] = list.map(
+      item => new AsyncTask(item.ownerRef, item.ref, item.ref, item.name, item.icon),
+    );
     return {
       pageNum: currentPageNum,
       totalPages,
-      content: keyword ? arr.filter(item => item.getName().includes(keyword)) : arr,
+      content: arr,
     };
   }
 
   async loadOfficialNodes(pageNum: number, pageSize: number, keyword?: string): Promise<IPageInfo> {
-    const { content, pageNum: currentPageNum, totalPages } = await getOfficialNodes({
+    const {
+      content,
+      pageNum: currentPageNum,
+      totalPages,
+    } = await getOfficialNodes({
       pageNum,
       pageSize,
       name: keyword,
     });
-    const arr: IWorkflowNode[] = content.map(item => new AsyncTask(item.ownerRef, item.ref, item.ref, item.name, item.icon));
+    const arr: IWorkflowNode[] = content.map(
+      item => new AsyncTask(item.ownerRef, item.ref, item.ref, item.name, item.icon),
+    );
     return {
       pageNum: currentPageNum,
       totalPages,
-      content: keyword ? arr.filter(item => item.getName().includes(keyword)) : arr,
+      content: arr,
     };
   }
 
   async loadCommunityNodes(pageNum: number, pageSize: number, keyword?: string): Promise<IPageInfo> {
-    const { content, pageNum: currentPageNum, totalPages } = await getOfficialNodes({
+    const {
+      content,
+      pageNum: currentPageNum,
+      totalPages,
+    } = await getOfficialNodes({
       pageNum,
       pageSize,
       name: keyword,
       type: NodeCategoryEnum.COMMUNITY,
     });
-    const arr: IWorkflowNode[] = content.map(item => new AsyncTask(item.ownerRef, item.ref, item.ref, item.name, item.icon));
+    const arr: IWorkflowNode[] = content.map(
+      item => new AsyncTask(item.ownerRef, item.ref, item.ref, item.name, item.icon),
+    );
     return {
       pageNum: currentPageNum,
       totalPages,
-      content: keyword ? arr.filter(item => item.getName().includes(keyword)) : arr,
+      content: arr,
     };
   }
 }
