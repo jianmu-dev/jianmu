@@ -87,6 +87,7 @@ public class TaskInstanceEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleTaskInstanceEvent(TaskInstanceCreatedEvent event) {
         // 任务上下文抛出事件通知Worker
+        MDC.put("triggerId", event.getTriggerId());
         this.workerInternalApplication.dispatchTask(event);
         logger.info("Task instance id: {}  ref: {} is running", event.getTaskInstanceId(), event.getAsyncTaskRef());
     }
@@ -94,6 +95,7 @@ public class TaskInstanceEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleTaskInstanceWaitingEvent(TaskInstanceWaitingEvent event) {
         // 任务上下文抛出事件通知流程上下文
+        MDC.put("triggerId", event.getTriggerId());
         logger.info("get TaskInstanceWaitingEvent: {}", event);
         this.asyncTaskInstanceInternalApplication.waiting(event.getBusinessId());
     }
@@ -101,6 +103,7 @@ public class TaskInstanceEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleTaskInstanceRunningEvent(TaskInstanceRunningEvent event) {
         // 任务上下文抛出事件通知流程上下文
+        MDC.put("triggerId", event.getTriggerId());
         logger.info("get TaskInstanceRunningEvent: {}", event);
         this.asyncTaskInstanceInternalApplication.run(event.getBusinessId());
     }
@@ -108,6 +111,7 @@ public class TaskInstanceEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleTaskInstanceSucceedEvent(TaskInstanceSucceedEvent event) {
         // 任务上下文抛出事件通知流程上下文
+        MDC.put("triggerId", event.getTriggerId());
         logger.info("get TaskInstanceSucceedEvent: {}", event);
         if (event.isVolume()) {
             this.cacheApplication.executeSucceeded(event.getTaskInstanceId());
@@ -121,6 +125,7 @@ public class TaskInstanceEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleTaskInstanceFailedEvent(TaskInstanceFailedEvent event) {
         // 任务上下文抛出事件通知流程上下文
+        MDC.put("triggerId", event.getTriggerId());
         logger.info("get TaskInstanceFailedEvent: {}", event);
         if (event.isVolume()) {
             this.cacheApplication.executeFailed(event.getTaskInstanceId());
@@ -134,6 +139,7 @@ public class TaskInstanceEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleTaskInstanceDispatchFailedEvent(TaskInstanceDispatchFailedEvent event) {
         // 任务上下文抛出事件通知流程上下文
+        MDC.put("triggerId", event.getTriggerId());
         logger.info("get TaskInstanceDispatchFailedEvent: {}", event);
         this.workflowInstanceInternalApplication.terminateByTriggerId(event.getTriggerId());
     }
