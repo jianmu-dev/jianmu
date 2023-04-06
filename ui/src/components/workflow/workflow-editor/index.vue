@@ -23,7 +23,7 @@
       <graph-panel
         :workflow-data="workflowData"
         @graph-created="handleGraphCreated"
-        @node-selected="nodeId => handleNodeSelected(nodeId, false)"
+        @node-selected="nodeId => handleNodeSelected(nodeId, true)"
       />
     </div>
   </div>
