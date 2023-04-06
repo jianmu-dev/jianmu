@@ -218,7 +218,7 @@ export default defineComponent({
     const caches = ref<string[]>(props.caches || []);
     // 构造需要的数据
     const cachesInfo = ref<{ name: string; disable: boolean }[]>(
-      caches.value.map((name: string) => ({ name, disable: false })),
+      caches.value.filter(item => item).map((name: string) => ({ name, disable: false })),
     );
 
     onMounted(() => {
