@@ -65,7 +65,30 @@ export class Shell extends BaseNode {
         type: 'object',
         required: true,
         fields: {
-          name: [{ required: true, message: '请输入变量名', trigger: 'blur' }],
+          name: [
+            { required: true, message: '请输入变量名', trigger: 'blur' },
+            {
+              validator: (rule: any, value: any, callback: any) => {
+                if (!value) {
+                  callback();
+                  return;
+                }
+                try {
+                  checkDuplicate(
+                    this.envs.map(({ name }) => name),
+                    RefTypeEnum.SHELL_ENV,
+                  );
+                } catch ({ message, ref }) {
+                  if (ref === value) {
+                    callback(message);
+                    return;
+                  }
+                }
+                callback();
+              },
+              trigger: 'blur',
+            },
+          ],
           value: [
             { required: true, message: '请输入变量值', trigger: 'blur' },
             {

@@ -45,6 +45,7 @@
             :form-model-name="'envs'"
             :index="index"
             :rules="nodeData.getFormRules().envs.fields[index].fields"
+            @change="(newVal, oldVal) => changeEnvName(index, oldVal, 'envs')"
             @delete="deleteShellEnv"
           />
           <div class="add-shell-env" @click="addShellEnv">
@@ -211,6 +212,14 @@ export default defineComponent({
       },
       deleteShellEnv: (index: number) => {
         form.value.envs.splice(index, 1);
+      },
+      changeEnvName: (index: number, oldVal: string, formModelName: string) => {
+        form.value.envs.forEach(({ name }, idx) => {
+          if (index === idx || oldVal !== name) {
+            return;
+          }
+          formRef.value.validateField(`${formModelName}.${idx}.name`);
+        });
       },
       cachesInfo,
       addSelector: () => form.value.caches.push({ key: uuidv4(), name: '', value: '' }),

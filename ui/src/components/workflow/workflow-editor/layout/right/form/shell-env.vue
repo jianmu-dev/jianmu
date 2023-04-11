@@ -1,5 +1,5 @@
 <template>
-  <div :class="{'shell-env':true,'switch-bgc':switchBackgroundFlag}">
+  <div :class="{ 'shell-env': true, 'switch-bgc': switchBackgroundFlag }">
     <jm-form-item :prop="`${formModelName}.${index}.name`" :rules="rules.name" label="变量名称">
       <jm-input
         v-model="envName"
@@ -7,8 +7,9 @@
         @change="changeEnv"
         class="change-env"
         placeholder="请输入变量名称"
-        @focus="switchBackgroundFlag=true"
-        @blur="switchBackgroundFlag=false"/>
+        @focus="switchBackgroundFlag = true"
+        @blur="switchBackgroundFlag = false"
+      />
     </jm-form-item>
 
     <jm-form-item :prop="`${formModelName}.${index}.value`" :rules="rules.value" label="变量值">
@@ -18,10 +19,11 @@
         @change="changeVal"
         class="shell-env-val"
         placeholder="请输入变量值"
-        @focus="switchBackgroundFlag=true"
-        @blur="switchBackgroundFlag=false"/>
+        @focus="switchBackgroundFlag = true"
+        @blur="switchBackgroundFlag = false"
+      />
     </jm-form-item>
-    <i class="jm-icon-button-delete" @click="remove"/>
+    <i class="jm-icon-button-delete" @click="remove" />
   </div>
 </template>
 
@@ -29,6 +31,7 @@
 import { defineComponent, inject, PropType, ref } from 'vue';
 import { CustomRule } from '../../../model/data/common';
 import ExpressionEditor from './expression-editor.vue';
+// eslint-disable-next-line no-redeclare
 import { Node } from '@antv/x6';
 
 export default defineComponent({
@@ -55,7 +58,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update:name', 'update:value', 'delete'],
+  emits: ['update:name', 'update:value', 'change', 'delete'],
   setup(props, { emit }) {
     const envName = ref<string>(props.name);
     const envVal = ref<string>(props.value);
@@ -64,7 +67,6 @@ export default defineComponent({
     const nodeId = ref<string>('');
     const getNode = inject('getNode') as () => Node;
     nodeId.value = getNode().id;
-
 
     return {
       envName,
@@ -76,7 +78,9 @@ export default defineComponent({
         envName.value = envName.value.toUpperCase();
       },
       changeEnv: (val: string) => {
+        const oldVal = props.name;
         emit('update:name', val);
+        emit('change', envName.value, oldVal);
       },
       changeVal: (val: string) => {
         emit('update:value', val);
@@ -94,17 +98,17 @@ export default defineComponent({
   font-size: 14px;
   padding: 20px 20px 10px;
   position: relative;
-  border-bottom: 1px solid #E6EBF2;
+  border-bottom: 1px solid #e6ebf2;
 
   &:hover {
-    background: #FAFAFA;
+    background: #fafafa;
   }
 
   &.switch-bgc {
-    background: #EFF7FF;
+    background: #eff7ff;
 
     &:hover {
-      background: #EFF7FF;
+      background: #eff7ff;
     }
   }
 
@@ -118,8 +122,8 @@ export default defineComponent({
     right: 10px;
 
     &:hover {
-      background: #EFF7FF;
-      color: #086CD8;
+      background: #eff7ff;
+      color: #086cd8;
     }
   }
 }
