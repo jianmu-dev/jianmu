@@ -159,7 +159,6 @@ export default defineComponent({
       },
       changeType: async () => {
         resetDefaultVal();
-        emit('update:default', defaultVal.value);
         emit('update:type', typeVal.value);
         isReload.value = false;
         await nextTick();
