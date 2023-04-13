@@ -158,6 +158,7 @@ export default defineComponent({
         emit('update:name', nameVal.value);
       },
       changeType: async () => {
+        resetDefaultVal();
         emit('update:default', defaultVal.value);
         emit('update:type', typeVal.value);
         isReload.value = false;
