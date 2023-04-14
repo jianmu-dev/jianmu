@@ -18,4 +18,6 @@ public interface WebRequestRepository {
     void update(WebRequest webRequest);
 
     Optional<WebRequest> findByTriggerId(String triggerId);
+
+    Optional<WebRequest> findLatestByProjectId(String projectId);
 }
