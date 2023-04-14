@@ -2,18 +2,16 @@ package dev.jianmu.application.dsl.webhook;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
-public class DslWebhookParameter extends dev.jianmu.trigger.aggregate.WebhookParameter {
-    private Object value;
-    private Object defaultValue;
-
-    public void setValue(Object value) {
-        this.value = value;
-    }
-
+public class DslWebhookParameter {
+    private String name;
+    private String type;
+    private String exp;
+    private Boolean required = false;
     @JsonProperty("default")
-    public void setDefaultValue(Object defaultValue) {
-        this.defaultValue = defaultValue;
-    }
+    private Object defaultValue;
+    @Setter
+    private Object value;
 }
