@@ -8,6 +8,7 @@ import dev.jianmu.application.event.WebhookEvent;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.application.util.DslUtil;
+import dev.jianmu.el.ElContext;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
@@ -22,6 +23,7 @@ import dev.jianmu.project.repository.GitRepoRepository;
 import dev.jianmu.project.repository.ProjectGroupRepository;
 import dev.jianmu.project.repository.ProjectLastExecutionRepository;
 import dev.jianmu.project.repository.ProjectLinkGroupRepository;
+import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.task.aggregate.Volume;
 import dev.jianmu.task.event.VolumeCreatedEvent;
 import dev.jianmu.task.event.VolumeDeletedEvent;
@@ -29,11 +31,16 @@ import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.aggregate.Trigger;
 import dev.jianmu.trigger.aggregate.Webhook;
+import dev.jianmu.trigger.event.TriggerEventParameter;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
+import dev.jianmu.trigger.repository.TriggerRepository;
 import dev.jianmu.trigger.repository.WebRequestRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
+import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
+import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
+import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import org.quartz.CronExpression;
@@ -45,9 +52,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static dev.jianmu.application.service.ProjectGroupApplication.DEFAULT_PROJECT_GROUP_NAME;
 
@@ -78,6 +86,10 @@ public class ProjectApplication {
     private final InstanceParameterRepository instanceParameterRepository;
     private final StorageService storageService;
     private final WebRequestRepository webRequestRepository;
+    private final TriggerRepository triggerRepository;
+    private final CredentialManager credentialManager;
+    private final ExpressionLanguage expressionLanguage;
+    private final ParameterRepository parameterRepository;
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
@@ -96,7 +108,11 @@ public class ProjectApplication {
             ProjectLastExecutionRepository projectLastExecutionRepository,
             InstanceParameterRepository instanceParameterRepository,
             StorageService storageService,
-            WebRequestRepository webRequestRepository
+            WebRequestRepository webRequestRepository,
+            TriggerRepository triggerRepository,
+            CredentialManager credentialManager,
+            ExpressionLanguage expressionLanguage,
+            ParameterRepository parameterRepository
     ) {
         this.projectRepository = projectRepository;
         this.gitRepoRepository = gitRepoRepository;
@@ -115,6 +131,10 @@ public class ProjectApplication {
         this.instanceParameterRepository = instanceParameterRepository;
         this.storageService = storageService;
         this.webRequestRepository = webRequestRepository;
+        this.triggerRepository = triggerRepository;
+        this.credentialManager = credentialManager;
+        this.expressionLanguage = expressionLanguage;
+        this.parameterRepository = parameterRepository;
     }
 
     public void switchEnabled(String projectId, boolean enabled) {
@@ -139,11 +159,17 @@ public class ProjectApplication {
         this.publisher.publishEvent(triggerEvent);
     }
 
-    public TriggerEvent triggerByManual(String projectId) {
+    @Transactional
+    public TriggerEvent triggerByManual(String projectId, Map<String, Object> triggerParam) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目，项目id: " + projectId));
         if (!project.isEnabled()) {
             throw new RuntimeException("当前项目不可触发，请先修改状态");
+        }
+        var triggerOptional = this.triggerRepository.findByProjectId(projectId);
+        if (triggerOptional.isPresent() && triggerOptional.get().getType() == Trigger.Type.WEBHOOK) {
+            // 手动触发webhook项目
+            return this.saveTriggerEventParams(project, triggerOptional.get().getWebhook(), triggerParam);
         }
 
         var evt = dev.jianmu.trigger.event.TriggerEvent.Builder
@@ -165,6 +191,127 @@ public class ProjectApplication {
                 .build();
         this.publisher.publishEvent(triggerEvent);
         return triggerEvent;
+    }
+
+    private TriggerEvent saveTriggerEventParams(Project project, Webhook webhook, Map<String, Object> triggerParam) {
+        var eventParameters = new ArrayList<TriggerEventParameter>();
+        var parameters = new ArrayList<Parameter>();
+        if (webhook.getParam() != null) {
+            webhook.getParam().forEach(webhookParameter -> {
+                var value = triggerParam.get(webhookParameter.getName());
+                if (webhookParameter.isRequired() && value == null) {
+                    throw new RuntimeException("未填写参数：" + webhookParameter.getName());
+                }
+                var parameter = Parameter.Type
+                        .getTypeByName(webhookParameter.getType())
+                        .newParameter(value == null ? webhookParameter.getDefaultValue() : value);
+                var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
+                        .name(webhookParameter.getName())
+                        .type(webhookParameter.getType())
+                        .value(parameter.getStringValue())
+                        .parameterId(parameter.getId())
+                        .build();
+                parameters.add(parameter);
+                eventParameters.add(eventParameter);
+            });
+        }
+        // 验证Auth
+        if (webhook.getAuth() != null) {
+            var authValue = this.findSecret(webhook.getAuth().getValue());
+            var authToken = this.findEventParam(eventParameters, webhook.getAuth().getToken(), true);
+            if (!authValue.equals(authToken)) {
+                throw new RuntimeException("Auth验证失败，与密钥不匹配");
+            }
+        }
+        // 验证only
+        if (webhook.getOnly() != null) {
+            var el = this.findEventParam(eventParameters, webhook.getOnly(), false);
+            // 计算参数表达式
+            var expression = expressionLanguage.parseExpression(el);
+            var evaluationResult = expressionLanguage.evaluateExpression(expression, new ElContext());
+            if (evaluationResult.isFailure()) {
+                var errorMsg = "表达式：" + el + " 计算错误: " + evaluationResult.getFailureMessage();
+                throw new RuntimeException(errorMsg);
+            }
+            var res = evaluationResult.getValue();
+            if (res.getType() != Parameter.Type.BOOL || !((Boolean) res.getValue())) {
+                throw new RuntimeException("Only计算不匹配，计算结果为：" + res.getStringValue());
+            }
+        }
+        // 过滤SECRET类型参数不保存
+        var eventParametersClean = eventParameters.stream()
+                .filter(triggerEventParameter -> !triggerEventParameter.getType().equals("SECRET"))
+                .collect(Collectors.toList());
+        var parametersClean = parameters.stream()
+                .filter(parameter -> !(parameter.getType() == Parameter.Type.SECRET))
+                .collect(Collectors.toList());
+        var event = dev.jianmu.trigger.event.TriggerEvent.Builder
+                .aTriggerEvent()
+                .projectId(project.getId())
+                .triggerId("")
+                .triggerType(Trigger.Type.MANUAL.name())
+                .parameters(eventParametersClean)
+                .build();
+        this.triggerEventRepository.save(event);
+        this.parameterRepository.addAll(parametersClean);
+
+        MDC.put("triggerId", event.getId());
+        var triggerEvent = TriggerEvent.Builder.aTriggerEvent()
+                .projectId(project.getId())
+                .triggerId(event.getId())
+                .triggerType(Trigger.Type.MANUAL.name())
+                .workflowRef(project.getWorkflowRef())
+                .workflowVersion(project.getWorkflowVersion())
+                .occurredTime(event.getOccurredTime())
+                .build();
+        this.publisher.publishEvent(triggerEvent);
+        return triggerEvent;
+    }
+
+    private String findEventParam(List<TriggerEventParameter> params, String exp, boolean isAuth) {
+        String pattern = "\\$\\{trigger\\.(.*?)}";
+        Pattern r = Pattern.compile(pattern);
+        Matcher m = r.matcher(exp);
+        while (m.find()) {
+            String name = m.group(1);
+            var parameter = params.stream()
+                    .filter(t -> t.getName().equals(name))
+                    .findFirst()
+                    .orElse(null);
+            if (parameter != null) {
+                var value = this.findParameterString(parameter, isAuth);
+                exp = exp.replaceAll("\\$\\{trigger\\." + name + "}", value);
+            }
+        }
+        return exp;
+    }
+
+    private String findParameterString(TriggerEventParameter parameter, boolean isAuth) {
+        if (isAuth || parameter.getType().equals(Parameter.Type.BOOL.name()) || parameter.getType().equals(Parameter.Type.NUMBER.name())) {
+            return parameter.getValue();
+        }
+        return "\"" + parameter.getValue() + "\"";
+    }
+
+    private String findSecret(String secretExp) {
+        var secret = this.isSecret(secretExp);
+        if (secret == null) {
+            throw new IllegalArgumentException("密钥参数格式错误：" + secretExp);
+        }
+        // 处理密钥类型参数, 获取值后转换为String类型参数
+        var strings = secret.split("\\.");
+        var kv = this.credentialManager.findByNamespaceNameAndKey(strings[0], strings[1])
+                .orElseThrow(() -> new RuntimeException("Auth验证失败，未找到密钥"));
+        return kv.getValue();
+    }
+
+    private String isSecret(String paramValue) {
+        Pattern pattern = Pattern.compile("^\\(\\(([a-zA-Z0-9_-]+\\.+[a-zA-Z0-9_-]+)\\)\\)$");
+        Matcher matcher = pattern.matcher(paramValue);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
     }
 
     private Workflow createWorkflow(DslParser parser, String dslText, String ref) {

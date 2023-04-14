@@ -677,7 +677,7 @@ public class TriggerApplication {
     }
 
     public dev.jianmu.application.dsl.webhook.Webhook getWebhookParam(String id) {
-        var webRequest = webRequestRepositoryImpl.findById(id)
+        var webRequest = this.webRequestRepositoryImpl.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
         var workflow = this.workflowRepository.findByRefAndVersion(webRequest.getWorkflowRef(), webRequest.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
@@ -690,12 +690,7 @@ public class TriggerApplication {
         }
         trigger.getParam().forEach(webhookParameter -> {
             var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType());
-            var defaultParameter = Parameter.Type.getTypeByName(webhookParameter.getType()).newParameter(webhookParameter.getDefaultValue());
-            webhookParameter.setDefaultValue(defaultParameter.getValue());
-            webhookParameter.setValue(defaultParameter.getValue());
-            if (value != null) {
-                webhookParameter.setValue(value);
-            }
+            webhookParameter.setValue(value == null ? webhookParameter.getDefaultValue() : value);
         });
         return trigger;
     }
@@ -716,5 +711,13 @@ public class TriggerApplication {
 
     public Optional<WebRequest> findWebRequestById(String webRequestId) {
         return this.webRequestRepositoryImpl.findById(webRequestId);
+    }
+
+    public Optional<Trigger> findTrigger(String projectId) {
+        return this.triggerRepository.findByProjectId(projectId);
+    }
+
+    public Optional<WebRequest> findLatestWebRequest(String projectId) {
+        return this.webRequestRepositoryImpl.findLatestByProjectId(projectId);
     }
 }
