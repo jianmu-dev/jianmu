@@ -31,17 +31,17 @@ export interface ITriggerEventVo {
 export interface ITriggerWebhookVo
   extends Readonly<{
     webhook: string;
-  }> {
-}
+  }> {}
 
 /**
  * 分页返回Webhook请求列表 dto
  */
 export interface ITriggerViewingDto
-  extends Readonly<IPageDto & {
-    projectId: string;
-  }> {
-}
+  extends Readonly<
+    IPageDto & {
+      projectId: string;
+    }
+  > {}
 
 /**
  * WebRequest
@@ -58,8 +58,7 @@ export interface IWebRequestVo
     statusCode: WebhookRequstStateEnum;
     errorMsg?: string;
     requestTime: string;
-  }> {
-}
+  }> {}
 
 /**
  * 获取webhook参数
@@ -69,24 +68,23 @@ export interface IWebhookParameterVo
     name: string;
     type: string;
     exp: string;
-    value: object;
-  }> {
-}
+    required: boolean;
+    value?: string | number | boolean;
+    default?: string | number | boolean;
+  }> {}
 
 export interface IWebhookAuthVo
   extends Readonly<{
     token: string;
     value: string;
-  }> {
-}
+  }> {}
 
 export interface IWebhookParamVo
   extends Readonly<{
     param: IWebhookParameterVo[];
     auth: IWebhookAuthVo;
     only: string;
-  }> {
-}
+  }> {}
 
 /**
  * 获取payload参数
@@ -94,5 +92,4 @@ export interface IWebhookParamVo
 export interface IWebRequestPayloadVo
   extends Readonly<{
     payload: string;
-  }> {
-}
+  }> {}

@@ -8,6 +8,7 @@ import {
   SortTypeEnum,
   TriggerTypeEnum,
 } from '@/api/dto/enumeration';
+import { ParamTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
 
 /**
  * 保存项目dto
@@ -235,4 +236,62 @@ export interface INodeDefVo
     documentLink?: string;
     type: string;
     workerType: NodeTypeEnum;
+  }> {}
+
+/**
+ * IWebhookParameter
+ */
+
+export interface IWebhookParameter
+  extends Readonly<{
+    name: string;
+    type: ParamTypeEnum;
+    exp: string;
+    required: boolean;
+    defaultValue?: string | number | boolean;
+  }> {}
+
+/**
+ * IWebhookAuth
+ */
+export interface IWebhookAuth
+  extends Readonly<{
+    token: string;
+    value: string;
+  }> {}
+
+/**
+ * 触发器定义Vo
+ */
+export interface ITriggerDefinitionVo
+  extends Readonly<{
+    params?: IWebhookParameter[];
+    auth?: IWebhookAuth;
+    only?: string;
+    latestWebRequestId?: string;
+  }> {}
+
+/**
+ * 触发项目值Vo
+ */
+export interface ITriggerProjectVo
+  extends Readonly<{
+    triggerId: string;
+  }> {}
+
+/**
+ * 触发器参数Vo
+ */
+export interface ITriggerParamVo
+  extends Readonly<{
+    name: string;
+    value: string;
+  }> {}
+
+/**
+ * 触发项目Dto
+ */
+export interface IProjectTriggeringDto
+  extends Readonly<{
+    triggerParams: ITriggerParamVo[];
   }> {}
