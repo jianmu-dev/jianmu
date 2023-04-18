@@ -3,11 +3,17 @@ package dev.jianmu.api.controller;
 import dev.jianmu.api.dto.AddGroup;
 import dev.jianmu.api.dto.DslTextDto;
 import dev.jianmu.api.dto.GitRepoDto;
+import dev.jianmu.api.dto.ProjectTriggeringDto;
 import dev.jianmu.api.mapper.GitRepoMapper;
 import dev.jianmu.api.vo.ProjectIdVo;
+import dev.jianmu.api.vo.TriggerDefinitionVo;
 import dev.jianmu.api.vo.TriggerProjectVo;
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.GitApplication;
 import dev.jianmu.application.service.ProjectApplication;
+import dev.jianmu.application.service.TriggerApplication;
+import dev.jianmu.trigger.aggregate.Trigger;
+import dev.jianmu.trigger.aggregate.WebRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -30,10 +36,12 @@ import javax.validation.Valid;
 public class ProjectController {
     private final ProjectApplication projectApplication;
     private final GitApplication gitApplication;
+    private final TriggerApplication triggerApplication;
 
-    public ProjectController(ProjectApplication projectApplication, GitApplication gitApplication) {
+    public ProjectController(ProjectApplication projectApplication, GitApplication gitApplication, TriggerApplication triggerApplication) {
         this.projectApplication = projectApplication;
         this.gitApplication = gitApplication;
+        this.triggerApplication = triggerApplication;
     }
 
     @PutMapping("/enable/{projectId}")
@@ -50,8 +58,8 @@ public class ProjectController {
 
     @PostMapping("/trigger/{projectId}")
     @Operation(summary = "触发项目", description = "触发项目启动")
-    public TriggerProjectVo trigger(@Parameter(description = "触发器ID") @PathVariable String projectId) {
-        var triggerEvent = this.projectApplication.triggerByManual(projectId);
+    public TriggerProjectVo trigger(@Parameter(description = "触发器ID") @PathVariable String projectId, @Valid @RequestBody ProjectTriggeringDto dto) {
+        var triggerEvent = this.projectApplication.triggerByManual(projectId, dto.toMap());
         return TriggerProjectVo.builder()
                 .triggerId(triggerEvent.getTriggerId())
                 .build();
@@ -87,5 +95,22 @@ public class ProjectController {
     @Operation(summary = "删除项目", description = "删除项目")
     public void deleteById(@PathVariable String projectId) {
         this.projectApplication.deleteById(projectId);
+    }
+
+    @GetMapping("/{projectId}/trigger_def")
+    @Operation(summary = "获取webhook触发器定义")
+    public TriggerDefinitionVo findTriggerDef(@PathVariable String projectId) {
+        var trigger = this.triggerApplication.findTrigger(projectId)
+                .orElseThrow(() -> new DataNotFoundException("未找到触发器"));
+        if (trigger.getType() != Trigger.Type.WEBHOOK) {
+            throw new RuntimeException("非webhook触发器");
+        }
+        var webRequest = this.triggerApplication.findLatestWebRequest(projectId);
+        return TriggerDefinitionVo.builder()
+                .params(trigger.getWebhook().getParam())
+                .auth(trigger.getWebhook().getAuth())
+                .only(trigger.getWebhook().getOnly())
+                .latestWebRequestId(webRequest.map(WebRequest::getId).orElse(null))
+                .build();
     }
 }
