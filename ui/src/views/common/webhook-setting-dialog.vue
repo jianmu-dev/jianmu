@@ -53,7 +53,7 @@
                       </jm-radio-group>
                     </jm-form-item>
                     <jm-form-item v-if="scope.row.type === ParamTypeEnum.NUMBER" :prop="scope.row.name">
-                      <jm-input v-model="ruleForm[scope.row.name]" type="number" placeholder="请输入参数值" />
+                      <jm-input v-model.number="ruleForm[scope.row.name]" type="number" placeholder="请输入参数值" />
                     </jm-form-item>
                     <jm-form-item v-if="scope.row.type === ParamTypeEnum.STRING" :prop="scope.row.name">
                       <jm-input
