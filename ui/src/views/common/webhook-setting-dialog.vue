@@ -31,7 +31,7 @@
                 :height="paramsTableHeight"
                 class="params-table"
               >
-                <jm-table-column prop="name" label="参数名" class-name="webhook-param-name">
+                <jm-table-column prop="name" label="参数名" class-name="webhook-param-name" width="256px">
                   <template #default="scope">
                     <div class="param-name">
                       <i v-if="scope.row.required" />
@@ -39,7 +39,7 @@
                     </div>
                   </template>
                 </jm-table-column>
-                <jm-table-column prop="type" label="类型">
+                <jm-table-column prop="type" label="类型" width="160px">
                   <template #default="scope">
                     {{ scope.row.type }}
                   </template>
@@ -203,10 +203,6 @@ export default defineComponent({
         if (!webhookDefinition.param) {
           return;
         }
-        // paramsTableData.value = webhookDefinition.param.map(({ name, type, exp, required }) => ({
-        //   name,
-        //   type, exp, required,
-        // }));
 
         if (webhookDefinition.auth) {
           authTableData.value.push(webhookDefinition.auth);
@@ -255,7 +251,6 @@ export default defineComponent({
             payload.triggerParams.push({ name: key, value: ruleForm.value[key] });
           });
           emit('submit', payload);
-          closeDialog();
         })
         .catch(err => {
           console.warn(err);
@@ -348,6 +343,12 @@ export default defineComponent({
               .header-row th {
                 background: #eef0f3;
                 border: none;
+
+                &.webhook-param-value {
+                  .cell {
+                    padding-left: 0;
+                  }
+                }
               }
             }
 
@@ -379,8 +380,22 @@ export default defineComponent({
                               }
 
                               .el-input__suffix {
+                                top: -4px;
+
+                                .el-input__suffix-inner {
+                                  &:hover {
+                                    .el-icon-view.el-input__clear {
+                                      &::before,
+                                      &::after {
+                                        color: #096dd9;
+                                      }
+                                    }
+                                  }
+                                }
+
                                 i::before,
                                 i::after {
+                                  color: #6b7b8d;
                                   font-size: 16px;
                                 }
                               }
@@ -389,11 +404,9 @@ export default defineComponent({
                         }
 
                         .el-form-item__content {
-                          display: flex;
+                          line-height: inherit;
 
                           .el-textarea {
-                            height: inherit;
-
                             .el-textarea__inner {
                               box-sizing: border-box;
                               padding: 3px 8px;
@@ -402,12 +415,13 @@ export default defineComponent({
                             }
 
                             & + .el-form-item__error {
-                              top: unset;
-                              bottom: -16px;
+                              margin-top: 6px;
                             }
                           }
 
                           .el-input {
+                            line-height: inherit;
+
                             .el-input__inner[type='number'],
                             .el-input__inner[type='password'],
                             .el-input__inner[type='text'] {
@@ -418,16 +432,17 @@ export default defineComponent({
                             }
 
                             & + .el-form-item__error {
-                              top: unset;
-                              bottom: -11px;
+                              margin-top: 6px;
                             }
                           }
 
                           .el-radio-group {
-                            & + .el-form-item__error {
-                              top: unset;
-                              bottom: -13px;
-                            }
+                            line-height: 16px;
+                          }
+
+                          .el-form-item__error {
+                            position: static;
+                            padding-top: 0;
                           }
                         }
                       }

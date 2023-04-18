@@ -155,6 +155,7 @@
       v-if="visible"
       :project-id="project.id"
       @submit="payload => manualTriggerWebhook(payload)"
+      ref="webhookSettingDialog"
     />
   </div>
   <div class="project-item" v-else>
@@ -459,6 +460,7 @@ export default defineComponent({
         executing.value = true;
         await executeImmediately(props.project.id, payload);
         proxy.$success('操作成功');
+        visible.value = false;
         emit('triggered', props.project.id);
       } catch (err) {
         proxy.$throw(err, proxy);

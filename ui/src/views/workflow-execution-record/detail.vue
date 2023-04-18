@@ -292,6 +292,7 @@ export default defineComponent({
     const manualTriggerWebhook = async (payload: IProjectTriggeringDto) => {
       try {
         await executeImmediately(props.projectId, payload);
+        visible.value = false;
         proxy.$success('操作成功');
 
         // 清除滚动偏移量
