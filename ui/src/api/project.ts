@@ -40,6 +40,7 @@ export async function save(dto: IProjectSavingDto): Promise<IProjectIdVo> {
 /**
  * 立即执行
  * @param id
+ * @param dto (项目触发dto，没传入dto请求时默认转换成空对象)
  */
 export function executeImmediately(id: string, dto?: IProjectTriggeringDto): Promise<ITriggerProjectVo> {
   return restProxy({

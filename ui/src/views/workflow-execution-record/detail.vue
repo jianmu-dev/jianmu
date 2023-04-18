@@ -355,7 +355,7 @@ export default defineComponent({
 
       execute: async () => {
         const isWarning = data.value.project?.triggerType === TriggerTypeEnum.WEBHOOK;
-        let msg = '<div>确定要触发吗?</div>';
+        const msg = '<div>确定要触发吗?</div>';
         if (isWarning) {
           // 获取webhook触发器定义
           webhookDefinition.value = await fetchWebhookDefinition(props.projectId);

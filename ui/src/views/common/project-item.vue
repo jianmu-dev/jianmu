@@ -503,7 +503,7 @@ export default defineComponent({
         const { triggerType } = props.project;
         const isWarning = triggerType === TriggerTypeEnum.WEBHOOK;
 
-        let msg = '<div>确定要触发吗?</div>';
+        const msg = '<div>确定要触发吗?</div>';
         if (isWarning) {
           // 获取webhook触发器定义
           webhookDefinition.value = await fetchWebhookDefinition(id);
