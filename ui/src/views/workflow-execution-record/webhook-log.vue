@@ -1,13 +1,12 @@
 <template>
   <div class="workflow-execution-record-webhook-log">
     <div class="basic-section">
-      <div class="param-key">流程名称：
-      </div>
-      <jm-text-viewer :value="workflowName" :tip-append-to-body="false" class="param-value"/>
+      <div class="param-key">流程名称：</div>
+      <jm-text-viewer :value="workflowName" :tip-append-to-body="false" class="param-value" />
       <div class="param-key">节点名称：</div>
-      <jm-text-viewer :value="nodeName" :tip-append-to-body="false" class="param-value node-name"/>
+      <jm-text-viewer :value="nodeName" :tip-append-to-body="false" class="param-value node-name" />
       <div class="param-key">启动时间：</div>
-      <jm-text-viewer :value="startTime" :tip-append-to-body="false" class="param-value"/>
+      <jm-text-viewer :value="startTime" :tip-append-to-body="false" class="param-value" />
     </div>
 
     <div class="tab-section">
@@ -18,7 +17,7 @@
           </template>
           <div class="tab-content">
             <div class="log">
-              <jm-log-viewer v-if="webhookLog" :filename="`${nodeName}.txt`" :value="webhookLog"/>
+              <jm-log-viewer v-if="webhookLog" :filename="`${nodeName}.txt`" :value="webhookLog" />
             </div>
           </div>
         </jm-tab-pane>
@@ -30,33 +29,22 @@
             <div class="params">
               <jm-scrollbar>
                 <div class="content">
-                  <jm-table
-                    :data="webhookParams"
-                    border>
+                  <jm-table :data="webhookParams" border>
                     <jm-table-column label="参数唯一标识" align="center">
                       <template #default="scope">
-                        <jm-text-viewer :value="scope.row.name" :tip-append-to-body="false" class="params-name"/>
+                        <jm-text-viewer :value="scope.row.name" :tip-append-to-body="false" class="params-name" />
                       </template>
                     </jm-table-column>
-                    <jm-table-column
-                      label="参数类型"
-                      align="center"
-                      prop="type">
+                    <jm-table-column label="参数类型" align="center" prop="type">
                       <template #default="scope">
                         <div class="text-viewer">
-                          <jm-text-viewer :value="scope.row.type" :tip-append-to-body="false" class="params-name"/>
+                          <jm-text-viewer :value="scope.row.type" :tip-append-to-body="false" class="params-name" />
                         </div>
                       </template>
                     </jm-table-column>
-                    <jm-table-column
-                      label="参数值"
-                      align="center">
+                    <jm-table-column label="参数值" align="center">
                       <template #default="scope">
-                        <param-value
-                          :value="scope.row.value"
-                          :tip-append-to-body="false"
-                          :type="scope.row.valueType"
-                        />
+                        <param-value :value="scope.row.value" :tip-append-to-body="false" :type="scope.row.valueType" />
                       </template>
                     </jm-table-column>
                   </jm-table>
@@ -79,7 +67,6 @@ import { datetimeFormatter } from '@/utils/formatter';
 import { fetchTriggerEvent } from '@/api/view-no-auth';
 import { IEventParameterVo } from '@/api/dto/trigger';
 import { ParamTypeEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
-import useClipboard from 'vue-clipboard3';
 import JmTextViewer from '@/components/text-viewer/index.vue';
 import ParamValue from '@/views/common/param-value.vue';
 
@@ -103,7 +90,6 @@ export default defineComponent({
     const tabActiveName = ref<string>(props.tabType);
     const webhookLog = ref<string>('');
     const webhookParams = ref<IEventParameterVo[]>([]);
-    const { toClipboard } = useClipboard();
     const maxWidthRecord = ref<Record<string, number>>({});
 
     onMounted(async () => {
@@ -116,8 +102,11 @@ export default defineComponent({
       try {
         // 初始化Webhook
         const { payload, parameters } = await fetchTriggerEvent(props.triggerId);
-        webhookLog.value = 'Webhook:\n' +
-          `payload: ${JSON.stringify(JSON.parse(payload), null, 2)}\n`;
+        webhookLog.value = payload
+          ? 'Webhook:\n' + `payload: ${JSON.stringify(JSON.parse(payload), null, 2)}\n`
+          : props.triggerType === TriggerTypeEnum.MANUAL
+            ? '此次为手动触发，无webhook日志'
+            : '';
         webhookParams.value = parameters.sort((p1, p2) => p1.name.localeCompare(p2.name));
       } catch (err) {
         proxy.$throw(err, proxy);
@@ -144,7 +133,7 @@ export default defineComponent({
   font-size: 14px;
   color: #333333;
   margin-bottom: 25px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   height: 100%;
 
   .basic-section {
@@ -152,11 +141,11 @@ export default defineComponent({
     padding: 16px 20px;
     display: flex;
     align-items: center;
-    box-shadow: 0 0 8px 0 #9EB1C5;
+    box-shadow: 0 0 8px 0 #9eb1c5;
     cursor: default;
 
     .param-key {
-      color: #6B7B8D;
+      color: #6b7b8d;
       line-height: 25px;
 
       &:nth-child(n + 2) {
@@ -191,7 +180,7 @@ export default defineComponent({
         width: 120px;
         height: 40px;
         text-align: center;
-        background-color: #EEF0F3;
+        background-color: #eef0f3;
         color: #082340;
         border-radius: 6px 6px 0 0;
       }
@@ -199,7 +188,7 @@ export default defineComponent({
       &.is-active {
         .tab {
           background-color: #082340;
-          color: #FFFFFF;
+          color: #ffffff;
         }
       }
     }
@@ -218,15 +207,15 @@ export default defineComponent({
   }
 
   .tab-content {
-    border: 1px solid #EEF0F7;
+    border: 1px solid #eef0f7;
 
     .log {
       margin: 16px;
-      height: calc(100vh - 258px)
+      height: calc(100vh - 258px);
     }
 
     .params {
-      background-color: #FFFFFF;
+      background-color: #ffffff;
       border-radius: 4px;
       color: #082340;
       height: calc(100vh - 226px);
@@ -260,7 +249,8 @@ export default defineComponent({
           .el-table__body-wrapper {
             overflow: visible;
 
-            th, td {
+            th,
+            td {
               color: #082340;
             }
 
