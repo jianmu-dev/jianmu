@@ -7,9 +7,9 @@
       :destroy-on-close="true"
       @close="closeDialog"
     >
-      <template #title> 触发执行 </template>
+      <template #title> 触发执行</template>
       <div class="content-wrapper" v-loading="loading">
-        <div class="operator" v-if="paramsTableData">
+        <div class="operator" v-if="paramsTableData.length > 0">
           <span class="tips">项目已配置webhook，手动触发请填写参数</span>
           <div class="btns">
             <div class="import" v-if="latestWebhook" @click.stop="importWebhookDefinition">
@@ -22,7 +22,7 @@
             </div>
           </div>
         </div>
-        <div class="content-container">
+        <div class="content-container" v-if="paramsTableData.length > 0">
           <jm-form :rules="rules" :model="ruleForm" ref="formRef" @submit.prevent>
             <div ref="paramTableRef">
               <jm-table
@@ -108,9 +108,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, onMounted, ref, PropType } from 'vue';
+import { computed, defineComponent, getCurrentInstance, onMounted, ref, PropType, nextTick } from 'vue';
 import { ElForm } from 'element-plus';
-import { fetchWebhookDefinition } from '@/api/project';
 import { IProjectTriggeringDto, ITriggerDefinitionVo, IWebhookAuth, IWebhookParameter } from '@/api/dto/project';
 import { ParamTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
 import { IWebhookParameterVo, IWebRequestVo } from '@/api/dto/trigger';
@@ -138,7 +137,7 @@ export default defineComponent({
     const formRef = ref<InstanceType<typeof ElForm>>();
     const loading = ref<boolean>(false);
     // 参数table数据
-    const paramsTableData = ref<IWebhookParameter[]>();
+    const paramsTableData = ref<IWebhookParameter[]>([]);
     // auth table数据
     const authTableData = ref<IWebhookAuth[]>([]);
     // only table数据
@@ -160,8 +159,9 @@ export default defineComponent({
     // 初始化数据
     const init = async () => {
       try {
-        // loading.value = true;
-        paramsTableData.value = props.webhookDefinition.params;
+        await nextTick();
+        loading.value = true;
+        paramsTableData.value = props.webhookDefinition.params!;
 
         if (props.webhookDefinition.auth) {
           authTableData.value.push(props.webhookDefinition.auth);
@@ -183,8 +183,8 @@ export default defineComponent({
             rules.value[param.name] = rule;
           }
           ruleForm.value[param.name] = '';
-          if (!param.required && (param.type === ParamTypeEnum.BOOL || param.type === ParamTypeEnum.NUMBER)) {
-            // 对非必填的BOOL跟NUMBER类型的值赋默认值
+          if (!param.required) {
+            // 对非必填的赋默认值
             ruleForm.value[param.name] = param.defaultValue;
           }
         });
@@ -192,7 +192,7 @@ export default defineComponent({
       } catch (err) {
         proxy.$throw(err, proxy);
       } finally {
-        // loading.value = false;
+        loading.value = false;
       }
     };
     // 导入上一次webhook触发器定义
@@ -203,7 +203,10 @@ export default defineComponent({
         if (!webhookDefinition.param) {
           return;
         }
-        paramsTableData.value = webhookDefinition.param;
+        // paramsTableData.value = webhookDefinition.param.map(({ name, type, exp, required }) => ({
+        //   name,
+        //   type, exp, required,
+        // }));
 
         if (webhookDefinition.auth) {
           authTableData.value.push(webhookDefinition.auth);
@@ -213,8 +216,10 @@ export default defineComponent({
           onlyExpression.value = webhookDefinition.only;
         }
 
-        paramsTableData.value.forEach((param: IWebhookParameterVo) => {
-          ruleForm.value[param.name] = param.value;
+        webhookDefinition.param.forEach((param: IWebhookParameterVo) => {
+          if (paramsTableData.value.find(({ name }) => name === param.name)) {
+            ruleForm.value[param.name] = param.value;
+          }
         });
       } catch (err) {
         proxy.$throw(err, proxy);

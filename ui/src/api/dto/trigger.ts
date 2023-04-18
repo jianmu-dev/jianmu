@@ -69,7 +69,7 @@ export interface IWebhookParameterVo
     type: string;
     exp: string;
     required: boolean;
-    value?: string | number | boolean;
+    value: string | number | boolean;
     default?: string | number | boolean;
   }> {}
 
