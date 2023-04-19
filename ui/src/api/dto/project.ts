@@ -285,7 +285,7 @@ export interface ITriggerProjectVo
 export interface ITriggerParamVo
   extends Readonly<{
     name: string;
-    value: string;
+    value?: string;
   }> {}
 
 /**

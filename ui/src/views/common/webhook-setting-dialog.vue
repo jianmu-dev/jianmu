@@ -7,7 +7,7 @@
       :destroy-on-close="true"
       @close="closeDialog"
     >
-      <template #title> 触发执行</template>
+      <template #title>触发执行</template>
       <div class="content-wrapper" v-loading="loading">
         <div class="operator" v-if="paramsTableData.length > 0">
           <span class="tips">项目已配置webhook，手动触发请填写参数</span>
@@ -213,7 +213,7 @@ export default defineComponent({
         }
 
         webhookDefinition.param.forEach((param: IWebhookParameterVo) => {
-          if (paramsTableData.value.find(({ name }) => name === param.name)) {
+          if (paramsTableData.value.find(({ name, type }) => name === param.name && type === param.type)) {
             ruleForm.value[param.name] = param.value;
           }
         });
@@ -282,7 +282,10 @@ export default defineComponent({
 .webhook-setting-dialog {
   ::v-deep(.el-dialog) {
     .el-dialog__header {
+      display: flex;
+      align-items: center;
       padding: 16px;
+      font-size: 16px;
     }
 
     .el-dialog__body {
@@ -370,6 +373,7 @@ export default defineComponent({
                         position: relative;
                         top: 50%;
                         transform: translateY(-50%);
+                        margin-right: 16px;
 
                         &.secret-item {
                           .el-form-item__content {
