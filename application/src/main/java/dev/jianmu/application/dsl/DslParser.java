@@ -553,13 +553,13 @@ public class DslParser {
                             if (required != null && !(required instanceof Boolean)) {
                                 throw new IllegalArgumentException("Webhook参数是否必填配置错误");
                             }
-                            Parameter.Type.getTypeByName((String) type).newParameter(defaultValue);
+                            Parameter<?> parameter = Parameter.Type.getTypeByName((String) type).newParameter(defaultValue);
                             return WebhookParameter.Builder.aWebhookParameter()
                                     .name((String) name)
                                     .type((String) type)
                                     .exp((String) exp)
                                     .required(required != null && (Boolean) required)
-                                    .defaultVault(defaultValue)
+                                    .defaultVault(parameter.getValue())
                                     .build();
                         }).collect(Collectors.toList());
                 webhookBuilder.param(ps);
