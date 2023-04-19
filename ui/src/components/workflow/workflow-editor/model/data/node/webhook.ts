@@ -70,7 +70,15 @@ export class Webhook extends BaseNode {
         type: 'object',
         required: true,
         fields: {
-          name: [{ required: true, message: '请输入参数名称', trigger: 'blur' }],
+          name: [
+            { required: true, message: '请输入参数名称', trigger: 'blur' },
+            {
+              required: true,
+              pattern: /^[a-zA-Z_]([a-zA-Z0-9_]+)?$/,
+              message: '以英文字母或下划线开头，支持下划线、数字、英文字母',
+              trigger: 'blur',
+            },
+          ],
           type: [{ required: true, message: '请选择参数类型', trigger: 'change' }],
           exp: [{ required: true, message: '请输入参数表达式', trigger: 'blur' }],
           required: [{ required: true, type: 'boolean' }],
