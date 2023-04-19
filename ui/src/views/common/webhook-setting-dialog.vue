@@ -143,7 +143,7 @@ export default defineComponent({
     // only table数据
     const onlyExpression = ref<string>('');
     const rules = ref<Record<string, any>>({});
-    const ruleForm = ref<Record<string, any>>({});
+    const ruleForm = ref<Record<string, string | boolean | number>>({});
     const latestWebhook = ref<IWebRequestVo>();
     // 获取最近执行的webhook记录
     const getLatestWebhook = async () => {
@@ -185,7 +185,7 @@ export default defineComponent({
           ruleForm.value[param.name] = '';
           if (!param.required) {
             // 对非必填的赋默认值
-            ruleForm.value[param.name] = param.defaultValue;
+            ruleForm.value[param.name] = param.defaultValue!;
           }
         });
         await getLatestWebhook();
