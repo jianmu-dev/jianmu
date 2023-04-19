@@ -541,8 +541,8 @@ public class DslParser {
                             var exp = p.get("exp");
                             var required = p.get("required");
                             var defaultValue = p.get("default");
-                            if (!(name instanceof String)) {
-                                throw new IllegalArgumentException("Webhook参数名配置错误");
+                            if (!(name instanceof String) || !((String) name).matches("^[a-zA-Z_][_a-zA-Z0-9]{0,29}$")) {
+                                throw new DslException("Webhook参数名称以英文字母或下划线开头，支持下划线、数字、英文字母，不超过30个字符");
                             }
                             if (!(type instanceof String)) {
                                 throw new IllegalArgumentException("Webhook参数类型配置错误");
@@ -606,7 +606,7 @@ public class DslParser {
                     if (!(v instanceof String)) {
                         throw new DslException("cache名称仅支持字符串类型");
                     }
-                    if (!((String) v).matches("^[a-zA-Z][_a-zA-Z0-9]{0,29}$")) {
+                    if (!((String) v).matches("^[a-zA-Z_][_a-zA-Z0-9]{0,29}$")) {
                         throw new DslException("cache名称以英文字母或下划线开头，支持下划线、数字、英文字母，不超过30个字符");
                     }
                 });
