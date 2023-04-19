@@ -1,14 +1,16 @@
 <template>
   <div :class="{ 'webhook-param': true, 'switch-bgc': switchBackgroundFlag }">
     <i class="jm-icon-button-delete" @click="deleteParam" />
-    <jm-form-item label="名称" :prop="`${formModelName}.${index}.name`" :rules="rules.name">
+    <jm-form-item label="名称" :prop="`${formModelName}.${index}.name`" :rules="rules.name" class="webhook-param-name">
       <jm-input
         v-model="nameVal"
         placeholder="请输入参数名称"
+        :maxlength="30"
         @change="changeName"
         @focus="switchBackgroundFlag = true"
         @blur="switchBackgroundFlag = false"
       />
+      <div class="webhook-param-description">以英文字母或下划线开头，支持下划线、数字、英文字母</div>
     </jm-form-item>
     <jm-form-item label="类型" :prop="`${formModelName}.${index}.type`" :rules="rules.type">
       <jm-select
@@ -196,6 +198,25 @@ export default defineComponent({
 
     &:hover {
       background: #eff7ff;
+    }
+  }
+
+  .webhook-param-name {
+    .webhook-param-description {
+      height: 18px;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 18px;
+      color: #79879c;
+      margin-top: 4px;
+    }
+  }
+
+  ::v-deep(.el-form-item) {
+    &.is-error {
+      .webhook-param-description {
+        display: none;
+      }
     }
   }
 

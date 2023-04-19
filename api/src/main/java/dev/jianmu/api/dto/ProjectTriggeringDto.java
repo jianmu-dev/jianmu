@@ -5,7 +5,6 @@ import lombok.Getter;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,6 +27,7 @@ public class ProjectTriggeringDto {
             return Map.of();
         }
         return this.triggerParams.stream()
+                .filter(t -> t.getValue() != null)
                 .collect(Collectors.toMap(TriggerParamVo::getName, TriggerParamVo::getValue, (k1, k2) -> k2));
     }
 
@@ -35,7 +35,6 @@ public class ProjectTriggeringDto {
     public static class TriggerParamVo {
         @NotBlank(message = "参数名称不能为空")
         private String name;
-        @NotNull(message = "参数值不能为空")
         private Object value;
     }
 }
