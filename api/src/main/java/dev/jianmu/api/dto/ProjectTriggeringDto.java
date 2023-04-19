@@ -27,6 +27,7 @@ public class ProjectTriggeringDto {
             return Map.of();
         }
         return this.triggerParams.stream()
+                .filter(t -> t.getValue() != null)
                 .collect(Collectors.toMap(TriggerParamVo::getName, TriggerParamVo::getValue, (k1, k2) -> k2));
     }
 
