@@ -8,7 +8,6 @@ import {
   TriggerTypeEnum,
   WorkerTypeEnum,
 } from '@/api/dto/enumeration';
-import { ParamTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
 
 /**
  * 保存项目dto
@@ -255,26 +254,4 @@ export interface INodeDefVo
     type: string;
     webhook?: string;
     workerType: WorkerTypeEnum;
-  }> {}
-
-/**
- * IWebhookParameter
- */
-
-export interface IWebhookParameter
-  extends Readonly<{
-    name: string;
-    type: ParamTypeEnum;
-    exp: string;
-    required: boolean;
-    defaultValue?: string | number | boolean;
-  }> {}
-
-/**
- * IWebhookAuth
- */
-export interface IWebhookAuth
-  extends Readonly<{
-    token: string;
-    value: string;
   }> {}
