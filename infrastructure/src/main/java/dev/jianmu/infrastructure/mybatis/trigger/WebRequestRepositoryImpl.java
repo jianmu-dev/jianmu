@@ -48,11 +48,6 @@ public class WebRequestRepositoryImpl implements WebRequestRepository {
         return this.webRequestMapper.findByTriggerId(triggerId);
     }
 
-    @Override
-    public Optional<WebRequest> findLatestByProjectId(String projectId) {
-        return this.webRequestMapper.findLatestByProjectId(projectId);
-    }
-
     public PageInfo<WebRequest> findPage(String projectId, int pageNum, int pageSize) {
         return PageHelper.startPage(pageNum, pageSize)
                 .doSelectPageInfo(() -> this.webRequestMapper.findPage(projectId));
