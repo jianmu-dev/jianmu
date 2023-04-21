@@ -170,6 +170,7 @@ public class ProjectApplication {
         this.publisher.publishEvent(triggerEvent);
     }
 
+    @Transactional
     public TriggerEvent triggerByManual(String projectId, String associationId, String associationType, String associationPlatform) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目，项目id: " + projectId));
