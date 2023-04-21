@@ -29,6 +29,7 @@ import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -89,7 +90,7 @@ public class WorkflowInstanceInternalApplication {
     }
 
     // 创建流程
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void create(WorkflowStartCmd cmd, String projectId) {
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
@@ -120,7 +121,6 @@ public class WorkflowInstanceInternalApplication {
         projectLastExecution.init(workflowInstance.getId(), workflowInstance.getSerialNo(), cmd.getOccurredTime(), workflowInstance.getStatus().name());
         this.workflowInstanceRepository.add(workflowInstance);
         this.projectLastExecutionRepository.update(projectLastExecution);
-
     }
 
     private Set<GlobalParameter> findGlobalParameters(String triggerId, String workflowRef, String version, String associationId, String associationType, String associationPlatform) {
