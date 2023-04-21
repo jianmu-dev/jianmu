@@ -988,7 +988,7 @@ public class TriggerApplication {
     }
 
     public dev.jianmu.application.dsl.webhook.Webhook getWebhookParam(String id) {
-        var webRequest = webRequestRepositoryImpl.findById(id)
+        var webRequest = this.webRequestRepositoryImpl.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
         var workflow = this.workflowRepository.findByRefAndVersion(webRequest.getWorkflowRef(), webRequest.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
