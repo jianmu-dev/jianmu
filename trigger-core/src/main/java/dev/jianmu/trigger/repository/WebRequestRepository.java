@@ -20,4 +20,6 @@ public interface WebRequestRepository {
     void deleteByProjectId(String projectId);
 
     Optional<WebRequest> findByTriggerId(String triggerId);
+
+    Optional<WebRequest> findLatestByProjectId(String projectId);
 }
