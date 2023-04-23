@@ -55,7 +55,7 @@
                     }"
                   >
                     <jm-text-viewer
-                      v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
+                      v-if="scope.row.type !== ParamTypeEnum.SECRET"
                       :value="scope.row.value"
                       @loaded="({ contentMaxWidth }) => getTotalWidth(contentMaxWidth, scope.row.value)"
                       class="value"
@@ -70,7 +70,7 @@
               </div>
             </div>
             <template v-else>
-              <param-value :value="scope.row.value" :type="scope.row.valueType" />
+              <param-value :value="scope.row.value" :type="scope.row.type" />
             </template>
           </template>
         </jm-table-column>
