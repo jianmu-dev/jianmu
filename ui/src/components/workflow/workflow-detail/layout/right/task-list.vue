@@ -40,23 +40,23 @@ export default defineComponent({
   setup(props, { emit }) {
     // 当前选择
     const selectedTask = ref<ITaskExecutionRecordVo>();
-    // const latestTask = computed<ITaskExecutionRecordVo | undefined>(() => {
-    //   if (props.tasks.length === 0) {
-    //     return undefined;
-    //   }
-    //   return props.tasks[0];
-    // });
+    const latestTask = computed<ITaskExecutionRecordVo | undefined>(() => {
+      if (props.tasks.length === 0) {
+        return undefined;
+      }
+      return props.tasks[0];
+    });
 
     const changeTask = (t: ITaskExecutionRecordVo) => {
       selectedTask.value = { ...t };
       emit('change', selectedTask.value.instanceId);
     };
-    // onUpdated(() => {
-    //   if (latestTask.value && !selectedTask.value) {
-    //     console.log('changeTask', latestTask.value);
-    //     changeTask(latestTask.value);
-    //   }
-    // });
+    onUpdated(() => {
+      if (latestTask.value && !selectedTask.value) {
+        console.log('changeTask', latestTask.value);
+        changeTask(latestTask.value);
+      }
+    });
     return {
       TaskStatusEnum,
       changeTask,
