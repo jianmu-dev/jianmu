@@ -3,7 +3,6 @@ package dev.jianmu.api.mapper;
 import dev.jianmu.api.vo.GlobalParameterVo;
 import dev.jianmu.workflow.aggregate.definition.GlobalParameter;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 /**
@@ -16,6 +15,5 @@ import org.mapstruct.factory.Mappers;
 public interface GlobalParameterMapper {
     GlobalParameterMapper INSTANCE = Mappers.getMapper(GlobalParameterMapper.class);
 
-    @Mapping(target = "value", expression = "java(globalParameter.getHidden() ? \"**********\" : globalParameter.getValue())")
     GlobalParameterVo toGlobalParameterVo(GlobalParameter globalParameter);
 }
