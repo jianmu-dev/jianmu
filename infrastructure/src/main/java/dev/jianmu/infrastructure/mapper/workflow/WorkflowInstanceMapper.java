@@ -81,14 +81,14 @@ public interface WorkflowInstanceMapper {
     @Result(column = "global_parameters", property = "globalParameters", typeHandler = ParameterSetTypeHandler.class)
     Optional<WorkflowInstance> findByTriggerId(String triggerId);
 
-    @Insert("insert into jm_workflow_instance(id, serial_no, trigger_id, trigger_type, name, description, run_mode, status, workflow_ref, workflow_version,occurred_time, start_time, suspended_time, end_time, _version) " +
+    @Insert("insert into jm_workflow_instance(id, serial_no, trigger_id, trigger_type, name, description, run_mode, status, workflow_ref, workflow_version,global_parameters,occurred_time, start_time, suspended_time, end_time, _version) " +
             "values(#{wk.id},#{wk.serialNo},#{wk.triggerId},#{wk.triggerType},#{wk.name},#{wk.description},#{wk.runMode},#{wk.status},#{wk.workflowRef},#{wk.workflowVersion}," +
+            "#{wk.globalParameters, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.ParameterSetTypeHandler}," +
             "#{wk.occurredTime},#{wk.startTime},#{wk.suspendedTime},#{wk.endTime},#{version})")
     boolean add(@Param("wk") WorkflowInstance workflowInstance, @Param("version") int version);
 
     @Update("update jm_workflow_instance " +
             "set run_mode=#{wk.runMode},status=#{wk.status},start_time=#{wk.startTime}," +
-            "global_parameters = #{wk.globalParameters, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.ParameterSetTypeHandler}," +
             "suspended_time=#{wk.suspendedTime},end_time=#{wk.endTime},_version= _version+1 " +
             "where id = #{wk.id}")
     void save(@Param("wk") WorkflowInstance workflowInstance);

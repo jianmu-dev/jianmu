@@ -211,10 +211,6 @@ public class WorkflowInstance extends AggregateRoot {
         this.raiseSseEvents(event);
     }
 
-    public void setGlobalParameters(Set<GlobalParameter> globalParameters) {
-        this.globalParameters = globalParameters;
-    }
-
     public String getId() {
         return id;
     }
@@ -293,6 +289,8 @@ public class WorkflowInstance extends AggregateRoot {
         private String workflowRef;
         // 流程定义版本
         private String workflowVersion;
+        // 全局参数
+        private Set<GlobalParameter> globalParameters;
 
         private Builder() {
         }
@@ -336,6 +334,11 @@ public class WorkflowInstance extends AggregateRoot {
             return this;
         }
 
+        public Builder globalParameters(Set<GlobalParameter> globalParameters) {
+            this.globalParameters = globalParameters;
+            return this;
+        }
+
         public WorkflowInstance build() {
             WorkflowInstance workflowInstance = new WorkflowInstance();
             workflowInstance.workflowVersion = this.workflowVersion;
@@ -346,6 +349,7 @@ public class WorkflowInstance extends AggregateRoot {
             workflowInstance.description = this.description;
             workflowInstance.id = this.id;
             workflowInstance.workflowRef = this.workflowRef;
+            workflowInstance.globalParameters = this.globalParameters;
             return workflowInstance;
         }
     }
