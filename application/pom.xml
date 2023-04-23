@@ -5,7 +5,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>dev.jianmu</groupId>
-        <version>0.5.5-saas</version>
+        <version>0.5.6-saas</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,13 +15,13 @@
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>infrastructure</artifactId>
-            <version>0.5.5-saas</version>
+            <version>0.5.6-saas</version>
         </dependency>
         <!--oauth2依赖-->
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>oauth2</artifactId>
-            <version>0.5.5-saas</version>
+            <version>0.5.6-saas</version>
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
