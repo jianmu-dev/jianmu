@@ -1,5 +1,6 @@
 package dev.jianmu.workflow.service;
 
+import dev.jianmu.workflow.aggregate.definition.GlobalParameter;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;
@@ -8,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Ethan Liu
@@ -18,7 +20,7 @@ import java.util.List;
 public class WorkflowInstanceDomainService {
     private static final Logger logger = LoggerFactory.getLogger(WorkflowInstanceDomainService.class);
 
-    public WorkflowInstance create(String triggerId, String triggerType, int serialNo, Workflow workflow) {
+    public WorkflowInstance create(String triggerId, String triggerType, int serialNo, Workflow workflow, Set<GlobalParameter> globalParameters) {
         // 构造流程实例
         return WorkflowInstance.Builder.aWorkflowInstance()
                 .serialNo(serialNo)
@@ -28,6 +30,7 @@ public class WorkflowInstanceDomainService {
                 .description(workflow.getDescription())
                 .workflowRef(workflow.getRef())
                 .workflowVersion(workflow.getVersion())
+                .globalParameters(globalParameters)
                 .build();
     }
 

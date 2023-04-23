@@ -115,17 +115,17 @@ public class WorkflowInstanceInternalApplication {
         AtomicInteger serialNo = new AtomicInteger(1);
         this.workflowInstanceRepository.findByRefAndSerialNoMax(workflow.getRef())
                 .ifPresent(workflowInstance -> serialNo.set(workflowInstance.getSerialNo() + 1));
+        // 添加全局参数
+        var globalParameters = this.findGlobalParameters(workflow, cmd.getTriggerId(), project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform());
         // 创建新的流程实例
-        WorkflowInstance workflowInstance = workflowInstanceDomainService.create(cmd.getTriggerId(), cmd.getTriggerType(), serialNo.get(), workflow);
+        WorkflowInstance workflowInstance = workflowInstanceDomainService.create(cmd.getTriggerId(), cmd.getTriggerType(), serialNo.get(), workflow, globalParameters);
         workflowInstance.init(cmd.getOccurredTime());
         projectLastExecution.init(workflowInstance.getId(), workflowInstance.getSerialNo(), cmd.getOccurredTime(), workflowInstance.getStatus().name());
         this.workflowInstanceRepository.add(workflowInstance);
         this.projectLastExecutionRepository.update(projectLastExecution);
     }
 
-    private Set<GlobalParameter> findGlobalParameters(String triggerId, String workflowRef, String version, String associationId, String associationType, String associationPlatform) {
-        var workflow = this.workflowRepository.findByRefAndVersion(workflowRef, version)
-                .orElseThrow(() -> new DataNotFoundException("未找到流程"));
+    private Set<GlobalParameter> findGlobalParameters(Workflow workflow, String triggerId, String associationId, String associationType, String associationPlatform) {
         // 查询参数源
         var eventParameters = this.triggerEventRepository.findById(triggerId)
                 .map(TriggerEvent::getParameters)
@@ -141,7 +141,7 @@ public class WorkflowInstanceInternalApplication {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         var eventParamValues = this.parameterRepository.findByIds(new HashSet<>(eventParams.values()));
         var eventMap = this.parameterDomainService.matchParameters(eventParams, eventParamValues);
-        // 事件参数scope为event
+        // 事件参数scope为trigger
         eventMap.forEach((key, val) -> context.add("trigger", key, val));
         var globalParameters = new HashSet<GlobalParameter>();
         workflow.getGlobalParameters()
@@ -185,22 +185,14 @@ public class WorkflowInstanceInternalApplication {
             return;
         }
         this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.INIT))
-                        .stream().limit(project.getConcurrent() - i)
-                        .forEach(workflowInstance -> this.createVolume(workflowInstance, projectLastExecution, project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform()));
+                .stream().limit(project.getConcurrent() - i)
+                .forEach(workflowInstance -> this.createVolume(workflowInstance, projectLastExecution, project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform()));
     }
 
     // 流程实例创建Volume
     private void createVolume(WorkflowInstance workflowInstance, ProjectLastExecution projectLastExecution, String associationId, String associationTYpe, String associationPlatform) {
         MDC.put("triggerId", workflowInstance.getTriggerId());
         workflowInstance.start();
-        // 添加全局参数
-        try {
-            var globalParameters = this.findGlobalParameters(workflowInstance.getTriggerId(), workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion(), associationId, associationTYpe, associationPlatform);
-            workflowInstance.setGlobalParameters(globalParameters);
-        } catch (Exception e) {
-            log.error("流程实例启动失败：", e);
-            workflowInstance.terminate();
-        }
         // 修改项目最后执行状态
         projectLastExecution.running(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStartTime(), workflowInstance.getStatus().name());
 

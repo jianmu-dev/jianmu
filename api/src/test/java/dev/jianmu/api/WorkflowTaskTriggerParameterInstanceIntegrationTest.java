@@ -112,7 +112,7 @@ public class WorkflowTaskTriggerParameterInstanceIntegrationTest {
                 .nodes(nodes)
                 .build();
         WorkflowInstanceDomainService workflowInstanceDomainService = new WorkflowInstanceDomainService();
-        instance = workflowInstanceDomainService.create("trigger567", "CRON", 1, workflow);
+        instance = workflowInstanceDomainService.create("trigger567", "CRON", 1, workflow, Set.of());
     }
 
 //    @Test
