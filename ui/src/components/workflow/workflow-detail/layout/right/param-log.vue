@@ -40,7 +40,7 @@
         </jm-table-column>
         <jm-table-column label="参数值" header-align="center">
           <template #default="scope">
-            <div v-if="scope.row.type === ParamTypeEnum.SECRET">
+            <div v-if="scope.row.hidden">
               <!-- 密钥类型切换 -->
               <div class="hide-container" v-if="secretVisible">
                 <span>******</span>
@@ -55,7 +55,7 @@
                     }"
                   >
                     <jm-text-viewer
-                      v-if="scope.row.type !== ParamTypeEnum.SECRET"
+                      v-if="scope.row.hidden"
                       :value="scope.row.value"
                       @loaded="({ contentMaxWidth }) => getTotalWidth(contentMaxWidth, scope.row.value)"
                       class="value"
