@@ -450,6 +450,7 @@ public class WorkerInternalApplication {
 
         env.put("JM_INSTANCE_ID", workflowInstance.getId());
         env.put("JM_INSTANCE_TRIGGER_TYPE", workflowInstance.getTriggerType());
+        env.put("JM_INSTANCE_NAME", workflowInstance.getName());
         env.put("JM_INSTANCE_WORKFLOW_REF", workflowInstance.getWorkflowRef());
         env.put("JM_INSTANCE_WORKFLOW_VERSION", workflowInstance.getWorkflowVersion());
         env.put("JM_INSTANCE_CREATE_TIME", formatTime(workflowInstance.getCreateTime()));
