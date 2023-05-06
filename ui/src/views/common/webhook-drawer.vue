@@ -120,14 +120,14 @@
                     <jm-text-viewer :value="scope.row.name" />
                   </template>
                 </jm-table-column>
-                <jm-table-column label="参数类型" width="200px" prop="type"> </jm-table-column>
+                <jm-table-column label="参数类型" width="200px" prop="type"></jm-table-column>
                 <jm-table-column label="参数值" prop="value">
                   <template #default="scope">
                     <div v-if="scope.row.type === ParamTypeEnum.SECRET">
                       <!-- 密钥类型切换 -->
                       <div class="hide-container" v-if="secretVisible">
                         <span>********************</span>
-                        <i class="hide-secret jm-icon-input-visible" @click="hideSecret"></i>
+                        <i class="hide-secret jm-icon-input-invisible" @click="hideSecret"></i>
                       </div>
                       <div class="display-container" v-else>
                         <template v-if="scope.row.value">
@@ -151,7 +151,7 @@
                             </template>
                           </div>
                         </template>
-                        <i class="display-secret jm-icon-input-invisible" @click="displaySecret"></i>
+                        <i class="display-secret jm-icon-input-visible" @click="displaySecret"></i>
                       </div>
                     </div>
                     <template v-else>
@@ -871,10 +871,6 @@ export default defineComponent({
             position: relative;
             top: -2px;
 
-            .jm-icon-input-visible::before {
-              content: '\e803';
-            }
-
             &:hover {
               background: #eff7ff;
             }
@@ -896,7 +892,7 @@ export default defineComponent({
 
           .display-secret {
             .jm-icon-input-invisible::before {
-              content: '\e800';
+              content: '\e803';
             }
 
             &:hover {
