@@ -891,10 +891,6 @@ export default defineComponent({
           }
 
           .display-secret {
-            .jm-icon-input-invisible::before {
-              content: '\e803';
-            }
-
             &:hover {
               background: #eff7ff;
             }
