@@ -880,16 +880,6 @@ export default defineComponent({
           .trigger-params-value {
             width: 280px;
           }
-
-          .display-secret {
-            .jm-icon-input-invisible::before {
-              content: '\e800';
-            }
-
-            &:hover {
-              background: #eff7ff;
-            }
-          }
         }
       }
 
