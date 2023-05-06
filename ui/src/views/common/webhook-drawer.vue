@@ -880,12 +880,6 @@ export default defineComponent({
           .trigger-params-value {
             width: 280px;
           }
-
-          .display-secret {
-            &:hover {
-              background: #eff7ff;
-            }
-          }
         }
       }
 
