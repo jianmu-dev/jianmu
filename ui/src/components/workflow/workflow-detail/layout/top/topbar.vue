@@ -23,9 +23,9 @@
       <!-- <button class="jm-icon-workflow-edit edit-button" @click="jumpToEdit">编辑</button> -->
       <button
         v-show="showStopAll"
-        :class="[clicked ? 'clicked' : '']"
         class="jm-icon-button-stop stop-button"
         @click="terminateAll"
+        @keypress.enter.prevent
       >
         终止全部
       </button>
@@ -64,10 +64,8 @@ export default defineComponent({
       },
     );
 
-    const clicked = ref<boolean>(false);
     const width = ref<number>(234);
     return {
-      clicked,
       width,
       terminateAll() {
         const isWarning = props.project?.triggerType === TriggerTypeEnum.WEBHOOK;
@@ -79,11 +77,7 @@ export default defineComponent({
             type: isWarning ? 'warning' : 'info',
             dangerouslyUseHTMLString: true,
           })
-          .then((type: string) => {
-            if (clicked.value) return;
-            if (type === 'confirm') {
-              clicked.value = true;
-            }
+          .then(() => {
             detailTopbar.terminateAllRecord();
           });
       },
@@ -265,9 +259,6 @@ export default defineComponent({
         background-color: #eff7ff;
         color: @primary-color;
       }
-    }
-    .clicked {
-      cursor: no-drop;
     }
 
     .trigger-button {
