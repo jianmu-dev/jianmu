@@ -186,7 +186,8 @@ export default defineComponent({
       goBack: async () => {
         const originData = workflowBackUp.data ? JSON.parse(workflowBackUp.data) : {};
         const targetData: any = graph.toJSON();
-        if (targetData.cells.length === 0) {
+        // 未编辑状态，cells.length===1 && ref === 'start'
+        if (targetData.cells.length === 1 && JSON.parse(targetData.cells[0].data).ref === 'start') {
           delete targetData.cells;
         }
         workflowTool.slimGraphData(originData);
