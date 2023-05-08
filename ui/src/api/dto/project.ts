@@ -219,7 +219,9 @@ export interface IGlobalParamseterVo
     type: string;
     value: string | number | boolean;
     required: boolean;
-  }> {}
+  }> {
+  secretVisible?: boolean;
+}
 
 /**
  * 流程vo
