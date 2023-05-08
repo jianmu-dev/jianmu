@@ -33,7 +33,10 @@ export class GraphPanel {
       this.globalParamsCallbackFn([]);
       return;
     }
-    const params: IGlobalParamseterVo[] = await getGlobalParameters(this.currentRecord.triggerId);
+    const params: IGlobalParamseterVo[] = (await getGlobalParameters(this.currentRecord.triggerId)).map(e => {
+      e.secretVisible = true;
+      return e;
+    });
     this.globalParamsCallbackFn(params);
   }
   async getDslAndNodeinfos() {

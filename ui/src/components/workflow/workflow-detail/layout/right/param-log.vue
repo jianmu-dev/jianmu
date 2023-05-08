@@ -42,9 +42,9 @@
           <template #default="scope">
             <div v-if="scope.row.hidden">
               <!-- 密钥类型切换 -->
-              <div class="hide-container" v-if="secretVisible">
+              <div class="hide-container" v-if="scope.row.secretVisible">
                 <span>******</span>
-                <i class="hide-secret jm-icon-input-invisible" @click="hideSecret"></i>
+                <i class="hide-secret jm-icon-input-visible" @click="scope.row.secretVisible = false"></i>
               </div>
               <div class="display-container" v-else>
                 <template v-if="scope.row.value">
@@ -66,7 +66,7 @@
                     </template>
                   </div>
                 </template>
-                <i class="display-secret jm-icon-input-visible" @click="displaySecret"></i>
+                <i class="display-secret jm-icon-input-invisible" @click="scope.row.secretVisible = true"></i>
               </div>
             </div>
             <template v-else>
@@ -94,15 +94,9 @@ export default defineComponent({
     },
   },
   setup() {
-    // 密钥类型显隐
-    const secretVisible = ref<boolean>(true);
     const maxWidthRecord = ref<Record<string, number>>({});
     return {
       ParamTypeEnum,
-      // 密钥类型显隐
-      secretVisible,
-      hideSecret: () => (secretVisible.value = false),
-      displaySecret: () => (secretVisible.value = true),
       maxWidthRecord,
       getTotalWidth(width: number, ref: string) {
         maxWidthRecord.value[ref] = width;
