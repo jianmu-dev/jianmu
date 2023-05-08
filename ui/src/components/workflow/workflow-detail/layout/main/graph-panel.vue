@@ -183,6 +183,15 @@ export default defineComponent({
     });
     const processLogDrawer = ref<boolean>(false);
     const paramLogDrawer = ref<boolean>(false);
+
+    onUpdated(() => {
+      if (paramLogDrawer.value) {
+        globalParams.value = globalParams.value.map(e => {
+          e.secretVisible = true;
+          return e;
+        });
+      }
+    });
     return {
       workflowRef,
       dslSourceCode,
