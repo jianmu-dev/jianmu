@@ -44,7 +44,7 @@
               <!-- 密钥类型切换 -->
               <div class="hide-container" v-if="scope.row.secretVisible">
                 <span>******</span>
-                <i class="hide-secret jm-icon-input-visible" @click="scope.row.secretVisible = false"></i>
+                <i class="hide-secret jm-icon-input-invisible" @click="scope.row.secretVisible = false"></i>
               </div>
               <div class="display-container" v-else>
                 <template v-if="scope.row.value">
@@ -66,7 +66,7 @@
                     </template>
                   </div>
                 </template>
-                <i class="display-secret jm-icon-input-invisible" @click="scope.row.secretVisible = true"></i>
+                <i class="display-secret jm-icon-input-visible" @click="scope.row.secretVisible = true"></i>
               </div>
             </div>
             <template v-else>
