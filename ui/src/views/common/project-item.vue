@@ -150,6 +150,13 @@
       </div>
     </div>
     <div class="cover"></div>
+    <webhook-setting-dialog
+      v-model="visible"
+      v-if="visible"
+      :project-id="project.id"
+      @submit="payload => manualTriggerWebhook(payload)"
+      ref="webhookSettingDialog"
+    />
   </div>
   <div class="project-item" v-else>
     <div
@@ -322,14 +329,21 @@
     ></cache-drawer>
     <project-preview-dialog v-if="dslDialogFlag" :project-id="project.id" @close="dslDialogFlag = false" />
     <div class="cover"></div>
+    <webhook-setting-dialog
+      v-model="visible"
+      v-if="visible"
+      :project-id="project.id"
+      :webhook-definition="webhookDefinition"
+      @submit="payload => manualTriggerWebhook(payload)"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, getCurrentInstance, PropType, ref, SetupContext } from 'vue';
 import { DslSourceEnum, DslTypeEnum, ProjectStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
-import { IProjectVo } from '@/api/dto/project';
-import { active, del, executeImmediately, synchronize } from '@/api/project';
+import { IProjectTriggeringDto, IProjectVo, ITriggerDefinitionVo } from '@/api/dto/project';
+import { active, del, executeImmediately, fetchWebhookDefinition, synchronize } from '@/api/project';
 import { datetimeFormatter } from '@/utils/formatter';
 import ProjectPreviewDialog from './project-preview-dialog.vue';
 import WebhookDrawer from './webhook-drawer.vue';
@@ -337,9 +351,10 @@ import CacheDrawer from '@/views/common/cache-drawer.vue';
 import { useRouter } from 'vue-router';
 import { terminate } from '@/api/workflow-execution-record';
 import dayjs from 'dayjs';
+import WebhookSettingDialog from '@/views/common/webhook-setting-dialog.vue';
 
 export default defineComponent({
-  components: { ProjectPreviewDialog, WebhookDrawer, CacheDrawer },
+  components: { WebhookSettingDialog, ProjectPreviewDialog, WebhookDrawer, CacheDrawer },
   props: {
     project: {
       type: Object as PropType<IProjectVo>,
@@ -438,7 +453,24 @@ export default defineComponent({
     const startTime = computed<string>(() => props.project.startTime);
     // 项目执行次数
     const executeCount = computed<number>(() => props.project.serialNo);
+    const visible = ref<boolean>(false);
+    const webhookDefinition = ref<ITriggerDefinitionVo>();
+    const manualTriggerWebhook = async (payload: IProjectTriggeringDto) => {
+      try {
+        executing.value = true;
+        await executeImmediately(props.project.id, payload);
+        proxy.$success('操作成功');
+        visible.value = false;
+        emit('triggered', props.project.id);
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      } finally {
+        executing.value = false;
+      }
+    };
     return {
+      visible,
+      webhookDefinition,
       executeCount,
       startTime,
       stopProcess,
@@ -462,7 +494,8 @@ export default defineComponent({
       webhookDrawerFlag,
       cacheDrawerFlag,
       concurrentVal,
-      execute: (id: string) => {
+      manualTriggerWebhook,
+      execute: async (id: string) => {
         if (!enabled.value || executing.value) {
           return;
         }
@@ -470,33 +503,60 @@ export default defineComponent({
         const { triggerType } = props.project;
         const isWarning = triggerType === TriggerTypeEnum.WEBHOOK;
 
-        let msg = '<div>确定要触发吗?</div>';
+        const msg = '<div>确定要触发吗?</div>';
         if (isWarning) {
-          msg +=
-            '<div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">注意：项目已配置webhook，手动触发可能会导致不可预知的结果，请慎重操作。</div>';
-        }
-
-        proxy
-          .$confirm(msg, '触发项目执行', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: isWarning ? 'warning' : 'info',
-            dangerouslyUseHTMLString: true,
-          })
-          .then(() => {
-            executing.value = true;
-
-            executeImmediately(id)
-              .then(() => {
-                proxy.$success('操作成功');
-                executing.value = false;
-                emit('triggered', id);
+          // 获取webhook触发器定义
+          webhookDefinition.value = await fetchWebhookDefinition(id);
+          // 如果没有webhook触发器参数定义则可直接触发
+          if (!webhookDefinition.value.params) {
+            proxy
+              .$confirm(msg, '触发项目执行', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'info',
+                dangerouslyUseHTMLString: true,
               })
-              .catch((err: Error) => {
-                proxy.$throw(err, proxy);
-                executing.value = false;
+              .then(() => {
+                executing.value = true;
+
+                executeImmediately(id)
+                  .then(() => {
+                    proxy.$success('操作成功');
+                    executing.value = false;
+                    emit('triggered', id);
+                  })
+                  .catch((err: Error) => {
+                    proxy.$throw(err, proxy);
+                    executing.value = false;
+                  });
               });
-          });
+          } else {
+            // 打开webhook配置弹窗
+            visible.value = true;
+          }
+        } else {
+          proxy
+            .$confirm(msg, '触发项目执行', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: isWarning ? 'warning' : 'info',
+              dangerouslyUseHTMLString: true,
+            })
+            .then(() => {
+              executing.value = true;
+
+              executeImmediately(id)
+                .then(() => {
+                  proxy.$success('操作成功');
+                  executing.value = false;
+                  emit('triggered', id);
+                })
+                .catch((err: Error) => {
+                  proxy.$throw(err, proxy);
+                  executing.value = false;
+                });
+            });
+        }
       },
       able: (id: string) => {
         if (abling.value) {

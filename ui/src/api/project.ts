@@ -1,5 +1,14 @@
 import { restProxy } from '@/api';
-import { IGitCloningDto, IGitVo, IProjectIdVo, IProjectImportingDto, IProjectSavingDto } from '@/api/dto/project';
+import {
+  IGitCloningDto,
+  IGitVo,
+  IProjectIdVo,
+  IProjectImportingDto,
+  IProjectSavingDto,
+  IProjectTriggeringDto,
+  ITriggerDefinitionVo,
+  ITriggerProjectVo,
+} from '@/api/dto/project';
 
 export const baseUrl = {
   project: '/projects',
@@ -21,20 +30,24 @@ export async function save(dto: IProjectSavingDto): Promise<IProjectIdVo> {
     auth: true,
   });
 
-  return dto.id ? {
-    id: dto.id,
-  } : res;
+  return dto.id
+    ? {
+      id: dto.id,
+    }
+    : res;
 }
 
 /**
  * 立即执行
  * @param id
+ * @param dto (项目触发dto，没传入dto请求时默认转换成空对象)
  */
-export function executeImmediately(id: string): Promise<void> {
+export function executeImmediately(id: string, dto?: IProjectTriggeringDto): Promise<ITriggerProjectVo> {
   return restProxy({
     url: `${baseUrl.project}/trigger/${id}`,
     method: 'post',
     auth: true,
+    payload: dto ? dto : {},
   });
 }
 
@@ -120,6 +133,17 @@ export function active(id: string, enable: boolean): Promise<void> {
   return restProxy({
     url: `${baseUrl.project}/${enable ? 'enable' : 'disable'}/${id}`,
     method: 'put',
+    auth: true,
+  });
+}
+
+/**
+ * 获取webhook触发器定义
+ */
+export function fetchWebhookDefinition(projectId: string): Promise<ITriggerDefinitionVo> {
+  return restProxy({
+    url: `${baseUrl.project}/${projectId}/trigger_def`,
+    method: 'get',
     auth: true,
   });
 }

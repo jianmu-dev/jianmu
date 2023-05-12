@@ -13,7 +13,7 @@ export interface IWebhookParam {
   type: ParamTypeEnum | undefined;
   exp: string;
   required: boolean;
-  default?: string;
+  default?: string | number | boolean;
 }
 
 export interface IWebhookAuth {
@@ -26,8 +26,12 @@ export class Webhook extends BaseNode {
   auth?: IWebhookAuth;
   only?: string;
 
-  constructor(name: string = 'webhook', params: IWebhookParam[] = [],
-    auth: IWebhookAuth | undefined = undefined, only: string | undefined = undefined) {
+  constructor(
+    name = 'webhook',
+    params: IWebhookParam[] = [],
+    auth: IWebhookAuth | undefined = undefined,
+    only: string | undefined = undefined,
+  ) {
     super(NodeRefEnum.WEBHOOK, name, NodeTypeEnum.WEBHOOK, icon, 'https://v2.jianmu.dev/guide/webhook.html');
     this.params = params;
     this.auth = auth;
@@ -38,7 +42,7 @@ export class Webhook extends BaseNode {
     return new Webhook(name, params, auth, only);
   }
 
-  buildSelectableParam(nodeId: string = ''): ISelectableParam | undefined {
+  buildSelectableParam(nodeId = ''): ISelectableParam | undefined {
     if (this.params.length === 0) {
       return undefined;
     }
@@ -46,7 +50,8 @@ export class Webhook extends BaseNode {
     return {
       value: WEBHOOK_PARAM_SCOPE,
       label: super.getName(),
-      children: this.params.filter(({ name }) => name)
+      children: this.params
+        .filter(({ name }) => name)
         .map(({ name }) => {
           return {
             value: name,
@@ -65,12 +70,22 @@ export class Webhook extends BaseNode {
         type: 'object',
         required: true,
         fields: {
-          name: [{ required: true, message: '请输入参数名称', trigger: 'blur' }],
+          name: [
+            { required: true, message: '请输入参数名称', trigger: 'blur' },
+            {
+              required: true,
+              pattern: /^[a-zA-Z_]([a-zA-Z0-9_]+)?$/,
+              message: '以英文字母或下划线开头，支持下划线、数字、英文字母',
+              trigger: 'blur',
+            },
+          ],
           type: [{ required: true, message: '请选择参数类型', trigger: 'change' }],
           exp: [{ required: true, message: '请输入参数表达式', trigger: 'blur' }],
           required: [{ required: true, type: 'boolean' }],
           default: [
             {
+              required:
+                this.params[index].type === ParamTypeEnum.NUMBER || this.params[index].type === ParamTypeEnum.BOOL,
               validator: ({ fullField }: any, value: any, callback: any) => {
                 const param = this.params[fullField!.split('.')[1]];
                 if (param.required || !param.type) {
@@ -81,21 +96,22 @@ export class Webhook extends BaseNode {
                 const defaultVal = param.default!;
                 switch (param.type) {
                   case ParamTypeEnum.BOOL:
-                    if (!['true', 'false'].includes(defaultVal)) {
-                      callback('请输入正确的参数默认值');
+                    if (![true, false].includes(defaultVal as boolean)) {
+                      callback('请选择参数默认值');
                       return;
                     }
                     break;
                   case ParamTypeEnum.NUMBER:
-                    if (isNaN(parseFloat(defaultVal))) {
-                      callback('请输入正确的参数默认值');
+                    if (isNaN(defaultVal as number)) {
+                      callback('请输入参数默认值');
                       return;
                     }
                     break;
                 }
                 callback();
               },
-              trigger: 'blur',
+              type: this.params[index].type === ParamTypeEnum.BOOL ? 'boolean' : 'string',
+              trigger: this.params[index].type === ParamTypeEnum.BOOL ? 'change' : 'blur',
             },
           ],
         } as Record<string, CustomRule>,
@@ -154,32 +170,34 @@ export class Webhook extends BaseNode {
 
     return {
       type: NodeTypeEnum.WEBHOOK,
-      param: params.length === 0 ? undefined : params.map(param => {
-        const newParam: any = { ...param };
-        delete newParam.key;
-        if (!param.required) {
-          const defaultVal = param.default!;
-          switch (param.type) {
-            case ParamTypeEnum.BOOL:
-              switch (defaultVal) {
-                case 'true':
-                  newParam.default = true;
+      param:
+        params.length === 0
+          ? undefined
+          : params.map(param => {
+            const newParam: any = { ...param };
+            delete newParam.key;
+            if (!param.required) {
+              const defaultVal = param.default!;
+              switch (param.type) {
+                case ParamTypeEnum.BOOL:
+                  switch (defaultVal) {
+                    case 'true':
+                      newParam.default = true;
+                      break;
+                    case 'false':
+                      newParam.default = false;
+                      break;
+                  }
                   break;
-                case 'false':
-                  newParam.default = false;
+                case ParamTypeEnum.NUMBER:
+                  newParam.default = parseFloat(defaultVal as string);
                   break;
               }
-              break;
-            case ParamTypeEnum.NUMBER:
-              newParam.default = parseFloat(defaultVal);
-              break;
-          }
-        }
-        return newParam;
-      }),
+            }
+            return newParam;
+          }),
       auth,
       only: only ? only : undefined,
     };
   }
 }
-

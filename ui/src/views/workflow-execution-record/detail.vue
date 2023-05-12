@@ -103,6 +103,14 @@
     <div class="workflow-section">
       <workflow />
     </div>
+
+    <webhook-setting-dialog
+      v-model="visible"
+      v-if="visible"
+      :project-id="projectId"
+      :webhook-definition="webhookDefinition"
+      @submit="payload => manualTriggerWebhook(payload)"
+    />
   </div>
 </template>
 
@@ -114,19 +122,20 @@ import { IState } from '@/model/modules/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
 import { TaskStatusEnum, TriggerTypeEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 import Workflow from '@/views/workflow-execution-record/workflow.vue';
+import WebhookSettingDialog from '@/views/common/webhook-setting-dialog.vue';
 import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { executeImmediately } from '@/api/project';
+import { executeImmediately, fetchWebhookDefinition } from '@/api/project';
 import sleep from '@/utils/sleep';
 import { onBeforeRouteUpdate, useRouter } from 'vue-router';
 import { terminate, terminateAll } from '@/api/workflow-execution-record';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
-import { IProjectDetailVo } from '@/api/dto/project';
+import { IProjectDetailVo, IProjectTriggeringDto, ITriggerDefinitionVo } from '@/api/dto/project';
 import { IRootState } from '@/model';
 
 const { mapActions, mapMutations } = createNamespacedHelpers(namespace);
 
 export default defineComponent({
-  components: { Workflow },
+  components: { Workflow, WebhookSettingDialog },
   props: {
     projectId: {
       type: String,
@@ -278,7 +287,33 @@ export default defineComponent({
         ).length >= 2,
     );
     const clicked = ref<boolean>(false);
+    const visible = ref<boolean>(false);
+    const webhookDefinition = ref<ITriggerDefinitionVo>();
+    const manualTriggerWebhook = async (payload: IProjectTriggeringDto) => {
+      try {
+        await executeImmediately(props.projectId, payload);
+        visible.value = false;
+        proxy.$success('操作成功');
+
+        // 清除滚动偏移量
+        proxy.mutateNavScrollLeft(0);
+
+        await router.push({
+          name: 'workflow-execution-record-detail',
+          query: {
+            projectId: props.projectId,
+          },
+        });
+
+        // 刷新详情
+        reloadMain();
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      }
+    };
     return {
+      visible,
+      webhookDefinition,
       navScrollBar,
       WorkflowExecutionRecordStatusEnum,
       data,
@@ -292,6 +327,7 @@ export default defineComponent({
       ...mapActions({
         fetchDetail: 'fetchDetail',
       }),
+      manualTriggerWebhook,
       close: () => {
         router.push(rootState.fromRoute.fullPath);
       },
@@ -317,41 +353,74 @@ export default defineComponent({
       datetimeFormatter,
       checkWorkflowRunning,
 
-      execute: () => {
+      execute: async () => {
         const isWarning = data.value.project?.triggerType === TriggerTypeEnum.WEBHOOK;
-        let msg = '<div>确定要触发吗?</div>';
+        const msg = '<div>确定要触发吗?</div>';
         if (isWarning) {
-          msg +=
-            '<div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">注意：项目已配置webhook，手动触发可能会导致不可预知的结果，请慎重操作。</div>';
-        }
-
-        proxy
-          .$confirm(msg, '触发项目执行', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: isWarning ? 'warning' : 'info',
-            dangerouslyUseHTMLString: true,
-          })
-          .then(() => {
-            executeImmediately(props.projectId)
-              .then(async () => {
-                proxy.$success('操作成功');
-
-                // 清除滚动偏移量
-                proxy.mutateNavScrollLeft(0);
-
-                await router.push({
-                  name: 'workflow-execution-record-detail',
-                  query: {
-                    projectId: props.projectId,
-                  },
-                });
-
-                // 刷新详情
-                reloadMain();
+          // 获取webhook触发器定义
+          webhookDefinition.value = await fetchWebhookDefinition(props.projectId);
+          // 如果没有webhook触发器参数定义则可直接触发
+          if (!webhookDefinition.value.params) {
+            proxy
+              .$confirm(msg, '触发项目执行', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'info',
+                dangerouslyUseHTMLString: true,
               })
-              .catch((err: Error) => proxy.$throw(err, proxy));
-          });
+              .then(() => {
+                executeImmediately(props.projectId)
+                  .then(async () => {
+                    proxy.$success('操作成功');
+
+                    // 清除滚动偏移量
+                    proxy.mutateNavScrollLeft(0);
+
+                    await router.push({
+                      name: 'workflow-execution-record-detail',
+                      query: {
+                        projectId: props.projectId,
+                      },
+                    });
+
+                    // 刷新详情
+                    reloadMain();
+                  })
+                  .catch((err: Error) => proxy.$throw(err, proxy));
+              });
+          } else {
+            // 打开webhook配置弹窗
+            visible.value = true;
+          }
+        } else {
+          proxy
+            .$confirm(msg, '触发项目执行', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: isWarning ? 'warning' : 'info',
+              dangerouslyUseHTMLString: true,
+            })
+            .then(() => {
+              executeImmediately(props.projectId)
+                .then(async () => {
+                  proxy.$success('操作成功');
+
+                  // 清除滚动偏移量
+                  proxy.mutateNavScrollLeft(0);
+
+                  await router.push({
+                    name: 'workflow-execution-record-detail',
+                    query: {
+                      projectId: props.projectId,
+                    },
+                  });
+
+                  // 刷新详情
+                  reloadMain();
+                })
+                .catch((err: Error) => proxy.$throw(err, proxy));
+            });
+        }
       },
       terminateAllRecord: () => {
         proxy
@@ -439,10 +508,12 @@ export default defineComponent({
       color: #042749;
       background-color: #ffffff;
       cursor: pointer;
+
       &::before {
         font-size: 16px;
         margin-right: 6px;
       }
+
       &::after {
         position: relative;
         content: '';
@@ -452,9 +523,11 @@ export default defineComponent({
         pointer-events: none;
       }
     }
+
     .clicked {
       cursor: no-drop;
     }
+
     .trigger-btn {
       position: absolute;
       right: 12px;

@@ -13,11 +13,16 @@ export const MAX_LABEL_LENGTH = 10;
 
 /**
  * 解析webhook节点
+ * @param trigger
  * @param nodes
  * @param edges
  * @param isWorkflow
  */
-function parseWebhook(nodes: NodeConfig[], edges: EdgeConfig[], isWorkflow: boolean): void {
+function parseWebhook(trigger: any, nodes: NodeConfig[], edges: EdgeConfig[], isWorkflow: boolean): void {
+  if (!trigger) {
+    return;
+  }
+
   const key = 'webhook';
   const label = key;
   const type = NodeTypeEnum.WEBHOOK;
@@ -112,9 +117,11 @@ function parseWorkflow(workflow: any): {
     switch (nodeType) {
       case NodeTypeEnum.START:
       case NodeTypeEnum.END:
+        uniqueKey = undefined;
         break;
       case NodeTypeEnum.CONDITION:
         description += `<br/>${workflow[key].expression}`;
+        uniqueKey = undefined;
         break;
       default: {
         type = NodeTypeEnum.ASYNC_TASK;
@@ -311,7 +318,11 @@ function parsePipeline(pipeline: any): {
  * @param triggerType
  * @param nodeInfos
  */
-export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | undefined, nodeInfos?: INodeDefVo[]): {
+export function parse(
+  dsl: string | undefined,
+  triggerType: TriggerTypeEnum | undefined,
+  nodeInfos?: INodeDefVo[],
+): {
   dslType: DslTypeEnum;
   nodes: NodeConfig[];
   edges: EdgeConfig[];
@@ -330,9 +341,9 @@ export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | un
       // 解析cron节点
       parseCron(trigger.schedule, nodes, edges, !!workflow);
       break;
-    case TriggerTypeEnum.WEBHOOK:
+    default:
       // 解析webhook节点
-      parseWebhook(nodes, edges, !!workflow);
+      parseWebhook(trigger, nodes, edges, !!workflow);
       break;
   }
 
