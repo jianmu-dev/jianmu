@@ -690,6 +690,16 @@ public class DslParser {
     private void workflowSyntaxCheck() {
         var flow = this.workflow;
         var treeMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        var nodeList = flow.entrySet().stream()
+            .filter(entry -> entry.getValue() instanceof Map)
+            .map(entry -> (Map<?, ?>) entry.getValue())
+            .collect(Collectors.toList());
+        if (nodeList.stream().noneMatch(node -> Objects.equals(node.get("type"), "start"))) {
+            throw new DslException("未设置开始节点");
+        }
+        if (nodeList.stream().noneMatch(node -> Objects.equals(node.get("type"), "end"))) {
+            throw new DslException("未设置结束节点");
+        }
         flow.forEach((key, val) -> {
             if (val instanceof Map) {
                 this.checkNode(key, (Map<?, ?>) val);
