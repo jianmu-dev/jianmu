@@ -489,6 +489,7 @@ public class Workflow extends AggregateRoot {
                 throw new RuntimeException("节点唯一引用名称不允许重复");
             }
 
+            this.checkDag();
 
             Workflow workflow = new Workflow();
             workflow.nodes = Set.copyOf(this.nodes);
@@ -501,6 +502,21 @@ public class Workflow extends AggregateRoot {
             workflow.name = this.name;
             workflow.description = this.description;
             return workflow;
+        }
+
+        private void checkDag() {
+            this.nodes.stream()
+                .filter(node -> !(node instanceof Start))
+                .filter(node -> !(node instanceof End))
+                .forEach(node -> {
+                    if (node.getSources().isEmpty()) {
+                        throw new RuntimeException("节点\"" + node.getRef() + "\"缺少上游节点");
+                    }
+
+                    if (node.getTargets().isEmpty()) {
+                        throw new RuntimeException("节点\"" + node.getRef() + "\"缺少下游节点");
+                    }
+                });
         }
     }
 }
