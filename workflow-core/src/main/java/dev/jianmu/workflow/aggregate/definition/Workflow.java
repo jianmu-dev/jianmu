@@ -473,12 +473,12 @@ public class Workflow extends AggregateRoot {
                 throw new RuntimeException("Node数量不能小于2");
             }
             long startCount = this.nodes.stream().filter(node -> node instanceof Start).count();
-            if (startCount > 1) {
-                throw new RuntimeException("开始节点不能多于1个");
+            if (startCount != 1) {
+                throw new RuntimeException("开始节点不存在或多于1个");
             }
             long endCount = this.nodes.stream().filter(node -> node instanceof End).count();
-            if (endCount > 1) {
-                throw new RuntimeException("结束节点不能多于1个");
+            if (endCount != 1) {
+                throw new RuntimeException("结束节点不存在或多于1个");
             }
 
             boolean d = this.nodes.stream()
@@ -489,6 +489,7 @@ public class Workflow extends AggregateRoot {
                 throw new RuntimeException("节点唯一引用名称不允许重复");
             }
 
+            this.checkDag();
 
             Workflow workflow = new Workflow();
             workflow.nodes = Set.copyOf(this.nodes);
@@ -501,6 +502,21 @@ public class Workflow extends AggregateRoot {
             workflow.name = this.name;
             workflow.description = this.description;
             return workflow;
+        }
+
+        private void checkDag() {
+            this.nodes.stream()
+                .filter(node -> !(node instanceof Start))
+                .filter(node -> !(node instanceof End))
+                .forEach(node -> {
+                    if (node.getSources().isEmpty()) {
+                        throw new RuntimeException("节点\"" + node.getRef() + "\"缺少上游节点");
+                    }
+
+                    if (node.getTargets().isEmpty()) {
+                        throw new RuntimeException("节点\"" + node.getRef() + "\"缺少下游节点");
+                    }
+                });
         }
     }
 }
