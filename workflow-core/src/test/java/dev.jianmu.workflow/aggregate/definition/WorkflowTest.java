@@ -85,7 +85,23 @@ public class WorkflowTest {
                     .nodes(nodes)
                     .build();
         });
-        assertEquals("开始节点不能多于1个", exception.getMessage(), "开始节点不能多于1个");
+        assertEquals("开始节点不存在或多于1个", exception.getMessage(), "开始节点不存在或多于1个");
+    }
+
+    @Test
+    @DisplayName("开始节点不能没有")
+    void buildRuleTest2_2() {
+        // 开始节点不能没有
+        Set<Node> nodes = Set.of(condition1, end1);
+        Throwable exception = assertThrows(RuntimeException.class, () -> {
+            Workflow.Builder.aWorkflow()
+                .name("TestWL")
+                .ref("test_wl1")
+                .description("测试流程1")
+                .nodes(nodes)
+                .build();
+        });
+        assertEquals("开始节点不存在或多于1个", exception.getMessage(), "开始节点不存在或多于1个");
     }
 
     @Test
@@ -101,14 +117,30 @@ public class WorkflowTest {
                         .nodes(nodes)
                         .build()
         );
-        assertEquals("结束节点不能多于1个", exception.getMessage(), "结束节点不能多于1个");
+        assertEquals("结束节点不存在或多于1个", exception.getMessage(), "结束节点不存在或多于1个");
+    }
+
+    @Test
+    @DisplayName("结束节点不能没有")
+    void buildRuleTest3_2() {
+        // 结束节点不能没有
+        Set<Node> nodes = Set.of(start1, condition1);
+        Throwable exception = assertThrows(RuntimeException.class, () ->
+            Workflow.Builder.aWorkflow()
+                .name("TestWL")
+                .ref("test_wl1")
+                .description("测试流程1")
+                .nodes(nodes)
+                .build()
+        );
+        assertEquals("结束节点不存在或多于1个", exception.getMessage(), "结束节点不存在或多于1个");
     }
 
     @Test
     @DisplayName("节点唯一引用名称不允许重复")
     void buildRuleTest4() {
         // 节点唯一引用名称不允许重复
-        Set<Node> nodes = Set.of(condition1, condition2);
+        Set<Node> nodes = Set.of(start1, condition1, condition2, end1);
         Throwable exception = assertThrows(RuntimeException.class, () -> {
             Workflow.Builder.aWorkflow()
                     .name("TestWL")

@@ -473,12 +473,12 @@ public class Workflow extends AggregateRoot {
                 throw new RuntimeException("Node数量不能小于2");
             }
             long startCount = this.nodes.stream().filter(node -> node instanceof Start).count();
-            if (startCount > 1) {
-                throw new RuntimeException("开始节点不能多于1个");
+            if (startCount != 1) {
+                throw new RuntimeException("开始节点不存在或多于1个");
             }
             long endCount = this.nodes.stream().filter(node -> node instanceof End).count();
-            if (endCount > 1) {
-                throw new RuntimeException("结束节点不能多于1个");
+            if (endCount != 1) {
+                throw new RuntimeException("结束节点不存在或多于1个");
             }
 
             boolean d = this.nodes.stream()
