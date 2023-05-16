@@ -7,7 +7,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>dev.jianmu</groupId>
-        <version>0.5.10-saas</version>
+        <version>0.5.11-saas</version>
     </parent>
 
     <artifactId>git-repo-core</artifactId>
