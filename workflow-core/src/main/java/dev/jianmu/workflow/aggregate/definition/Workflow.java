@@ -508,6 +508,7 @@ public class Workflow extends AggregateRoot {
             this.nodes.stream()
                 .filter(node -> !(node instanceof Start))
                 .filter(node -> !(node instanceof End))
+                .filter(node -> !(node instanceof CustomWebhook))
                 .forEach(node -> {
                     if (node.getSources().isEmpty()) {
                         throw new RuntimeException("节点\"" + node.getRef() + "\"缺少上游节点");
