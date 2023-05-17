@@ -677,7 +677,7 @@ public class DslParser {
                             if (refs.contains(ref)) {
                                 throw new DslException("Webhook参数ref\"" + ref + "\"重复");
                             }
-                            refs.add(name);
+                            refs.add(ref);
                             if (name != null && !(name instanceof String)) {
                                 throw new IllegalArgumentException("Webhook参数" + ref + "名称配置错误");
                             }
