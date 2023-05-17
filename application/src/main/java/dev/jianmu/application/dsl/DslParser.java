@@ -660,7 +660,7 @@ public class DslParser {
                 }
             }
             if (param instanceof List) {
-                var names = new HashSet<>();
+                var refs = new HashSet<>();
                 var ps = ((List<?>) param).stream()
                         .filter(p -> p instanceof Map)
                         .map(p -> (Map<String, Object>) p)
@@ -674,13 +674,13 @@ public class DslParser {
                             if (!(ref instanceof String) || !((String) ref).matches("^[a-zA-Z_][_a-zA-Z0-9]{0,29}$")) {
                                 throw new IllegalArgumentException("Webhook参数ref以英文字母或下划线开头，支持下划线、数字、英文字母，不超过30个字符");
                             }
+                            if (refs.contains(ref)) {
+                                throw new DslException("Webhook参数ref\"" + ref + "\"重复");
+                            }
+                            refs.add(ref);
                             if (name != null && !(name instanceof String)) {
                                 throw new IllegalArgumentException("Webhook参数" + ref + "名称配置错误");
                             }
-                            if (names.contains(name)) {
-                                throw new DslException("Webhook参数名称\"" + name + "\"重复");
-                            }
-                            names.add(name);
                             if (type != null && !(type instanceof String)) {
                                 throw new IllegalArgumentException("Webhook参数" + ref + "类型配置错误");
                             }
