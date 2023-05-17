@@ -638,12 +638,12 @@ public class TriggerApplication {
             // Body node
             var bodyNode = root.putObject("body");
             // Body Json node
-            if (contentType.startsWith("application/json")) {
+            if (contentType != null && contentType.startsWith("application/json")) {
                 var bodyJson = this.objectMapper.readTree(body);
                 bodyNode.set("json", bodyJson);
             }
             // Body Form node
-            if (contentType.startsWith("application/x-www-form-urlencoded")) {
+            if (contentType != null && contentType.startsWith("application/x-www-form-urlencoded")) {
                 var formNode = bodyNode.putObject("form");
                 var formMap = Pattern.compile("&")
                         .splitAsStream(body)
@@ -659,7 +659,7 @@ public class TriggerApplication {
                 });
             }
             // Body Text node
-            if (contentType.startsWith("text/plain")) {
+            if (contentType != null && contentType.startsWith("text/plain")) {
                 bodyNode.put("text", body);
             }
             return WebRequest.Builder.aWebRequest()

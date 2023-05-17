@@ -51,4 +51,21 @@ public class WebHookController {
                 .triggerId(triggerEvent.getId())
                 .build();
     }
+
+    @RequestMapping(value = "/**", method = RequestMethod.GET)
+    @ResponseBody
+    @Operation(summary = "触发项目", description = "触发项目启动")
+    public WebhookResult receiveGetEvent(
+        HttpServletRequest request) {
+        var path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+        var bestMatchPattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+        var apm = new AntPathMatcher();
+        var projectName = apm.extractPathWithinPattern(bestMatchPattern, path);
+        var decodeProjectName = URLDecoder.decode(projectName, StandardCharsets.UTF_8);
+        var triggerEvent = this.triggerApplication.receiveHttpEvent(decodeProjectName, request, null);
+        return WebhookResult.builder()
+            .projectId(triggerEvent.getProjectId())
+            .triggerId(triggerEvent.getId())
+            .build();
+    }
 }
