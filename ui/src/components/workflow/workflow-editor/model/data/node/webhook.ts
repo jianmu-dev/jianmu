@@ -1,9 +1,10 @@
 import { BaseNode } from './base-node';
 import { CustomRule } from '../common';
-import { NodeRefEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
+import { NodeRefEnum, NodeTypeEnum, ParamTypeEnum, RefTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/webhook.svg';
 import { extractReferences, getParam } from '../../../../workflow-expression-editor/model/util';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
+import { checkDuplicate } from '@/components/workflow/workflow-editor/model/util/reference';
 
 export const WEBHOOK_PARAM_SCOPE = 'trigger';
 
@@ -76,6 +77,27 @@ export class Webhook extends BaseNode {
               required: true,
               pattern: /^[a-zA-Z_]([a-zA-Z0-9_]+)?$/,
               message: '以英文字母或下划线开头，支持下划线、数字、英文字母',
+              trigger: 'blur',
+            },
+            {
+              validator: (rule: any, value: any, callback: any) => {
+                if (!value) {
+                  callback();
+                  return;
+                }
+                try {
+                  checkDuplicate(
+                    this.params.map(({ name }) => name),
+                    RefTypeEnum.TRIGGER_PARAM,
+                  );
+                } catch ({ message, ref }) {
+                  if (ref === value) {
+                    callback(message);
+                    return;
+                  }
+                }
+                callback();
+              },
               trigger: 'blur',
             },
           ],
@@ -165,6 +187,7 @@ export class Webhook extends BaseNode {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-types
   toDsl(): object {
     const { params, auth, only } = this;
 
