@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.pagehelper.PageInfo;
+
 import dev.jianmu.application.dsl.webhook.WebhookDslParser;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.IgnoreSyncDslEventException;
@@ -42,6 +43,7 @@ import dev.jianmu.workflow.el.*;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import lombok.extern.slf4j.Slf4j;
+
 import org.quartz.*;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -52,6 +54,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
+
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -100,27 +103,27 @@ public class TriggerApplication {
     private final AccessTokenRepository accessTokenRepository;
 
     public TriggerApplication(
-            TriggerRepository triggerRepository,
-            TriggerEventRepository triggerEventRepository,
-            ParameterRepository parameterRepository,
-            ProjectRepository projectRepository,
-            WebRequestRepositoryImpl webRequestRepositoryImpl,
-            WorkflowRepository workflowRepository,
-            CredentialManager credentialManager,
-            Scheduler quartzScheduler,
-            ApplicationEventPublisher publisher,
-            ObjectMapper objectMapper,
-            ExpressionLanguage expressionLanguage,
-            StorageService storageService,
-            ExternalParameterRepository externalParameterRepository,
-            OAuth2Properties oAuth2Properties,
-            GitRepoRepository gitRepoRepository,
-            CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository,
-            CustomWebhookDomainService customWebhookDomainService,
-            WebRequestRepository webRequestRepository,
-            WebhookOnlyService webhookOnlyService,
-            GlobalProperties globalProperties,
-            AccessTokenRepository accessTokenRepository
+        TriggerRepository triggerRepository,
+        TriggerEventRepository triggerEventRepository,
+        ParameterRepository parameterRepository,
+        ProjectRepository projectRepository,
+        WebRequestRepositoryImpl webRequestRepositoryImpl,
+        WorkflowRepository workflowRepository,
+        CredentialManager credentialManager,
+        Scheduler quartzScheduler,
+        ApplicationEventPublisher publisher,
+        ObjectMapper objectMapper,
+        ExpressionLanguage expressionLanguage,
+        StorageService storageService,
+        ExternalParameterRepository externalParameterRepository,
+        OAuth2Properties oAuth2Properties,
+        GitRepoRepository gitRepoRepository,
+        CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository,
+        CustomWebhookDomainService customWebhookDomainService,
+        WebRequestRepository webRequestRepository,
+        WebhookOnlyService webhookOnlyService,
+        GlobalProperties globalProperties,
+        AccessTokenRepository accessTokenRepository
     ) {
         this.triggerRepository = triggerRepository;
         this.triggerEventRepository = triggerEventRepository;
@@ -147,46 +150,46 @@ public class TriggerApplication {
 
     private static String decode(final String encoded) {
         return Optional.ofNullable(encoded)
-                .map(e -> URLDecoder.decode(e, StandardCharsets.UTF_8))
-                .orElse(null);
+            .map(e -> URLDecoder.decode(e, StandardCharsets.UTF_8))
+            .orElse(null);
     }
 
     @Transactional
     public void trigger(String triggerId) {
         var trigger = this.triggerRepository.findByTriggerId(triggerId)
-                .orElseThrow(() -> new DataNotFoundException("未找到触发器"));
+            .orElseThrow(() -> new DataNotFoundException("未找到触发器"));
         var project = this.projectRepository.findById(trigger.getProjectId())
-                .orElseThrow(() -> new DataNotFoundException("未找到要触发的项目"));
+            .orElseThrow(() -> new DataNotFoundException("未找到要触发的项目"));
         if (!project.isEnabled()) {
             log.info("当前项目不可触发，请先修改状态");
             return;
         }
         var evt = TriggerEvent.Builder.aTriggerEvent()
-                .projectId(trigger.getProjectId())
-                .triggerId(trigger.getId())
-                .triggerType(trigger.getType().name())
-                .build();
+            .projectId(trigger.getProjectId())
+            .triggerId(trigger.getId())
+            .triggerType(trigger.getType().name())
+            .build();
         this.triggerEventRepository.save(evt);
         this.publisher.publishEvent(evt);
     }
 
     @Transactional
     public TriggerEvent trigger(
-            List<TriggerEventParameter> eventParameters,
-            List<Parameter> parameters,
-            WebRequest webRequest
+        List<TriggerEventParameter> eventParameters,
+        List<Parameter> parameters,
+        WebRequest webRequest
     ) {
         var parametersClean = parameters.stream()
-                .filter(parameter -> !(parameter.getType() == Parameter.Type.SECRET))
-                .collect(Collectors.toList());
+            .filter(parameter -> !(parameter.getType() == Parameter.Type.SECRET))
+            .collect(Collectors.toList());
         var event = TriggerEvent.Builder.aTriggerEvent()
-                .triggerId(webRequest.getTriggerId())
-                .projectId(webRequest.getProjectId())
-                .webRequestId(webRequest.getId())
-                .payload(webRequest.getPayload())
-                .parameters(eventParameters)
-                .triggerType(Trigger.Type.WEBHOOK.name())
-                .build();
+            .triggerId(webRequest.getTriggerId())
+            .projectId(webRequest.getProjectId())
+            .webRequestId(webRequest.getId())
+            .payload(webRequest.getPayload())
+            .parameters(eventParameters)
+            .triggerType(Trigger.Type.WEBHOOK.name())
+            .build();
         this.parameterRepository.addAll(parametersClean);
         this.triggerEventRepository.save(event);
         this.publisher.publishEvent(event);
@@ -196,10 +199,10 @@ public class TriggerApplication {
     @Transactional
     public void saveOrUpdate(String projectId, String userId, Webhook webhook, String webhookType, List<CustomWebhookInstance.EventInstance> eventInstances) {
         var project = this.projectRepository.findById(projectId)
-                .orElseThrow(() -> new DataNotFoundException("未找到项目：" + projectId));
+            .orElseThrow(() -> new DataNotFoundException("未找到项目：" + projectId));
         var webhookInstanceBuilder = CustomWebhookInstanceEvent.Builder.aCustomWebhookInstanceEvent()
-                .webhook(webhookType)
-                .eventInstances(eventInstances);
+            .webhook(webhookType)
+            .eventInstances(eventInstances);
         var events = this.customWebhookDomainService.getGitEvents(this.oAuth2Properties.getThirdPartyType(), eventInstances);
         var ref = project.getId();
         var optionalTrigger = this.triggerRepository.findByProjectId(projectId);
@@ -221,11 +224,11 @@ public class TriggerApplication {
         // 创建webhook
         ref = this.createGitWebhook(ref, userId, project.getAssociationId(), project.getAssociationType(), events);
         var trigger = Trigger.Builder.aTrigger()
-                .ref(ref)
-                .projectId(projectId)
-                .type(Trigger.Type.WEBHOOK)
-                .webhook(webhook)
-                .build();
+            .ref(ref)
+            .projectId(projectId)
+            .type(Trigger.Type.WEBHOOK)
+            .webhook(webhook)
+            .build();
         this.triggerRepository.add(trigger);
         this.triggerRepository.updateById(trigger);
         // 创建CustomWebhookInstance
@@ -241,12 +244,12 @@ public class TriggerApplication {
         ref = URLEncoder.encode(ref, StandardCharsets.UTF_8);
         if (AssociationUtil.AssociationType.GIT_REPO.name().equals(associationType)) {
             var oAuth2Api = OAuth2ApiProxy.builder()
-                    .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
-                    .userId(userId)
-                    .build();
+                .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+                .userId(userId)
+                .build();
             // 创建Git webhook
             var gitRepo = this.gitRepoRepository.findById(associationId)
-                    .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + associationId));
+                .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + associationId));
             try {
                 var accessToken = this.accessTokenRepository.get();
                 ref = oAuth2Api.createWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, false, events).getId();
@@ -267,11 +270,11 @@ public class TriggerApplication {
         }
         ref = URLEncoder.encode(ref, StandardCharsets.UTF_8);
         var gitRepo = this.gitRepoRepository.findById(associationId)
-                .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + associationId));
+            .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + associationId));
         var oAuth2Api = OAuth2ApiProxy.builder()
-                .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
-                .userId(userId)
-                .build();
+            .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+            .userId(userId)
+            .build();
         try {
             var accessToken = this.accessTokenRepository.get();
             try {
@@ -290,67 +293,67 @@ public class TriggerApplication {
     @Transactional
     public void saveOrUpdate(String projectId, String schedule) {
         var project = this.projectRepository.findById(projectId)
-                .orElseThrow(() -> new DataNotFoundException("未找到项目：" + projectId));
+            .orElseThrow(() -> new DataNotFoundException("未找到项目：" + projectId));
         this.triggerRepository.findByProjectId(projectId)
-                .ifPresentOrElse(trigger -> {
-                    try {
-                        // 更新schedule
-                        trigger.setSchedule(schedule);
-                        trigger.setType(Trigger.Type.CRON);
-                        trigger.setWebhook(null);
-                        // 停止触发器
-                        this.quartzScheduler.pauseTrigger(TriggerKey.triggerKey(trigger.getId()));
-                        // 卸载任务
-                        this.quartzScheduler.unscheduleJob(TriggerKey.triggerKey(trigger.getId()));
-                        // 删除任务
-                        this.quartzScheduler.deleteJob(JobKey.jobKey(trigger.getId()));
-                        var jobDetail = this.createJobDetail(trigger);
-                        var cronTrigger = this.createCronTrigger(trigger);
-                        this.quartzScheduler.scheduleJob(jobDetail, cronTrigger);
-                    } catch (SchedulerException e) {
-                        log.error("触发器更新失败: {}", e.getMessage());
-                        throw new RuntimeException("触发器更新失败");
-                    }
-                    this.triggerRepository.updateById(trigger);
-                }, () -> {
-                    var trigger = Trigger.Builder.aTrigger()
-                            .projectId(projectId)
-                            .type(Trigger.Type.CRON)
-                            .schedule(schedule)
-                            .build();
-                    try {
-                        var jobDetail = this.createJobDetail(trigger);
-                        var cronTrigger = this.createCronTrigger(trigger);
-                        quartzScheduler.scheduleJob(jobDetail, cronTrigger);
-                    } catch (SchedulerException e) {
-                        log.error("触发器加载失败: {}", e.getMessage());
-                        throw new RuntimeException("触发器加载失败");
-                    }
-                    this.triggerRepository.add(trigger);
-                });
+            .ifPresentOrElse(trigger -> {
+                try {
+                    // 更新schedule
+                    trigger.setSchedule(schedule);
+                    trigger.setType(Trigger.Type.CRON);
+                    trigger.setWebhook(null);
+                    // 停止触发器
+                    this.quartzScheduler.pauseTrigger(TriggerKey.triggerKey(trigger.getId()));
+                    // 卸载任务
+                    this.quartzScheduler.unscheduleJob(TriggerKey.triggerKey(trigger.getId()));
+                    // 删除任务
+                    this.quartzScheduler.deleteJob(JobKey.jobKey(trigger.getId()));
+                    var jobDetail = this.createJobDetail(trigger);
+                    var cronTrigger = this.createCronTrigger(trigger);
+                    this.quartzScheduler.scheduleJob(jobDetail, cronTrigger);
+                } catch (SchedulerException e) {
+                    log.error("触发器更新失败: {}", e.getMessage());
+                    throw new RuntimeException("触发器更新失败");
+                }
+                this.triggerRepository.updateById(trigger);
+            }, () -> {
+                var trigger = Trigger.Builder.aTrigger()
+                    .projectId(projectId)
+                    .type(Trigger.Type.CRON)
+                    .schedule(schedule)
+                    .build();
+                try {
+                    var jobDetail = this.createJobDetail(trigger);
+                    var cronTrigger = this.createCronTrigger(trigger);
+                    quartzScheduler.scheduleJob(jobDetail, cronTrigger);
+                } catch (SchedulerException e) {
+                    log.error("触发器加载失败: {}", e.getMessage());
+                    throw new RuntimeException("触发器加载失败");
+                }
+                this.triggerRepository.add(trigger);
+            });
     }
 
     @Transactional
     public void deleteByProjectId(String projectId, String userId, String associationId, String associationType) {
         // 删除Cron触发器
         this.triggerRepository.findByProjectId(projectId)
-                .ifPresent(trigger -> {
-                    if (trigger.getType() == Trigger.Type.CRON) {
-                        try {
-                            // 停止触发器
-                            quartzScheduler.pauseTrigger(TriggerKey.triggerKey(trigger.getId()));
-                            // 卸载任务
-                            quartzScheduler.unscheduleJob(TriggerKey.triggerKey(trigger.getId()));
-                            // 删除任务
-                            quartzScheduler.deleteJob(JobKey.jobKey(trigger.getId()));
-                        } catch (SchedulerException e) {
-                            log.error("触发器删除失败: {}", e.getMessage());
-                            throw new RuntimeException("触发器删除失败");
-                        }
+            .ifPresent(trigger -> {
+                if (trigger.getType() == Trigger.Type.CRON) {
+                    try {
+                        // 停止触发器
+                        quartzScheduler.pauseTrigger(TriggerKey.triggerKey(trigger.getId()));
+                        // 卸载任务
+                        quartzScheduler.unscheduleJob(TriggerKey.triggerKey(trigger.getId()));
+                        // 删除任务
+                        quartzScheduler.deleteJob(JobKey.jobKey(trigger.getId()));
+                    } catch (SchedulerException e) {
+                        log.error("触发器删除失败: {}", e.getMessage());
+                        throw new RuntimeException("触发器删除失败");
                     }
-                    this.triggerRepository.deleteById(trigger.getId());
-                    this.deleteGitWebhook(userId, associationId, associationType, trigger.getRef());
-                });
+                }
+                this.triggerRepository.deleteById(trigger.getId());
+                this.deleteGitWebhook(userId, associationId, associationType, trigger.getRef());
+            });
         // 删除WebRequest
         this.webRequestRepository.deleteByProjectId(projectId);
     }
@@ -361,11 +364,11 @@ public class TriggerApplication {
             return;
         }
         var oAuth2Api = OAuth2ApiProxy.builder()
-                .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
-                .userId(userId)
-                .build();
+            .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+            .userId(userId)
+            .build();
         var gitRepo = this.gitRepoRepository.findById(associationId)
-                .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + associationId));
+            .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + associationId));
         try {
             var accessToken = this.accessTokenRepository.get();
             oAuth2Api.getWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), ref);
@@ -379,9 +382,9 @@ public class TriggerApplication {
 
     public LocalDateTime getNextFireTime(String projectId) {
         var triggerId = this.triggerRepository.findByProjectId(projectId)
-                .filter(trigger -> trigger.getType() == Trigger.Type.CRON)
-                .map(Trigger::getId)
-                .orElse("");
+            .filter(trigger -> trigger.getType() == Trigger.Type.CRON)
+            .map(Trigger::getId)
+            .orElse("");
         if (triggerId.isBlank()) {
             return null;
         }
@@ -390,7 +393,7 @@ public class TriggerApplication {
             var schedulerTrigger = this.quartzScheduler.getTrigger(TriggerKey.triggerKey(triggerId));
             if (schedulerTrigger != null) {
                 var dateTime = schedulerTrigger.getNextFireTime()
-                        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
                 return dateTime;
             }
             return null;
@@ -426,22 +429,22 @@ public class TriggerApplication {
     private CronTrigger createCronTrigger(Trigger trigger) {
         var builder = CronScheduleBuilder.cronSchedule(trigger.getSchedule());
         return TriggerBuilder.newTrigger()
-                .withIdentity(TriggerKey.triggerKey(trigger.getId()))
-                .usingJobData("triggerId", trigger.getId())
-                .withSchedule(builder)
-                .build();
+            .withIdentity(TriggerKey.triggerKey(trigger.getId()))
+            .usingJobData("triggerId", trigger.getId())
+            .withSchedule(builder)
+            .build();
     }
 
     private JobDetail createJobDetail(Trigger trigger) {
         return JobBuilder.newJob()
-                .withIdentity(JobKey.jobKey(trigger.getId()))
-                .ofType(PublishJob.class)
-                .build();
+            .withIdentity(JobKey.jobKey(trigger.getId()))
+            .ofType(PublishJob.class)
+            .build();
     }
 
     public TriggerEvent findTriggerEvent(String triggerEventId) {
         var event = this.triggerEventRepository.findById(triggerEventId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该触发事件"));
+            .orElseThrow(() -> new DataNotFoundException("未找到该触发事件"));
         if ("WEBHOOK".equals(event.getTriggerType()) && ObjectUtils.isEmpty(event.getPayload())) {
             event.setPayload(this.storageService.readWebhook(event.getWebRequestId()));
         }
@@ -450,11 +453,11 @@ public class TriggerApplication {
 
     public WebhookEvent findWebhookEventByTriggerEvent(TriggerEvent triggerEvent) {
         var webRequest = webRequestRepositoryImpl.findById(triggerEvent.getWebRequestId())
-                .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
+            .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
         var workflow = this.workflowRepository.findByRefAndVersion(webRequest.getWorkflowRef(), webRequest.getWorkflowVersion())
-                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+            .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
         var project = this.projectRepository.findByWorkflowRef(workflow.getRef())
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+            .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         dev.jianmu.application.dsl.webhook.Webhook dslWebhook = WebhookDslParser.parse(workflow.getDslText()).getTrigger();
         if (dslWebhook.getWebhook() == null) {
             return null;
@@ -462,7 +465,7 @@ public class TriggerApplication {
         // 创建表达式上下文
         var context = this.findTriggerContext(triggerEvent.getPayload(), project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform());
         var webhookDefinitionVersion = this.webhookDefinitionVersionRepository.findByType(dslWebhook.getWebhook())
-                .orElseThrow(() -> new DataNotFoundException("未找到Webhook定义版本：" + dslWebhook.getWebhook()));
+            .orElseThrow(() -> new DataNotFoundException("未找到Webhook定义版本：" + dslWebhook.getWebhook()));
         // 查询触发事件
         var webhookEvents = this.webhookOnlyService.findEvents(webhookDefinitionVersion.getEvents(), dslWebhook.getEventInstances());
         var webhookEvent = this.findWebhookEvent(webhookEvents, context);
@@ -485,7 +488,7 @@ public class TriggerApplication {
 
     public String getWebhookUrl(String projectId) {
         var trigger = this.triggerRepository.findByProjectId(projectId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目触发器"));
+            .orElseThrow(() -> new DataNotFoundException("未找到该项目触发器"));
         return "/webhook/" + trigger.getRef();
     }
 
@@ -495,7 +498,7 @@ public class TriggerApplication {
         var context = new ElContext();
         // 外部参数加入上下文
         this.externalParameterRepository.findAll(associationId, associationType, associationPlatform)
-                .forEach(extParam -> context.add("ext", extParam.getRef(), ParameterUtil.toParameter(extParam.getType().name(), extParam.getValue())));
+            .forEach(extParam -> context.add("ext", extParam.getRef(), ParameterUtil.toParameter(extParam.getType().name(), extParam.getValue())));
         try {
             var webhookPayload = this.objectMapper.readValue(payload, WebhookPayload.class);
             context.add("header", webhookPayload.getHeader());
@@ -509,20 +512,20 @@ public class TriggerApplication {
 
     public void retryHttpEvent(String webRequestId) {
         var webRequest = this.webRequestRepositoryImpl.findById(webRequestId)
-                .orElseThrow(() -> new DataNotFoundException("未找到可重试的记录"));
+            .orElseThrow(() -> new DataNotFoundException("未找到可重试的记录"));
         var newWebRequest = WebRequest.Builder.aWebRequest()
-                .payload(this.storageService.readWebhook(webRequest.getId()))
-                .userAgent(webRequest.getUserAgent())
-                .statusCode(WebRequest.StatusCode.OK)
-                .build();
+            .payload(this.storageService.readWebhook(webRequest.getId()))
+            .userAgent(webRequest.getUserAgent())
+            .statusCode(WebRequest.StatusCode.OK)
+            .build();
         this.writeWebhook(newWebRequest.getId(), newWebRequest.getPayload());
         var project = this.projectRepository.findById(webRequest.getProjectId())
-                .orElseThrow(() -> {
-                    newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
-                    newWebRequest.setErrorMsg("未找到项目ID: " + webRequest.getProjectId());
-                    this.webRequestRepositoryImpl.add(newWebRequest);
-                    return new DataNotFoundException("未找到项目ID: " + webRequest.getProjectId());
-                });
+            .orElseThrow(() -> {
+                newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
+                newWebRequest.setErrorMsg("未找到项目ID: " + webRequest.getProjectId());
+                this.webRequestRepositoryImpl.add(newWebRequest);
+                return new DataNotFoundException("未找到项目ID: " + webRequest.getProjectId());
+            });
         if (!project.isEnabled()) {
             throw new RuntimeException("当前项目不可触发，请先修改状态");
         }
@@ -530,12 +533,12 @@ public class TriggerApplication {
         newWebRequest.setWorkflowRef(project.getWorkflowRef());
         newWebRequest.setWorkflowVersion(project.getWorkflowVersion());
         var trigger = this.triggerRepository.findByProjectId(project.getId())
-                .orElseThrow(() -> {
-                    newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
-                    newWebRequest.setErrorMsg("项目：" + project.getWorkflowName() + " 未找到触发器");
-                    this.webRequestRepositoryImpl.add(newWebRequest);
-                    return new DataNotFoundException("项目：" + project.getWorkflowName() + " 未找到触发器");
-                });
+            .orElseThrow(() -> {
+                newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
+                newWebRequest.setErrorMsg("项目：" + project.getWorkflowName() + " 未找到触发器");
+                this.webRequestRepositoryImpl.add(newWebRequest);
+                return new DataNotFoundException("项目：" + project.getWorkflowName() + " 未找到触发器");
+            });
         newWebRequest.setTriggerId(trigger.getId());
         if (trigger.getType() != Trigger.Type.WEBHOOK) {
             newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
@@ -575,17 +578,17 @@ public class TriggerApplication {
                     continue;
                 }
                 Parameter<?> parameter = Parameter.Type
-                        .getTypeByName(webhookParameter.getType())
-                        .newParameter(value);
+                    .getTypeByName(webhookParameter.getType())
+                    .newParameter(value);
                 var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
-                        .ref(webhookParameter.getRef())
-                        .name(webhookParameter.getName())
-                        .type(webhookParameter.getType())
-                        .value(parameter.getStringValue())
-                        .required(webhookParameter.getRequired())
-                        .hidden(webhookParameter.getHidden())
-                        .parameterId(parameter.getId())
-                        .build();
+                    .ref(webhookParameter.getRef())
+                    .name(webhookParameter.getName())
+                    .type(webhookParameter.getType())
+                    .value(parameter.getStringValue())
+                    .required(webhookParameter.getRequired())
+                    .hidden(webhookParameter.getHidden())
+                    .parameterId(parameter.getId())
+                    .build();
                 parameters.add(parameter);
                 eventParameters.add(eventParameter);
                 context.add("trigger", eventParameter.getName(), parameter);
@@ -655,44 +658,44 @@ public class TriggerApplication {
 
     private WebhookEvent findWebhookEvent(List<WebhookEvent> events, ElContext context) {
         return events.stream()
-                .filter(event -> {
-                    var currentContext = context.copy();
-                    for (WebhookParameter webhookParameter : event.getEventParams()) {
-                        var value = this.extractParameter(currentContext, webhookParameter);
-                        if (value == null) {
-                            return false;
-                        }
-                        Parameter<?> parameter = Parameter.Type
-                                .getTypeByName(webhookParameter.getType())
-                                .newParameter(value);
-                        var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
-                                .ref(webhookParameter.getRef())
-                                .name(webhookParameter.getName())
-                                .type(webhookParameter.getType())
-                                .value(parameter.getStringValue())
-                                .required(webhookParameter.getRequired())
-                                .hidden(webhookParameter.getHidden())
-                                .parameterId(parameter.getId())
-                                .build();
-                        currentContext.add("trigger", eventParameter.getName(), parameter);
+            .filter(event -> {
+                var currentContext = context.copy();
+                for (WebhookParameter webhookParameter : event.getEventParams()) {
+                    var value = this.extractParameter(currentContext, webhookParameter);
+                    if (value == null) {
+                        return false;
                     }
-                    var res = this.calculateExp(event.getOnly(), ResultType.BOOL, context);
-                    return res.getType() == Parameter.Type.BOOL && (Boolean) res.getValue();
-                })
-                .findFirst()
-                .orElse(null);
+                    Parameter<?> parameter = Parameter.Type
+                        .getTypeByName(webhookParameter.getType())
+                        .newParameter(value);
+                    var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
+                        .ref(webhookParameter.getRef())
+                        .name(webhookParameter.getName())
+                        .type(webhookParameter.getType())
+                        .value(parameter.getStringValue())
+                        .required(webhookParameter.getRequired())
+                        .hidden(webhookParameter.getHidden())
+                        .parameterId(parameter.getId())
+                        .build();
+                    currentContext.add("trigger", eventParameter.getName(), parameter);
+                }
+                var res = this.calculateExp(event.getOnly(), ResultType.BOOL, context);
+                return res.getType() == Parameter.Type.BOOL && (Boolean) res.getValue();
+            })
+            .findFirst()
+            .orElse(null);
     }
 
     public TriggerEvent receiveHttpEvent(String ref, HttpServletRequest request, String contentType) {
         var webRequest = this.createWebRequest(request, contentType);
         this.writeWebhook(webRequest.getId(), webRequest.getPayload());
         var trigger = this.triggerRepository.findByRef(ref)
-                .orElseThrow(() -> {
-                    webRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
-                    webRequest.setErrorMsg("未找到触发器：" + ref);
-                    this.webRequestRepositoryImpl.add(webRequest);
-                    return new DataNotFoundException("未找到触发器：" + ref);
-                });
+            .orElseThrow(() -> {
+                webRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
+                webRequest.setErrorMsg("未找到触发器：" + ref);
+                this.webRequestRepositoryImpl.add(webRequest);
+                return new DataNotFoundException("未找到触发器：" + ref);
+            });
         if (trigger.getType() != Trigger.Type.WEBHOOK) {
             webRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
             webRequest.setErrorMsg("未找到触发器");
@@ -700,7 +703,7 @@ public class TriggerApplication {
             throw new IllegalArgumentException("触发器类型错误");
         }
         var project = this.projectRepository.findById(trigger.getProjectId())
-                .orElseThrow(() -> new DataNotFoundException("未找到项目"));
+            .orElseThrow(() -> new DataNotFoundException("未找到项目"));
         if (!project.isEnabled()) {
             throw new RuntimeException("当前项目不可触发，请先修改状态");
         }
@@ -740,17 +743,17 @@ public class TriggerApplication {
                     continue;
                 }
                 Parameter<?> parameter = Parameter.Type
-                        .getTypeByName(webhookParameter.getType())
-                        .newParameter(value);
+                    .getTypeByName(webhookParameter.getType())
+                    .newParameter(value);
                 var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
-                        .ref(webhookParameter.getRef())
-                        .name(webhookParameter.getName())
-                        .type(webhookParameter.getType())
-                        .value(parameter.getStringValue())
-                        .required(webhookParameter.getRequired())
-                        .hidden(webhookParameter.getHidden())
-                        .parameterId(parameter.getId())
-                        .build();
+                    .ref(webhookParameter.getRef())
+                    .name(webhookParameter.getName())
+                    .type(webhookParameter.getType())
+                    .value(parameter.getStringValue())
+                    .required(webhookParameter.getRequired())
+                    .hidden(webhookParameter.getHidden())
+                    .parameterId(parameter.getId())
+                    .build();
                 parameters.add(parameter);
                 eventParameters.add(eventParameter);
                 context.add("trigger", eventParameter.getName(), parameter);
@@ -835,7 +838,7 @@ public class TriggerApplication {
         // 处理密钥类型参数, 获取值后转换为String类型参数
         var strings = secret.split("\\.");
         var kv = this.credentialManager.findByNamespaceNameAndKey(strings[0], strings[1], associationId, associationType, associationPlatform)
-                .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
+            .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
         return kv.getValue();
     }
 
@@ -859,7 +862,7 @@ public class TriggerApplication {
         EvaluationResult evaluationResult = expressionLanguage.evaluateExpression(expression, context);
         if (evaluationResult.isFailure()) {
             var errorMsg = "表达式：" + exp +
-                    " 计算错误: " + evaluationResult.getFailureMessage();
+                " 计算错误: " + evaluationResult.getFailureMessage();
             throw new RuntimeException(errorMsg);
         }
         return evaluationResult.getValue();
@@ -883,17 +886,17 @@ public class TriggerApplication {
         try {
             // Get body
             var body = request.getReader()
-                    .lines()
-                    .collect(Collectors.joining(System.lineSeparator()));
+                .lines()
+                .collect(Collectors.joining(System.lineSeparator()));
             // Create root node
             var root = this.objectMapper.createObjectNode();
             // Headers node
             Map<String, List<String>> headers = Collections.list(request.getHeaderNames())
-                    .stream()
-                    .collect(Collectors.toMap(
-                            Function.identity(),
-                            h -> Collections.list(request.getHeaders(h))
-                    ));
+                .stream()
+                .collect(Collectors.toMap(
+                    Function.identity(),
+                    h -> Collections.list(request.getHeaders(h))
+                ));
             var headerNode = root.putObject("header");
             headers.forEach((key, value) -> {
                 if (value.size() > 1) {
@@ -907,7 +910,7 @@ public class TriggerApplication {
             var url = request.getRequestURL().toString();
             var queryString = request.getQueryString();
             MultiValueMap<String, String> parameters =
-                    UriComponentsBuilder.fromUriString(url + "?" + queryString).build().getQueryParams();
+                UriComponentsBuilder.fromUriString(url + "?" + queryString).build().getQueryParams();
             var queryNode = root.putObject("query");
             parameters.forEach((key, value) -> {
                 if ("null".equals(key)) {
@@ -922,20 +925,19 @@ public class TriggerApplication {
             });
             // Body node
             var bodyNode = root.putObject("body");
-            // Body Json node
-            if (contentType.startsWith("application/json")) {
+            if (contentType.contains("application/json")) {
+                // Body Json node
                 var bodyJson = this.objectMapper.readTree(body);
                 bodyNode.set("json", bodyJson);
                 // 忽略同步流水线DSl引发的push事件
                 this.ignoreSyncDslEvent(headerNode, bodyJson);
-            }
-            // Body Form node
-            if (contentType.startsWith("application/x-www-form-urlencoded")) {
+            } else if (contentType.contains("application/x-www-form-urlencoded")) {
+                // Body Form node
                 var formNode = bodyNode.putObject("form");
                 var formMap = Pattern.compile("&")
-                        .splitAsStream(body)
-                        .map(s -> Arrays.copyOf(s.split("=", 2), 2))
-                        .collect(groupingBy(s -> decode(s[0]), mapping(s -> decode(s[1]), toList())));
+                    .splitAsStream(body)
+                    .map(s -> Arrays.copyOf(s.split("=", 2), 2))
+                    .collect(groupingBy(s -> decode(s[0]), mapping(s -> decode(s[1]), toList())));
                 formMap.forEach((key, value) -> {
                     if (value.size() > 1) {
                         var item = formNode.putArray(key);
@@ -944,24 +946,23 @@ public class TriggerApplication {
                         formNode.put(key, value.get(0));
                     }
                 });
-            }
-            // Body Text node
-            if (contentType.startsWith("text/plain")) {
+            } else if (contentType.contains("text/plain")) {
+                // Body Text node
                 bodyNode.put("text", body);
             }
             return WebRequest.Builder.aWebRequest()
-                    .userAgent(request.getHeader("User-Agent"))
-                    .payload(root.toString())
-                    .statusCode(WebRequest.StatusCode.OK)
-                    .build();
+                .userAgent(request.getHeader("User-Agent"))
+                .payload(root.toString())
+                .statusCode(WebRequest.StatusCode.OK)
+                .build();
         } catch (IgnoreSyncDslEventException e) {
             throw new IgnoreSyncDslEventException(e.getMessage());
         } catch (Exception e) {
             return WebRequest.Builder.aWebRequest()
-                    .userAgent(request.getHeader("User-Agent"))
-                    .statusCode(WebRequest.StatusCode.UNKNOWN)
-                    .errorMsg(e.getMessage())
-                    .build();
+                .userAgent(request.getHeader("User-Agent"))
+                .statusCode(WebRequest.StatusCode.UNKNOWN)
+                .errorMsg(e.getMessage())
+                .build();
         }
     }
 
@@ -989,11 +990,11 @@ public class TriggerApplication {
 
     public dev.jianmu.application.dsl.webhook.Webhook getWebhookParam(String id) {
         var webRequest = this.webRequestRepositoryImpl.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
+            .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
         var workflow = this.workflowRepository.findByRefAndVersion(webRequest.getWorkflowRef(), webRequest.getWorkflowVersion())
-                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+            .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
         var project = this.projectRepository.findByWorkflowRef(workflow.getRef())
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+            .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         if (ObjectUtils.isEmpty(webRequest.getPayload())) {
             webRequest.setPayload(this.storageService.readWebhook(webRequest.getId()));
         }
@@ -1003,7 +1004,7 @@ public class TriggerApplication {
         dev.jianmu.application.dsl.webhook.Webhook trigger = WebhookDslParser.parse(workflow.getDslText()).getTrigger();
         if (trigger.getWebhook() != null) {
             var webhookDefinitionVersion = this.webhookDefinitionVersionRepository.findByType(trigger.getWebhook())
-                    .orElseThrow(() -> new DataNotFoundException("未找到Webhook定义版本：" + trigger.getWebhook()));
+                .orElseThrow(() -> new DataNotFoundException("未找到Webhook定义版本：" + trigger.getWebhook()));
             // 查询触发事件
             var webhookEvents = this.webhookOnlyService.findEvents(webhookDefinitionVersion.getEvents(), trigger.getEventInstances());
             webhookEvent = this.findWebhookEvent(webhookEvents, context);
@@ -1020,13 +1021,13 @@ public class TriggerApplication {
         var parameters = new ArrayList<WebhookParameter>();
         for (WebhookParameter webhookParameter : trigger.getParam()) {
             var newParam = WebhookParameter.Builder.aWebhookParameter()
-                    .ref(webhookParameter.getRef())
-                    .name(webhookParameter.getName() == null ? webhookParameter.getRef() : webhookParameter.getName())
-                    .value(webhookParameter.getValue())
-                    .type(webhookParameter.getType() == null ? Parameter.Type.STRING.name() : webhookParameter.getType())
-                    .required(webhookParameter.getRequired() != null && webhookParameter.getRequired())
-                    .hidden(webhookParameter.getHidden() != null && webhookParameter.getHidden())
-                    .build();
+                .ref(webhookParameter.getRef())
+                .name(webhookParameter.getName() == null ? webhookParameter.getRef() : webhookParameter.getName())
+                .value(webhookParameter.getValue())
+                .type(webhookParameter.getType() == null ? Parameter.Type.STRING.name() : webhookParameter.getType())
+                .required(webhookParameter.getRequired() != null && webhookParameter.getRequired())
+                .hidden(webhookParameter.getHidden() != null && webhookParameter.getHidden())
+                .build();
             var value = this.extractParameter(context, newParam);
             if (value != null) {
                 newParam.setValue(newParam.getHidden() ? "**********" : value);
@@ -1052,9 +1053,9 @@ public class TriggerApplication {
             return;
         }
         var triggerEvent = this.triggerEventRepository.findById(triggerId)
-                .orElseThrow(() -> new DataNotFoundException("未找到触发器"));
+            .orElseThrow(() -> new DataNotFoundException("未找到触发器"));
         var webRequest = this.webRequestRepositoryImpl.findById(triggerEvent.getWebRequestId())
-                .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
+            .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
         webRequest.setStatusCode(WebRequest.StatusCode.ALREADY_RUNNING);
         webRequest.setErrorMsg("待执行流程数已超过最大值：" + this.globalProperties.getTriggerQueue().getMax());
         this.webRequestRepositoryImpl.update(webRequest);

@@ -660,6 +660,7 @@ public class DslParser {
                 }
             }
             if (param instanceof List) {
+                var names = new HashSet<>();
                 var ps = ((List<?>) param).stream()
                         .filter(p -> p instanceof Map)
                         .map(p -> (Map<String, Object>) p)
@@ -676,6 +677,10 @@ public class DslParser {
                             if (name != null && !(name instanceof String)) {
                                 throw new IllegalArgumentException("Webhook参数" + ref + "名称配置错误");
                             }
+                            if (names.contains(name)) {
+                                throw new DslException("Webhook参数名称\"" + name + "\"重复");
+                            }
+                            names.add(name);
                             if (type != null && !(type instanceof String)) {
                                 throw new IllegalArgumentException("Webhook参数" + ref + "类型配置错误");
                             }
