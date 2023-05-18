@@ -16,6 +16,7 @@ import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.project.aggregate.*;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
+import dev.jianmu.project.event.FileDeletedEvent;
 import dev.jianmu.project.event.MovedEvent;
 import dev.jianmu.project.event.TriggerEvent;
 import dev.jianmu.project.query.ProjectVo;
@@ -24,12 +25,14 @@ import dev.jianmu.project.repository.ProjectGroupRepository;
 import dev.jianmu.project.repository.ProjectLastExecutionRepository;
 import dev.jianmu.project.repository.ProjectLinkGroupRepository;
 import dev.jianmu.secret.aggregate.CredentialManager;
+import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.aggregate.Volume;
 import dev.jianmu.task.event.VolumeCreatedEvent;
 import dev.jianmu.task.event.VolumeDeletedEvent;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.aggregate.Trigger;
+import dev.jianmu.trigger.aggregate.WebRequest;
 import dev.jianmu.trigger.aggregate.Webhook;
 import dev.jianmu.trigger.event.TriggerEventParameter;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
@@ -38,6 +41,7 @@ import dev.jianmu.trigger.repository.WebRequestRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
+import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.ParameterRepository;
@@ -607,6 +611,18 @@ public class ProjectApplication {
         }
         var projectLinkGroup = this.projectLinkGroupRepository.findByProjectId(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目分组， 项目id: " + id));
+        var triggerIds = this.workflowInstanceRepository.findByRef(project.getWorkflowRef()).stream()
+            .map(WorkflowInstance::getTriggerId)
+            .collect(Collectors.toList());
+        var webRequestIds = this.webRequestRepository.findByProjectId(project.getId()).stream()
+            .map(WebRequest::getId)
+            .collect(Collectors.toList());
+        var taskInstanceIds = this.taskInstanceRepository.findByWorkflowRef(project.getWorkflowRef()).stream()
+            .filter(taskInstance -> !taskInstance.getAsyncTaskRef().equalsIgnoreCase("start"))
+            .filter(taskInstance -> !taskInstance.getAsyncTaskRef().equalsIgnoreCase("end"))
+            .map(TaskInstance::getId)
+            .collect(Collectors.toList());
+
         this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
         this.projectGroupRepository.subProjectCountById(projectLinkGroup.getProjectGroupId(), 1);
         this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
@@ -616,11 +632,22 @@ public class ProjectApplication {
         this.asyncTaskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.taskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.gitRepoRepository.deleteById(project.getGitRepoId());
+        triggerIds.forEach(triggerId -> {
+            this.triggerEventRepository.deleteByTriggerId(triggerId);
+            this.triggerEventRepository.deleteParameterByTriggerId(triggerId);
+            this.instanceParameterRepository.deleteByTriggerId(triggerId);
+        });
         this.publisher.publishEvent(new DeletedEvent(project.getId()));
         this.publisher.publishEvent(VolumeDeletedEvent.aVolumeDeletedEvent()
                 .workflowRef(project.getWorkflowRef())
                 .deletedType(VolumeDeletedEvent.VolumeDeletedType.REF)
                 .build());
+        this.publisher.publishEvent(FileDeletedEvent.aFileDeletedEventBuild()
+            .projectId(project.getId())
+            .triggerIds(triggerIds)
+            .taskInstanceIds(taskInstanceIds)
+            .webRequestIds(webRequestIds)
+            .build());
     }
 
     @Transactional
@@ -721,5 +748,11 @@ public class ProjectApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该Workflow"));
         return this.workflowRepository.findByRefAndVersion(ref, project.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到该Workflow"));
+    }
+
+    public void deleteFile(List<String> triggerIds, List<String> taskInstanceIds, List<String> webRequestIds) {
+        triggerIds.forEach(this.storageService::deleteWorkflowLog);
+        taskInstanceIds.forEach(this.storageService::deleteTaskLog);
+        webRequestIds.forEach(this.storageService::deleteWebhook);
     }
 }

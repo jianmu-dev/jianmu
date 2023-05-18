@@ -88,6 +88,11 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
     }
 
     @Override
+    public List<WorkflowInstance> findByRef(String workflowRef) {
+        return this.workflowInstanceMapper.findByRef(workflowRef);
+    }
+
+    @Override
     public Optional<WorkflowInstance> findByRefAndSerialNoMax(String workflowRef) {
         return this.workflowInstanceMapper.findByRefAndSerialNoMax(workflowRef);
     }
