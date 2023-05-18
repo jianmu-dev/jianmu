@@ -65,4 +65,17 @@ public interface WebRequestMapper {
     @Result(column = "error_msg", property = "errorMsg")
     @Result(column = "request_time", property = "requestTime")
     Optional<WebRequest> findLatestByProjectId(String projectId);
+
+    @Select("select t2.* from jianmu_trigger_event t1 " +
+        "join jianmu_web_request t2 on t1.web_request_id = (t2.id collate utf8mb4_0900_ai_ci) " +
+        "where t1.project_id = #{projectId}")
+    @Result(column = "project_id", property = "projectId")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "user_agent", property = "userAgent")
+    @Result(column = "status_code", property = "statusCode")
+    @Result(column = "error_msg", property = "errorMsg")
+    @Result(column = "request_time", property = "requestTime")
+    List<WebRequest> findByProjectId(String projectId);
 }

@@ -1,5 +1,10 @@
 package dev.jianmu.api.eventhandler;
 
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionalEventListener;
+
 import dev.jianmu.application.command.WorkflowStartCmd;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.ProjectGroupApplication;
@@ -8,12 +13,10 @@ import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplicati
 import dev.jianmu.infrastructure.lock.DistributedLock;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
+import dev.jianmu.project.event.FileDeletedEvent;
 import dev.jianmu.project.event.MovedEvent;
 import dev.jianmu.project.event.TriggerEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * @author Ethan Liu
@@ -31,11 +34,11 @@ public class ProjectEventHandler {
     private final DistributedLock distributedLock;
 
     public ProjectEventHandler(
-            WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
-            ProjectApplication projectApplication,
-            TriggerApplication triggerApplication,
-            ProjectGroupApplication projectGroupApplication,
-            DistributedLock distributedLock
+        WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
+        ProjectApplication projectApplication,
+        TriggerApplication triggerApplication,
+        ProjectGroupApplication projectGroupApplication,
+        DistributedLock distributedLock
     ) {
         this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
         this.projectApplication = projectApplication;
@@ -48,12 +51,12 @@ public class ProjectEventHandler {
     public void handleTriggerEvent(TriggerEvent triggerEvent) {
         // 使用project id与WorkflowVersion作为triggerId,用于参数引用查询，参见WorkerApplication#getEnvironmentMap
         var cmd = WorkflowStartCmd.builder()
-                .triggerId(triggerEvent.getTriggerId())
-                .triggerType(triggerEvent.getTriggerType())
-                .workflowRef(triggerEvent.getWorkflowRef())
-                .workflowVersion(triggerEvent.getWorkflowVersion())
-                .occurredTime(triggerEvent.getOccurredTime())
-                .build();
+            .triggerId(triggerEvent.getTriggerId())
+            .triggerType(triggerEvent.getTriggerType())
+            .workflowRef(triggerEvent.getWorkflowRef())
+            .workflowVersion(triggerEvent.getWorkflowVersion())
+            .occurredTime(triggerEvent.getOccurredTime())
+            .build();
         var lock = this.distributedLock.getLock(triggerEvent.getProjectId());
         lock.lock();
         try {
@@ -84,5 +87,12 @@ public class ProjectEventHandler {
     public void handleGroupUpdate(MovedEvent movedEvent) {
         // 移动项目到项目组事件
         this.projectGroupApplication.moveProject(movedEvent.getProjectId(), movedEvent.getProjectGroupId());
+    }
+
+    @Async
+    @EventListener
+    public void handlerFileDelete(FileDeletedEvent event) {
+        // 删除项目相关文件
+        this.projectApplication.deleteFile(event.getTriggerIds(), event.getTaskInstanceIds(), event.getWebRequestIds());
     }
 }
