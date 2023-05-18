@@ -12,6 +12,11 @@ public class SecretParameter extends Parameter<String> {
         this.type = Type.SECRET;
     }
 
+    public SecretParameter(String value, boolean isDefault) {
+        super(value, isDefault);
+        this.type = Type.SECRET;
+    }
+
     @Override
     public String getStringValue() {
         return value;

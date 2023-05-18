@@ -21,10 +21,9 @@ public interface InstanceParameterMapper {
             " </script>")
     void addAll(@Param("instanceParameters") Set<InstanceParameter> instanceParameters);
 
-//    @Delete("delete t1, t2 from task_instance_parameter t1 " +
-//            "left join parameter t2 on t1.parameter_id = (t2.id collate utf8mb4_0900_ai_ci) " +
-//            "where t1.trigger_id = #{triggerId}")
-    @Delete("delete from task_instance_parameter where trigger_id = #{triggerId}")
+    @Delete("delete t1, t2 from task_instance_parameter t1 " +
+            "left join parameter t2 on (t1.parameter_id = (t2.id collate utf8mb4_0900_ai_ci) and t2.default = 0)" +
+            "where t1.trigger_id = #{triggerId}")
     void deleteByTriggerId(String triggerId);
 
     @Select("select * from task_instance_parameter where instance_id = #{instanceId}")
