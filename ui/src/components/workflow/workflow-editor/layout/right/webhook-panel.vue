@@ -1,29 +1,28 @@
 <template>
   <div class="jm-workflow-editor-webhook-panel">
-    <jm-form
-      :model="form"
-      ref="formRef"
-      @submit.prevent
-      label-position="top"
-    >
+    <jm-form :model="form" ref="formRef" @submit.prevent label-position="top">
       <!-- 触发器参数 -->
       <div class="webhook-param">
         <div class="param-title">
-            <span :class="{fold:true,folded:foldParamFlag}" @click="foldParam">
-              <i class="jm-icon-button-right"></i>
-            </span>
+          <span :class="{ fold: true, folded: foldParamFlag }" @click="foldParam">
+            <i class="jm-icon-button-right"></i>
+          </span>
           <span class="title-text">触发器参数</span>
           <jm-tooltip placement="top">
             <template #content>
-              引用触发器参数参考<a href="https://v2.jianmu.dev/guide/vars.html#%E8%A7%A6%E5%8F%91%E5%99%A8%E5%8F%82%E6%95%B0"
-                          target="_blank" style="color:#fff;text-decoration: underline;">参数章节</a>
+              引用触发器参数参考<a
+                href="https://v2.jianmu.dev/guide/vars.html#%E8%A7%A6%E5%8F%91%E5%99%A8%E5%8F%82%E6%95%B0"
+                target="_blank"
+                style="color: #fff; text-decoration: underline"
+                >参数章节</a
+              >
             </template>
             <i class="jm-icon-button-help"></i>
           </jm-tooltip>
         </div>
         <div class="param-content" v-if="foldParamFlag">
           <webhook-param
-            v-for="(param,index) in form.params"
+            v-for="(param, index) in form.params"
             :key="param.key"
             v-model:name="param.name"
             v-model:exp="param.exp"
@@ -35,9 +34,10 @@
             :rules="nodeData.getFormRules().params.fields[index].fields"
             @delete="deleteParam"
             @update:name="refreshEditorParams"
+            @change-name="(newVal, oldVal) => changeName(index, oldVal, 'params')"
           />
           <div class="add-param" @click="addParam">
-            <i class="jm-icon-button-add"/>
+            <i class="jm-icon-button-add" />
             添加触发器参数
           </div>
         </div>
@@ -45,9 +45,9 @@
       <!-- 高级设置 -->
       <div class="advanced-setting">
         <div class="param-title">
-            <span :class="{fold:true,folded:foldSettingFlag}" @click="foldSetting">
-              <i class="jm-icon-button-right"></i>
-            </span>
+          <span :class="{ fold: true, folded: foldSettingFlag }" @click="foldSetting">
+            <i class="jm-icon-button-right"></i>
+          </span>
           <span class="title-text">高级设置</span>
         </div>
         <div class="setting-content" v-if="foldSettingFlag">
@@ -63,7 +63,7 @@
                 <i class="jm-icon-button-help"></i>
               </jm-tooltip>
             </div>
-            <jm-switch v-model="authSwitch" @change="changeAuth"/>
+            <jm-switch v-model="authSwitch" @change="changeAuth" />
           </div>
           <div class="rules-content" v-if="authSwitch">
             <jm-form-item prop="auth.token" :rules="nodeData.getFormRules().auth.fields.token">
@@ -77,19 +77,18 @@
                 v-model="form.auth.token"
                 :node-id="nodeId"
                 placeholder="请输入token值"
-                @editor-created="handleEditorCreated"/>
+                @editor-created="handleEditorCreated"
+              />
             </jm-form-item>
             <jm-form-item prop="auth.value" :rules="nodeData.getFormRules().auth.fields.value">
               <template #label>
                 value
                 <jm-tooltip placement="top">
-                  <template #content>
-                    用于校验token值，相同则验证成<br/>功，必须是密钥类型
-                  </template>
+                  <template #content> 用于校验token值，相同则验证成<br />功，必须是密钥类型 </template>
                   <i class="jm-icon-button-help"></i>
                 </jm-tooltip>
               </template>
-              <secret-key-selector v-model="form.auth.value" :placeholder="'请选择value值'"/>
+              <secret-key-selector v-model="form.auth.value" :placeholder="'请选择value值'" />
             </jm-form-item>
           </div>
           <jm-form-item class="only-container" prop="only" :rules="nodeData.getFormRules().only">
@@ -100,9 +99,12 @@
                   <div>匹配规则，结果为 true 时触发流程，当</div>
                   <div>
                     <span>前只可引用触发器参数。详见</span>
-                    <a href="https://v2.jianmu.dev/guide/expression.html"
-                       target="_blank"
-                       style="color:#fff;text-decoration: underline;">运算表达式</a>
+                    <a
+                      href="https://v2.jianmu.dev/guide/expression.html"
+                      target="_blank"
+                      style="color: #fff; text-decoration: underline"
+                      >运算表达式</a
+                    >
                   </div>
                 </template>
                 <i class="jm-icon-button-help"></i>
@@ -113,7 +115,8 @@
                 v-model="form.only"
                 placeholder="请输入匹配规则"
                 :node-id="nodeId"
-                @editor-created="handleEditorCreated"/>
+                @editor-created="handleEditorCreated"
+              />
             </div>
           </jm-form-item>
         </div>
@@ -130,6 +133,7 @@ import SecretKeySelector from './form/secret-key-selector.vue';
 import ExpressionEditor from './form/expression-editor.vue';
 
 import { v4 as uuidv4 } from 'uuid';
+// eslint-disable-next-line no-redeclare
 import { Node } from '@antv/x6';
 import { ISelectableParam } from '../../../workflow-expression-editor/model/data';
 
@@ -157,7 +161,6 @@ export default defineComponent({
     const nodeId = ref<string>('');
     const getNode = inject('getNode') as () => Node;
     nodeId.value = getNode().id;
-
 
     onMounted(() => emit('form-created', formRef.value));
     // 折叠
@@ -190,13 +193,24 @@ export default defineComponent({
         foldSettingFlag.value = !foldSettingFlag.value;
       },
       changeAuth: (val: boolean) => {
-        form.value.auth = val ? {
-          token: '',
-          value: '',
-        } : undefined;
+        form.value.auth = val
+          ? {
+            token: '',
+            value: '',
+          }
+          : undefined;
         if (val) {
           refreshEditorParams();
         }
+      },
+      changeName: (index: number, oldVal: string, formModelName: string) => {
+        form.value.params.forEach(({ name }, idx) => {
+          if (index === idx || name !== oldVal) {
+            return;
+          }
+          console.log(index, idx);
+          formRef.value.validateField(`${formModelName}.${idx}.name`);
+        });
       },
     };
   },
@@ -215,7 +229,7 @@ export default defineComponent({
   // 页面全局设置，所有折叠按钮生效
   .jm-icon-button-right::before {
     font-size: 12px;
-    color: #6B7B8D;
+    color: #6b7b8d;
     transform: scale(0.8);
   }
 
@@ -235,23 +249,21 @@ export default defineComponent({
     align-items: center;
     color: @title-color;
 
-
     .title-text {
       margin: 0 6px 0 6px;
     }
   }
-
 
   .webhook-param {
     // 折叠
     .fold {
       cursor: pointer;
       font-size: 12px;
-      transition: all .1s linear;
+      transition: all 0.1s linear;
 
       &.folded {
         transform: rotate(90deg);
-        transition: all .1s linear;
+        transition: all 0.1s linear;
       }
     }
 
@@ -261,7 +273,7 @@ export default defineComponent({
 
     .param-content {
       border-radius: 2px;
-      border: 1px solid #E6EBF2;
+      border: 1px solid #e6ebf2;
 
       .add-param {
         padding: 10px 20px;
@@ -274,7 +286,6 @@ export default defineComponent({
         }
       }
     }
-
   }
 
   .advanced-setting {
@@ -283,11 +294,11 @@ export default defineComponent({
     .fold {
       cursor: pointer;
       font-size: 12px;
-      transition: all .1s linear;
+      transition: all 0.1s linear;
 
       &.folded {
         transform: rotate(90deg);
-        transition: all .1s linear;
+        transition: all 0.1s linear;
       }
     }
 
@@ -296,7 +307,7 @@ export default defineComponent({
         display: inline-block;
         height: 1px;
         width: 100%;
-        background: #E6EBF2;
+        background: #e6ebf2;
         margin: 20px 0;
       }
 
@@ -309,7 +320,7 @@ export default defineComponent({
       .rules-content {
         padding: 20px 20px 10px;
         border-radius: 2px;
-        border: 1px solid #E6EBF2;
+        border: 1px solid #e6ebf2;
         margin-top: 10px;
       }
 

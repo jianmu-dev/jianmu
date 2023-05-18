@@ -125,7 +125,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update:name', 'update:type', 'update:exp', 'update:required', 'update:default', 'delete'],
+  emits: ['update:name', 'update:type', 'update:exp', 'update:required', 'update:default', 'delete', 'change-name'],
   setup(props, { emit }) {
     const nameVal = ref<string>(props.name);
     const typeVal = ref<ParamTypeEnum>(props.type);
@@ -157,7 +157,9 @@ export default defineComponent({
       switchBackgroundFlag,
       isReload,
       changeName: () => {
+        const oldVal = props.name;
         emit('update:name', nameVal.value);
+        emit('change-name', nameVal.value, oldVal);
       },
       changeType: async () => {
         resetDefaultVal();

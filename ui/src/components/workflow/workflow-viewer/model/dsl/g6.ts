@@ -336,15 +336,19 @@ export function parse(
   // 解析workflow节点
   const { nodes, edges } = workflow ? parseWorkflow(workflow) : parsePipeline(pipeline);
 
-  switch (triggerType) {
-    case TriggerTypeEnum.CRON:
-      // 解析cron节点
-      parseCron(trigger.schedule, nodes, edges, !!workflow);
-      break;
-    default:
-      // 解析webhook节点
-      parseWebhook(trigger, nodes, edges, !!workflow);
-      break;
+  if (trigger) {
+    switch (trigger.type) {
+      case NodeTypeEnum.CRON:
+        if (triggerType !== TriggerTypeEnum.MANUAL) {
+          // 解析cron节点
+          parseCron(trigger.schedule, nodes, edges, !!workflow);
+        }
+        break;
+      default:
+        // 解析webhook节点
+        parseWebhook(trigger, nodes, edges, !!workflow);
+        break;
+    }
   }
 
   if (nodeInfos) {
