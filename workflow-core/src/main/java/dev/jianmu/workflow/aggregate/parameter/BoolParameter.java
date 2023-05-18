@@ -12,6 +12,11 @@ public class BoolParameter extends Parameter<Boolean> {
         this.type = Type.BOOL;
     }
 
+    public BoolParameter(Boolean value, boolean isDefault) {
+        super(value, isDefault);
+        this.type = Type.BOOL;
+    }
+
     @Override
     public String getStringValue() {
         return String.valueOf(value);
