@@ -139,7 +139,6 @@ public class WorkflowInstanceInternalApplication {
     }
 
     // 停止流程
-    @Async
     @Transactional
     public void suspend(String instanceId) {
         var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
