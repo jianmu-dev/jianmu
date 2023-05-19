@@ -99,18 +99,25 @@ public class WorkflowInstance extends AggregateRoot {
 
     // 挂起流程实例
     public void suspend() {
-        if (!this.isRunning()) {
-            throw new RuntimeException("流程实例已终止或结束，无法挂起");
-        }
-        this.status = ProcessStatus.SUSPENDED;
-        this.suspendedTime = LocalDateTime.now();
-        var processSuspendedEvent = ProcessSuspendedEvent.Builder.aProcessSuspendedEvent()
+        if (this.status == ProcessStatus.TERMINATED) {
+            var processTerminatedEvent = ProcessTerminatedEvent.Builder.aProcessTerminatedEvent()
                 .triggerId(triggerId)
                 .workflowRef(this.workflowRef)
                 .workflowVersion(this.workflowVersion)
                 .workflowInstanceId(this.id)
                 .build();
-        this.raiseEvent(processSuspendedEvent);
+            this.raiseEvent(processTerminatedEvent);
+        }else {
+            this.status = ProcessStatus.SUSPENDED;
+            this.suspendedTime = LocalDateTime.now();
+            var processSuspendedEvent = ProcessSuspendedEvent.Builder.aProcessSuspendedEvent()
+                .triggerId(triggerId)
+                .workflowRef(this.workflowRef)
+                .workflowVersion(this.workflowVersion)
+                .workflowInstanceId(this.id)
+                .build();
+            this.raiseEvent(processSuspendedEvent);
+        }
     }
 
     // 恢复流程运行
