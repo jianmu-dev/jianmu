@@ -3,6 +3,7 @@ package dev.jianmu.api.eventhandler;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import dev.jianmu.application.command.WorkflowStartCmd;
@@ -13,7 +14,7 @@ import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplicati
 import dev.jianmu.infrastructure.lock.DistributedLock;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
-import dev.jianmu.project.event.FileDeletedEvent;
+import dev.jianmu.project.event.TrashEvent;
 import dev.jianmu.project.event.MovedEvent;
 import dev.jianmu.project.event.TriggerEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -90,9 +91,9 @@ public class ProjectEventHandler {
     }
 
     @Async
-    @EventListener
-    public void handlerFileDelete(FileDeletedEvent event) {
-        // 删除项目相关文件
-        this.projectApplication.deleteFile(event.getTriggerIds(), event.getTaskInstanceIds(), event.getWebRequestIds());
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handlerFileDelete(TrashEvent event) {
+        // 清理项目数据
+        this.projectApplication.trashProject(event.getProjectId());
     }
 }

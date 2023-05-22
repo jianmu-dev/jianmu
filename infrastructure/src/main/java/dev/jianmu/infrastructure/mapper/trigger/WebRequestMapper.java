@@ -66,9 +66,7 @@ public interface WebRequestMapper {
     @Result(column = "request_time", property = "requestTime")
     Optional<WebRequest> findLatestByProjectId(String projectId);
 
-    @Select("select t2.* from jianmu_trigger_event t1 " +
-        "join jianmu_web_request t2 on t1.web_request_id = (t2.id collate utf8mb4_0900_ai_ci) " +
-        "where t1.project_id = #{projectId}")
+    @Select("select * from jianmu_web_request where project_id = #{projectId}")
     @Result(column = "project_id", property = "projectId")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")

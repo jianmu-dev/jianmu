@@ -48,4 +48,20 @@ public class InstanceParameterRepositoryImpl implements InstanceParameterReposit
     public void deleteByTriggerId(String triggerId) {
         this.instanceParameterMapper.deleteByTriggerId(triggerId);
     }
+
+    @Override
+    public void deleteByTriggerIdIn(List<String> triggerIds) {
+        if (triggerIds.isEmpty()) {
+            return;
+        }
+        this.instanceParameterMapper.deleteByTriggerIdIn(triggerIds);
+    }
+
+    @Override
+    public List<String> findParameterIdByTriggerIdIn(List<String> triggerIds) {
+        if (triggerIds.isEmpty()) {
+            return List.of();
+        }
+        return this.instanceParameterMapper.findParameterIdByTriggerIdIn(triggerIds);
+    }
 }

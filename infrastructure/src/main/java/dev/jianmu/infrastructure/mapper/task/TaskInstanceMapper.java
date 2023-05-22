@@ -182,18 +182,7 @@ public interface TaskInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     List<TaskInstance> findByTriggerIdAndStatus(@Param("triggerId") String triggerId, @Param("status") InstanceStatus status);
 
-    @Select("select * from task_instance where workflow_ref = #{workflowRef}")
-    @Result(column = "serial_no", property = "serialNo")
-    @Result(column = "def_key", property = "defKey")
-    @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
+    @Select("select id, async_task_ref from task_instance where workflow_ref = #{workflowRef}")
     @Result(column = "async_task_ref", property = "asyncTaskRef")
-    @Result(column = "workflow_ref", property = "workflowRef")
-    @Result(column = "workflow_version", property = "workflowVersion")
-    @Result(column = "business_id", property = "businessId")
-    @Result(column = "trigger_id", property = "triggerId")
-    @Result(column = "worker_id", property = "workerId")
-    @Result(column = "_version", property = "version")
-    @Result(column = "start_time", property = "startTime")
-    @Result(column = "end_time", property = "endTime")
-    List<TaskInstance> findByWorkflowRef(String workflowRef);
+    List<TaskInstance> findIdAndRefByWorkflowRef(String workflowRef);
 }
