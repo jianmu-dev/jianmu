@@ -50,5 +50,5 @@ public interface TaskInstanceRepository {
 
     List<TaskInstance> findByTriggerIdAndStatus(String triggerId, InstanceStatus status);
 
-    List<TaskInstance> findByWorkflowRef(String workflowRef);
+    List<TaskInstance> findIdAndRefByWorkflowRef(String workflowRef);
 }

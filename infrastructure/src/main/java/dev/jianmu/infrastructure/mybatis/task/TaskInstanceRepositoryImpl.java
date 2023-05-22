@@ -208,7 +208,7 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     }
 
     @Override
-    public List<TaskInstance> findByWorkflowRef(String workflowRef) {
-        return this.taskInstanceMapper.findByWorkflowRef(workflowRef);
+    public List<TaskInstance> findIdAndRefByWorkflowRef(String workflowRef) {
+        return this.taskInstanceMapper.findIdAndRefByWorkflowRef(workflowRef);
     }
 }

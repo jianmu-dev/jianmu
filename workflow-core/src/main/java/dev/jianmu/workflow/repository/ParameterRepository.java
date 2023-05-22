@@ -16,4 +16,6 @@ public interface ParameterRepository {
     void addAll(List<Parameter> parameters);
 
     List<Parameter> findByIds(Set<String> ids);
+
+    void deleteByIdIn(List<String> ids);
 }

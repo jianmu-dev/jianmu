@@ -50,4 +50,10 @@ public interface ParameterMapper {
             })
     })
     List<Parameter> findByIds(@Param("ids") Set<String> ids);
+
+    @Delete("<script>" +
+        "delete from parameter " +
+        "where `id` IN <foreach collection='ids' item='item' open='(' separator=',' close=')'> #{item}</foreach>" +
+        "</script>")
+    void deleteByIdIn(@Param("ids") List<String> ids);
 }
