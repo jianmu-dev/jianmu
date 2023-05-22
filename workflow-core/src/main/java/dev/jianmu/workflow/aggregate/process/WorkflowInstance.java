@@ -1,5 +1,8 @@
 package dev.jianmu.workflow.aggregate.process;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import dev.jianmu.workflow.aggregate.AggregateRoot;
 import dev.jianmu.workflow.event.process.*;
 
@@ -13,6 +16,8 @@ import java.util.UUID;
  * @create 2021-01-21 19:53
  */
 public class WorkflowInstance extends AggregateRoot {
+    private static final Logger logger = LoggerFactory.getLogger(WorkflowInstance.class);
+
     // ID
     private String id;
     // 执行顺序号
@@ -107,6 +112,7 @@ public class WorkflowInstance extends AggregateRoot {
                 .workflowInstanceId(this.id)
                 .build();
             this.raiseEvent(processTerminatedEvent);
+            logger.info("publish ProcessTerminatedEvent for task suspend: {}", processTerminatedEvent);
         }else {
             this.status = ProcessStatus.SUSPENDED;
             this.suspendedTime = LocalDateTime.now();
