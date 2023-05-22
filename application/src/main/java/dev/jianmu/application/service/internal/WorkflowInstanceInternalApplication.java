@@ -190,7 +190,6 @@ public class WorkflowInstanceInternalApplication {
     }
 
     // 终止流程
-    @Async
     @Transactional
     public void terminate(String instanceId) {
         var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
@@ -201,7 +200,7 @@ public class WorkflowInstanceInternalApplication {
         MDC.put("triggerId", workflowInstance.getTriggerId());
         workflowInstance.terminate();
         this.workflowInstanceRepository.save(workflowInstance);
-        if (projectLastExecution.getStatus() == ProcessStatus.TERMINATED.name()) {
+        if (projectLastExecution.getStatus().equals(ProcessStatus.TERMINATED.name())) {
             log.warn("流程实例已终止，无需终止");
             return;
         }
