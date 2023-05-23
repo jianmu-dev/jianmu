@@ -118,7 +118,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     List<WorkflowInstance> findByRef(@Param("workflowRef") String workflowRef);
 
-    @Select("SELECT * FROM jm_workflow_instance where workflow_ref=#{workflowRef} and serial_no <= ((select max(serial_no) from workflow_instance where workflow_ref=#{workflowRef}) - #{offset})")
+    @Select("SELECT * FROM jm_workflow_instance where workflow_ref=#{workflowRef} and serial_no <= ((select max(serial_no) from jm_workflow_instance where workflow_ref=#{workflowRef}) - #{offset})")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")

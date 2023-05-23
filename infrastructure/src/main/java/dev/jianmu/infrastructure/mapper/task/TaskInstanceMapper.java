@@ -182,7 +182,7 @@ public interface TaskInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     List<TaskInstance> findByTriggerIdAndStatus(@Param("triggerId") String triggerId, @Param("status") InstanceStatus status);
 
-    @Select("select id, async_task_ref from task_instance where workflow_ref = #{workflowRef}")
+    @Select("select id, async_task_ref from jm_task_instance where workflow_ref = #{workflowRef}")
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     List<TaskInstance> findIdAndRefByWorkflowRef(String workflowRef);
 }

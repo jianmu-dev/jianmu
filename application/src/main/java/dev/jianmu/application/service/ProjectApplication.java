@@ -70,6 +70,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static dev.jianmu.application.service.ProjectGroupApplication.DEFAULT_PROJECT_GROUP_NAME;
 
@@ -133,7 +134,7 @@ public class ProjectApplication {
             AssociationUtil associationUtil,
             InstanceParameterRepository instanceParameterRepository,
             StorageService storageService,
-            WebRequestRepository webRequestRepository
+            WebRequestRepository webRequestRepository,
             TriggerRepository triggerRepository,
             ParameterRepository parameterRepository,
             TrashProjectRepository trashProjectRepository

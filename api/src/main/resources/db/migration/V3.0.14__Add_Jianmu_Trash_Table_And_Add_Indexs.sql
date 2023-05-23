@@ -1,20 +1,20 @@
-ALTER TABLE `parameter`
+ALTER TABLE `jm_parameter`
     add `default` bit(1) NOT NULL DEFAULT 1 COMMENT '是否为默认值';
 
-ALTER TABLE `jianmu_trigger_event_parameter`
+ALTER TABLE `jm_trigger_event_parameter`
     ADD INDEX `idx_trigger_event_id` (`trigger_event_id`);
-ALTER TABLE `jianmu_web_request`
+ALTER TABLE `jm_web_request`
     ADD INDEX `idx_project_id` (`project_id`);
-ALTER TABLE `task_instance`
+ALTER TABLE `jm_task_instance`
     ADD INDEX `idx_workflow_ref` (`workflow_ref`);
-ALTER TABLE `async_task_instance`
+ALTER TABLE `jm_async_task_instance`
     ADD INDEX `idx_workflow_ref` (`workflow_ref`);
-ALTER TABLE `jianmu_trigger_event`
+ALTER TABLE `jm_trigger_event`
     ADD INDEX `idx_project_id` (`project_id`);
-ALTER TABLE `workflow`
+ALTER TABLE `jm_workflow`
     ADD INDEX `idx_ref` (`ref`);
 
-CREATE TABLE `jianmu_trash_project`
+CREATE TABLE `jm_trash_project`
 (
     `id`                   varchar(45)  NOT NULL COMMENT 'ID',
     `dsl_source`           varchar(45)  DEFAULT NULL COMMENT 'DSL来源',

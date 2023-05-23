@@ -16,14 +16,14 @@ import dev.jianmu.project.aggregate.Project;
  * @create 2023/5/22 10:34 上午
  */
 public interface TrashProjectMapper {
-    @Insert("insert into jianmu_trash_project(id, dsl_source, dsl_type, enabled, mutable, trigger_type, git_repo_id, workflow_name, workflow_description, workflow_ref, workflow_version, steps, dsl_text, created_time, last_modified_by, last_modified_time, concurrent) " +
+    @Insert("insert into jm_trash_project(id, dsl_source, dsl_type, enabled, mutable, trigger_type, git_repo_id, workflow_name, workflow_description, workflow_ref, workflow_version, steps, dsl_text, created_time, last_modified_by, last_modified_time, concurrent) " +
         "values(#{id}, #{dslSource}, #{dslType}, #{enabled}, #{mutable}, #{triggerType}, #{gitRepoId}, #{workflowName}, #{workflowDescription}, #{workflowRef}, #{workflowVersion}, #{steps}, #{dslText}, #{createdTime}, #{lastModifiedBy}, #{lastModifiedTime}, #{concurrent})")
     void add(Project project);
 
-    @Delete("delete from jianmu_trash_project where workflow_ref = #{workflowRef}")
+    @Delete("delete from jm_trash_project where workflow_ref = #{workflowRef}")
     void deleteByWorkflowRef(String workflowRef);
 
-    @Select("select * from jianmu_trash_project where id = #{id}")
+    @Select("select * from jm_trash_project where id = #{id}")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "workflow_description", property = "workflowDescription")
     @Result(column = "dsl_source", property = "dslSource")

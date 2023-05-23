@@ -8,6 +8,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import dev.jianmu.application.command.WorkflowStartCmd;
 import dev.jianmu.application.service.GitRepoApplication;
+import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.ProjectGroupApplication;
 import dev.jianmu.application.service.TriggerApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
