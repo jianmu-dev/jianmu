@@ -1,5 +1,8 @@
 package dev.jianmu.workflow.aggregate.process;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import dev.jianmu.event.impl.WorkflowInstanceCreatedEvent;
 import dev.jianmu.event.impl.WorkflowInstanceStatusUpdatedEvent;
 import dev.jianmu.workflow.aggregate.AggregateRoot;
@@ -17,6 +20,8 @@ import java.util.UUID;
  * @create 2021-01-21 19:53
  */
 public class WorkflowInstance extends AggregateRoot {
+    private static final Logger logger = LoggerFactory.getLogger(WorkflowInstance.class);
+
     // ID
     private String id;
     // 执行顺序号
@@ -119,18 +124,26 @@ public class WorkflowInstance extends AggregateRoot {
 
     // 挂起流程实例
     public void suspend() {
-        if (!this.isRunning()) {
-            throw new RuntimeException("流程实例已终止或结束，无法挂起");
-        }
-        this.status = ProcessStatus.SUSPENDED;
-        this.suspendedTime = LocalDateTime.now();
-        var processSuspendedEvent = ProcessSuspendedEvent.Builder.aProcessSuspendedEvent()
+        if (this.status == ProcessStatus.TERMINATED) {
+            var processTerminatedEvent = ProcessTerminatedEvent.Builder.aProcessTerminatedEvent()
                 .triggerId(triggerId)
                 .workflowRef(this.workflowRef)
                 .workflowVersion(this.workflowVersion)
                 .workflowInstanceId(this.id)
                 .build();
-        this.raiseEvent(processSuspendedEvent);
+            this.raiseEvent(processTerminatedEvent);
+            logger.info("publish ProcessTerminatedEvent for task suspend: {}", processTerminatedEvent);
+        }else {
+            this.status = ProcessStatus.SUSPENDED;
+            this.suspendedTime = LocalDateTime.now();
+            var processSuspendedEvent = ProcessSuspendedEvent.Builder.aProcessSuspendedEvent()
+                .triggerId(triggerId)
+                .workflowRef(this.workflowRef)
+                .workflowVersion(this.workflowVersion)
+                .workflowInstanceId(this.id)
+                .build();
+            this.raiseEvent(processSuspendedEvent);
+        }
         // 发布流程实例状态变更事件
         this.publishStatusUpdatedEvent();
     }

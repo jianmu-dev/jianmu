@@ -232,4 +232,9 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     public List<TaskInstance> findByTriggerIdAndStatus(String triggerId, InstanceStatus status) {
         return this.taskInstanceMapper.findByTriggerIdAndStatus(triggerId, status);
     }
+
+    @Override
+    public List<TaskInstance> findIdAndRefByWorkflowRef(String workflowRef) {
+        return this.taskInstanceMapper.findIdAndRefByWorkflowRef(workflowRef);
+    }
 }

@@ -28,6 +28,8 @@ public interface WorkflowInstanceRepository {
 
     List<WorkflowInstance> findAll(int pageNum, int pageSize);
 
+    List<WorkflowInstance> findByRef(String workflowRef);
+
     Optional<WorkflowInstance> findByRefAndSerialNoMax(String workflowRef);
 
     List<WorkflowInstance> findByRefOffset(String workflowRef, long offset);

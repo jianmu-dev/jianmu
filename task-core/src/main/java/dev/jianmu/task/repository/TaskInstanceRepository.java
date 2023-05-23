@@ -49,4 +49,6 @@ public interface TaskInstanceRepository {
     Optional<TaskInstance> findByBusinessIdAndVersion(String businessId, int version);
 
     List<TaskInstance> findByTriggerIdAndStatus(String triggerId, InstanceStatus status);
+
+    List<TaskInstance> findIdAndRefByWorkflowRef(String workflowRef);
 }

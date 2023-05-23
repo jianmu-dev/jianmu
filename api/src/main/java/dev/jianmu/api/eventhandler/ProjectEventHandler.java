@@ -1,7 +1,14 @@
 package dev.jianmu.api.eventhandler;
 
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
+
 import dev.jianmu.application.command.WorkflowStartCmd;
 import dev.jianmu.application.service.GitRepoApplication;
+import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.ProjectGroupApplication;
 import dev.jianmu.application.service.TriggerApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
@@ -9,13 +16,10 @@ import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.infrastructure.lock.DistributedLock;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
+import dev.jianmu.project.event.TrashEvent;
 import dev.jianmu.project.event.MovedEvent;
 import dev.jianmu.project.event.TriggerEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * @author Ethan Liu
@@ -27,6 +31,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 public class ProjectEventHandler {
     private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
+    private final ProjectApplication projectApplication;
     private final TriggerApplication triggerApplication;
     private final ProjectGroupApplication projectGroupApplication;
     private final GitRepoApplication gitRepoApplication;
@@ -34,12 +39,14 @@ public class ProjectEventHandler {
 
     public ProjectEventHandler(
             WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
+            ProjectApplication projectApplication,
             TriggerApplication triggerApplication,
             ProjectGroupApplication projectGroupApplication,
             GitRepoApplication gitRepoApplication,
             DistributedLock distributedLock
     ) {
         this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
+        this.projectApplication = projectApplication;
         this.triggerApplication = triggerApplication;
         this.projectGroupApplication = projectGroupApplication;
         this.gitRepoApplication = gitRepoApplication;
@@ -50,12 +57,12 @@ public class ProjectEventHandler {
     public void handleTriggerEvent(TriggerEvent triggerEvent) {
         // 使用project id与WorkflowVersion作为triggerId,用于参数引用查询，参见WorkerApplication#getEnvironmentMap
         var cmd = WorkflowStartCmd.builder()
-                .triggerId(triggerEvent.getTriggerId())
-                .triggerType(triggerEvent.getTriggerType())
-                .workflowRef(triggerEvent.getWorkflowRef())
-                .workflowVersion(triggerEvent.getWorkflowVersion())
-                .occurredTime(triggerEvent.getOccurredTime())
-                .build();
+            .triggerId(triggerEvent.getTriggerId())
+            .triggerType(triggerEvent.getTriggerType())
+            .workflowRef(triggerEvent.getWorkflowRef())
+            .workflowVersion(triggerEvent.getWorkflowVersion())
+            .occurredTime(triggerEvent.getOccurredTime())
+            .build();
         var lock = this.distributedLock.getLock(triggerEvent.getProjectId());
         lock.lock();
         try {
@@ -91,5 +98,12 @@ public class ProjectEventHandler {
         }
         // 移动项目到项目组事件
         this.projectGroupApplication.moveProject(movedEvent.getProjectId(), movedEvent.getProjectGroupId());
+    }
+
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handlerFileDelete(TrashEvent event) {
+        // 清理项目数据
+        this.projectApplication.trashProject(event.getProjectId());
     }
 }

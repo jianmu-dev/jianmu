@@ -21,11 +21,16 @@ public interface InstanceParameterMapper {
             " </script>")
     void addAll(@Param("instanceParameters") Set<InstanceParameter> instanceParameters);
 
-    //    @Delete("delete t1, t2 from jm_task_instance_parameter t1 " +
-    //            "left join jm_parameter t2 on t1.parameter_id = (t2.id collate utf8mb4_0900_ai_ci) " +
-    //            "where t1.trigger_id = #{triggerId}")
-    @Delete("delete from jm_task_instance_parameter where trigger_id = #{triggerId}")
+    @Delete("delete t1, t2 from jm_task_instance_parameter t1 " +
+        "left join jm_parameter t2 on (t1.parameter_id = (t2.id collate utf8mb4_0900_ai_ci) and t2.default = 0)" +
+        "where t1.trigger_id = #{triggerId}")
     void deleteByTriggerId(String triggerId);
+
+    @Delete("<script>" +
+        "delete from jm_task_instance_parameter " +
+        "where `trigger_id` IN <foreach collection='triggerIds' item='item' open='(' separator=',' close=')'> #{item}</foreach>" +
+        "</script>")
+    void deleteByTriggerIdIn(@Param("triggerIds") List<String> triggerIds);
 
     @Select("select * from jm_task_instance_parameter where instance_id = #{instanceId}")
     @Result(column = "instance_id", property = "instanceId")
@@ -66,4 +71,10 @@ public interface InstanceParameterMapper {
     @Result(column = "parameter_id", property = "parameterId")
     @Result(column = "workflow_type", property = "workflowType")
     List<InstanceParameter> findLastOutputParamByTriggerId(String triggerId);
+
+    @Select("<script>" +
+        "select parameter_id from jm_task_instance_parameter " +
+        "where `trigger_id` IN <foreach collection='triggerIds' item='item' open='(' separator=',' close=')'> #{item}</foreach>" +
+        "</script>")
+    List<String> findParameterIdByTriggerIdIn(@Param("triggerIds") List<String> triggerIds);
 }

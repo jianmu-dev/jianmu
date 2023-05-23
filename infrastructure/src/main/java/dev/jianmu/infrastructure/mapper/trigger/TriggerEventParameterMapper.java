@@ -24,4 +24,16 @@ public interface TriggerEventParameterMapper {
             "left join jm_parameter t2 on t1.parameter_id = (t2.id collate utf8mb4_0900_ai_ci) " +
             "where t1.trigger_event_id = #{triggerId}")
     void deleteByTriggerId(String triggerId);
+
+    @Delete("<script>" +
+        "delete from jm_trigger_event_parameter " +
+        "where `trigger_event_id` IN <foreach collection='triggerIds' item='item' open='(' separator=',' close=')'> #{item}</foreach>" +
+        "</script>")
+    void deleteParameterByTriggerIdIn(@Param("triggerIds") List<String> triggerIds);
+
+    @Select("<script>" +
+        "select parameter_id from jm_trigger_event_parameter " +
+        "where `trigger_event_id` IN <foreach collection='triggerIds' item='item' open='(' separator=',' close=')'> #{item}</foreach>" +
+        "</script>")
+    List<String> findParameterIdByTriggerIdIn(@Param("triggerIds") List<String> triggerIds);
 }

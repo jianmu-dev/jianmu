@@ -2,6 +2,7 @@ package dev.jianmu.trigger.repository;
 
 import dev.jianmu.trigger.aggregate.WebRequest;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -20,4 +21,6 @@ public interface WebRequestRepository {
     void deleteByProjectId(String projectId);
 
     Optional<WebRequest> findByTriggerId(String triggerId);
+
+    List<WebRequest> findByProjectId(String projectId);
 }

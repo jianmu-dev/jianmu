@@ -57,4 +57,15 @@ public interface WebRequestMapper {
     @Result(column = "error_msg", property = "errorMsg")
     @Result(column = "request_time", property = "requestTime")
     Optional<WebRequest> findByTriggerId(String triggerId);
+
+    @Select("select * from jm_web_request where project_id = #{projectId}")
+    @Result(column = "project_id", property = "projectId")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "user_agent", property = "userAgent")
+    @Result(column = "status_code", property = "statusCode")
+    @Result(column = "error_msg", property = "errorMsg")
+    @Result(column = "request_time", property = "requestTime")
+    List<WebRequest> findByProjectId(String projectId);
 }

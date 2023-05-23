@@ -163,7 +163,8 @@ public class AsyncTaskInstanceEventHandler {
         log.info("-----------------------------------------------------");
     }
 
-    @EventListener
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleTaskSuspendedEvent(TaskSuspendedEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get TaskSuspendedEvent here -------------------------");
@@ -172,7 +173,8 @@ public class AsyncTaskInstanceEventHandler {
         log.info("-----------------------------------------------------");
     }
 
-    @EventListener
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleTaskFailedEvent(TaskFailedEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get TaskFailedEvent here -------------------------");
