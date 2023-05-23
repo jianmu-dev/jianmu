@@ -12,6 +12,11 @@ public class StringParameter extends Parameter<String> {
         this.type = Type.STRING;
     }
 
+    public StringParameter(String value, boolean isDefault) {
+        super(value, isDefault);
+        this.type = Type.STRING;
+    }
+
     @Override
     public String getStringValue() {
         return value;

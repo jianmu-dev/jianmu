@@ -3,7 +3,6 @@ package dev.jianmu.task.repository;
 import dev.jianmu.task.aggregate.InstanceParameter;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -22,4 +21,8 @@ public interface InstanceParameterRepository {
     List<InstanceParameter> findLastOutputParamByTriggerId(String triggerId);
 
     void deleteByTriggerId(String triggerId);
+
+    void deleteByTriggerIdIn(List<String> triggerIds);
+
+    List<String> findParameterIdByTriggerIdIn(List<String> triggerIds);
 }

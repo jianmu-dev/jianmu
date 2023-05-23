@@ -15,9 +15,9 @@ import java.util.Set;
 */
 public interface ParameterMapper {
     @Insert("<script>" +
-            "insert into jm_parameter(id, type, value) values" +
+            "insert into jm_parameter(id, type, value, `default`) values" +
             "<foreach collection='parameters' item='i' index='index' separator=','>" +
-            "(#{i.id}, #{i.type}, convert(#{i.value}, BINARY))" +
+            "(#{i.id}, #{i.type}, convert(#{i.value}, BINARY), #{i.isDefault})" +
             "</foreach>" +
             " </script>")
     void addAll(@Param("parameters") List<Parameter> parameters);
@@ -50,4 +50,10 @@ public interface ParameterMapper {
             })
     })
     List<Parameter> findByIds(@Param("ids") Set<String> ids);
+
+    @Delete("<script>" +
+        "delete from jm_parameter " +
+        "where `id` IN <foreach collection='ids' item='item' open='(' separator=',' close=')'> #{item}</foreach>" +
+        "</script>")
+    void deleteByIdIn(@Param("ids") List<String> ids);
 }

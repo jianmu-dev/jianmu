@@ -36,4 +36,12 @@ public class ParameterRepositoryImpl implements ParameterRepository {
         }
         return this.parameterMapper.findByIds(ids);
     }
+
+    @Override
+    public void deleteByIdIn(List<String> ids) {
+        if (ids.isEmpty()) {
+            return;
+        }
+        this.parameterMapper.deleteByIdIn(ids);
+    }
 }

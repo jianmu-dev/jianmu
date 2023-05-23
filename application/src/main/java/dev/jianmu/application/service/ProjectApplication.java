@@ -27,26 +27,35 @@ import dev.jianmu.project.aggregate.ProjectLinkGroup;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
+import dev.jianmu.project.event.TrashEvent;
 import dev.jianmu.project.event.MovedEvent;
 import dev.jianmu.project.event.TriggerEvent;
 import dev.jianmu.project.query.ProjectVo;
 import dev.jianmu.project.repository.ProjectGroupRepository;
 import dev.jianmu.project.repository.ProjectLastExecutionRepository;
 import dev.jianmu.project.repository.ProjectLinkGroupRepository;
+import dev.jianmu.project.repository.TrashProjectRepository;
+import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.aggregate.Volume;
 import dev.jianmu.task.event.VolumeCreatedEvent;
 import dev.jianmu.task.event.VolumeDeletedEvent;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.aggregate.Trigger;
+import dev.jianmu.trigger.aggregate.WebRequest;
 import dev.jianmu.trigger.aggregate.Webhook;
 import dev.jianmu.trigger.repository.CustomWebhookDefinitionVersionRepository;
+import dev.jianmu.trigger.event.TriggerEventParameter;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
+import dev.jianmu.trigger.repository.TriggerRepository;
 import dev.jianmu.trigger.service.WebhookOnlyService;
 import dev.jianmu.trigger.repository.WebRequestRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
+import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
+import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
+import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import org.quartz.CronExpression;
@@ -98,6 +107,9 @@ public class ProjectApplication {
     private final InstanceParameterRepository instanceParameterRepository;
     private final StorageService storageService;
     private final WebRequestRepository webRequestRepository;
+    private final TriggerRepository triggerRepository;
+    private final ParameterRepository parameterRepository;
+    private final TrashProjectRepository trashProjectRepository;
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
@@ -122,7 +134,10 @@ public class ProjectApplication {
             InstanceParameterRepository instanceParameterRepository,
             StorageService storageService,
             WebRequestRepository webRequestRepository
-    ) {
+            TriggerRepository triggerRepository,
+            ParameterRepository parameterRepository,
+            TrashProjectRepository trashProjectRepository
+            ) {
         this.projectRepository = projectRepository;
         this.workflowRepository = workflowRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
@@ -145,6 +160,9 @@ public class ProjectApplication {
         this.instanceParameterRepository = instanceParameterRepository;
         this.storageService = storageService;
         this.webRequestRepository = webRequestRepository;
+        this.triggerRepository = triggerRepository;
+        this.parameterRepository = parameterRepository;
+        this.trashProjectRepository = trashProjectRepository;
     }
 
     public void switchEnabled(String accountId, String projectId, boolean enabled) {
@@ -486,17 +504,10 @@ public class ProjectApplication {
         if (running > 0) {
             throw new RuntimeException("仍有流程执行中，不能删除");
         }
-        var projectLinkGroup = this.projectLinkGroupRepository.findByProjectId(id)
-                .orElseThrow(() -> new DataNotFoundException("未找到项目分组， 项目id: " + id));
-        this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
-        this.projectGroupRepository.subProjectCountById(projectLinkGroup.getProjectGroupId(), 1);
         this.deleteGitFile(project, userId);
         this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
-        this.projectLastExecutionRepository.deleteByRef(project.getWorkflowRef());
-        this.workflowRepository.deleteByRef(project.getWorkflowRef());
-        this.workflowInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
-        this.asyncTaskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
-        this.taskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
+        this.trashProjectRepository.add(project);
+
         this.publisher.publishEvent(DeletedEvent.Builder.aDeletedEvent()
                 .projectId(project.getId())
                 .userId(userId)
@@ -507,6 +518,7 @@ public class ProjectApplication {
                 .workflowRef(project.getWorkflowRef())
                 .deletedType(VolumeDeletedEvent.VolumeDeletedType.REF)
                 .build());
+        this.publisher.publishEvent(new TrashEvent(project.getId()));
     }
 
     @Transactional
@@ -663,5 +675,43 @@ public class ProjectApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该Workflow"));
         return this.workflowRepository.findByRefAndVersion(ref, project.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到该Workflow"));
+    }
+
+    @Transactional
+    public void trashProject(String projectId) {
+        var project = this.trashProjectRepository.findById(projectId)
+            .orElseThrow(() -> new DataNotFoundException("未找到待删除项目：" + projectId));
+        var projectLinkGroup = this.projectLinkGroupRepository.findByProjectId(projectId)
+            .orElseThrow(() -> new DataNotFoundException("未找到项目分组， 项目id: " + projectId));
+        var triggerIds = this.workflowInstanceRepository.findByRef(project.getWorkflowRef()).stream()
+            .map(WorkflowInstance::getTriggerId)
+            .collect(Collectors.toList());
+        triggerIds.forEach(this.storageService::deleteWorkflowLog);
+        this.webRequestRepository.findByProjectId(project.getId()).stream()
+            .map(WebRequest::getId)
+            .forEach(this.storageService::deleteWebhook);
+        this.taskInstanceRepository.findIdAndRefByWorkflowRef(project.getWorkflowRef()).stream()
+            .filter(taskInstance -> !taskInstance.getAsyncTaskRef().equalsIgnoreCase("start"))
+            .filter(taskInstance -> !taskInstance.getAsyncTaskRef().equalsIgnoreCase("end"))
+            .map(TaskInstance::getId)
+            .forEach(this.storageService::deleteTaskLog);
+
+        this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
+        this.projectGroupRepository.subProjectCountById(projectLinkGroup.getProjectGroupId(), 1);
+        this.projectLastExecutionRepository.deleteByRef(project.getWorkflowRef());
+        this.workflowRepository.deleteByRef(project.getWorkflowRef());
+        this.workflowInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
+        this.asyncTaskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
+        this.taskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
+        this.gitRepoRepository.deleteById(project.getGitRepoId());
+        this.triggerEventRepository.deleteByProjectId(project.getId());
+
+        var eventParameterIds = this.triggerEventRepository.findParameterIdByTriggerIdIn(triggerIds);
+        this.triggerEventRepository.deleteParameterByTriggerIdIn(triggerIds);
+        this.parameterRepository.deleteByIdIn(eventParameterIds);
+
+        var instanceParameterIds = this.instanceParameterRepository.findParameterIdByTriggerIdIn(triggerIds);
+        this.instanceParameterRepository.deleteByTriggerIdIn(triggerIds);
+        this.parameterRepository.deleteByIdIn(instanceParameterIds);
     }
 }

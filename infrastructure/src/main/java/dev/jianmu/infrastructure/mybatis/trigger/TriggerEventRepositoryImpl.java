@@ -1,17 +1,19 @@
 package dev.jianmu.infrastructure.mybatis.trigger;
 
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
 import dev.jianmu.infrastructure.mapper.trigger.TriggerEventMapper;
 import dev.jianmu.infrastructure.mapper.trigger.TriggerEventParameterMapper;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
-import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
 
 /**
+ * @author Ethan Liu
  * @class TriggerEventRepositoryImpl
  * @description TriggerEventRepositoryImpl
- * @author Ethan Liu
  * @create 2021-11-11 08:36
  */
 @Repository
@@ -20,8 +22,8 @@ public class TriggerEventRepositoryImpl implements TriggerEventRepository {
     private final TriggerEventParameterMapper triggerEventParameterMapper;
 
     public TriggerEventRepositoryImpl(
-            TriggerEventMapper triggerEventMapper,
-            TriggerEventParameterMapper triggerEventParameterMapper
+        TriggerEventMapper triggerEventMapper,
+        TriggerEventParameterMapper triggerEventParameterMapper
     ) {
         this.triggerEventMapper = triggerEventMapper;
         this.triggerEventParameterMapper = triggerEventParameterMapper;
@@ -57,5 +59,26 @@ public class TriggerEventRepositoryImpl implements TriggerEventRepository {
     @Override
     public void deleteParameterByTriggerId(String triggerId) {
         this.triggerEventParameterMapper.deleteByTriggerId(triggerId);
+    }
+
+    @Override
+    public void deleteByProjectId(String projectId) {
+        this.triggerEventMapper.deleteByProjectId(projectId);
+    }
+
+    @Override
+    public void deleteParameterByTriggerIdIn(List<String> triggerIds) {
+        if (triggerIds.isEmpty()) {
+            return;
+        }
+        this.triggerEventParameterMapper.deleteParameterByTriggerIdIn(triggerIds);
+    }
+
+    @Override
+    public List<String> findParameterIdByTriggerIdIn(List<String> triggerIds) {
+        if (triggerIds.isEmpty()) {
+            return List.of();
+        }
+        return this.triggerEventParameterMapper.findParameterIdByTriggerIdIn(triggerIds);
     }
 }
