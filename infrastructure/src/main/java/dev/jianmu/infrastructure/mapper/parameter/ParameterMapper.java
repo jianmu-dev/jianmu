@@ -53,7 +53,8 @@ public interface ParameterMapper {
 
     @Delete("<script>" +
         "delete from parameter " +
-        "where `id` IN <foreach collection='ids' item='item' open='(' separator=',' close=')'> #{item}</foreach>" +
+        "where `id` IN <foreach collection='ids' item='item' open='(' separator=',' close=')'> #{item}</foreach> " +
+        "and `default` = 0" +
         "</script>")
     void deleteByIdIn(@Param("ids") List<String> ids);
 }
