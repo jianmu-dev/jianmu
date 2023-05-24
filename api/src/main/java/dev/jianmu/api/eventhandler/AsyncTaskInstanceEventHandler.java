@@ -164,22 +164,12 @@ public class AsyncTaskInstanceEventHandler {
     }
 
     @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @EventListener
     public void handleTaskSuspendedEvent(TaskSuspendedEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get TaskSuspendedEvent here -------------------------");
         log.info(event.toString());
         this.workflowInstanceInternalApplication.suspend(event.getWorkflowInstanceId());
-        log.info("-----------------------------------------------------");
-    }
-
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleTaskFailedEvent(TaskFailedEvent event) {
-        MDC.put("triggerId", event.getTriggerId());
-        log.info("Get TaskFailedEvent here -------------------------");
-        log.info(event.toString());
-        this.workflowInstanceInternalApplication.terminate(event.getWorkflowInstanceId());
         log.info("-----------------------------------------------------");
     }
 }
