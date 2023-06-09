@@ -564,6 +564,7 @@ public class ProjectApplication {
             this.workflowInstanceRepository.findOldDataByRefOffset(project.getWorkflowRef(), this.globalProperties.getGlobal().getRecord().getMax())
                     .stream()
                     .filter(workflowInstance -> workflowInstance.getStatus() == ProcessStatus.FINISHED || workflowInstance.getStatus() == ProcessStatus.TERMINATED)
+                    .filter(workflowInstance -> this.workflowInstanceRepository.findById(workflowInstance.getId()).isEmpty())
                     .forEach(workflowInstance -> {
                         this.storageService.deleteWorkflowLog(workflowInstance.getTriggerId());
                         // 删除触发器事件和web请求
