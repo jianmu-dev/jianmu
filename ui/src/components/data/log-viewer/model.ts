@@ -1,5 +1,6 @@
 // @ts-ignore
 import _listen from 'good-listener';
+import AnsiUp from 'ansi_up';
 
 export const MAX_SIZE = 3000;
 export type DownloadFnType = () => Promise<string>;
@@ -121,7 +122,7 @@ export default class LogViewer {
     if (this.isSse) {
       this.eventSource.onmessage = async (e: any) => {
         this.lines.push(Number(e.lastEventId));
-        this.allData.push(e.data);
+        this.allData.push(e.data && new AnsiUp().ansi_to_html(e.data));
         if (this.line === 0) {
           this.line = this.lines[0];
         }

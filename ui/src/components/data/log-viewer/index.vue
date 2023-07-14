@@ -23,7 +23,7 @@
         <div class="no" :style="{ left: `${-1 * noWidth}px`, width: `${noWidth}px` }">
           {{ idx + 1 }}
         </div>
-        <pre class="txt">{{ txt }}</pre>
+        <pre class="txt" v-html="txt" />
       </div>
     </div>
   </div>
@@ -35,6 +35,7 @@ import LogViewer, { CallBackFnType, DownloadFnType } from './model';
 
 export default defineComponent({
   name: 'jm-log-viewer',
+  inheritAttrs: false,
   props: {
     filename: {
       type: String,
