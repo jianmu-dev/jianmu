@@ -10,6 +10,7 @@ import dev.jianmu.application.exception.NotAllowAuthSignInException;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.user.repository.UserRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 /**
  * @author Ethan Liu

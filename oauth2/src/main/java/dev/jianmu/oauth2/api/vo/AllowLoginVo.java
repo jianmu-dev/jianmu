@@ -3,7 +3,7 @@ package dev.jianmu.oauth2.api.vo;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 
 /**

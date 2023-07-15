@@ -11,7 +11,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import dev.jianmu.api.vo.WebhookResult;
 import dev.jianmu.application.service.TriggerApplication;
