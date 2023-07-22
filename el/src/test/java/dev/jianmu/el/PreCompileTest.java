@@ -1,7 +1,5 @@
 package dev.jianmu.el;
 
-import dev.jianmu.el.El;
-import dev.jianmu.el.ElContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

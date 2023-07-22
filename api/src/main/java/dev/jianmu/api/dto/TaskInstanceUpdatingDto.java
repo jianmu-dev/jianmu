@@ -1,13 +1,11 @@
 package dev.jianmu.api.dto;
 
-import dev.jianmu.task.aggregate.InstanceStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import jakarta.validation.constraints.NotNull;
 
 /**
  * @class TaskInstanceUpdatingDto

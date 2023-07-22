@@ -6,8 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import dev.jianmu.infrastructure.jackson2.UnmodifiableListDeserializer;
-import dev.jianmu.infrastructure.jackson2.UnmodifiableSetDeserializer;
-import dev.jianmu.workflow.aggregate.definition.Node;
 import dev.jianmu.workflow.aggregate.definition.Start;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
@@ -17,7 +15,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @class StringListTypeHandler

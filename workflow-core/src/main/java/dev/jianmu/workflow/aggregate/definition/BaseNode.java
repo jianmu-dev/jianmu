@@ -2,7 +2,10 @@ package dev.jianmu.workflow.aggregate.definition;
 
 import dev.jianmu.workflow.aggregate.process.FailureMode;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Ethan Liu

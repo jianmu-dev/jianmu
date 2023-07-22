@@ -1,12 +1,11 @@
 package dev.jianmu.infrastructure.mybatis.project;
 
-import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
-
 import dev.jianmu.infrastructure.mapper.project.TrashProjectMapper;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.repository.TrashProjectRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 /**
  * @class TrashProjectRepositoryImpl

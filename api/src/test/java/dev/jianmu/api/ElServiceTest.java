@@ -3,11 +3,10 @@ package dev.jianmu.api;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.Expression;
 import dev.jianmu.workflow.el.ExpressionLanguage;
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
-import jakarta.annotation.Resource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

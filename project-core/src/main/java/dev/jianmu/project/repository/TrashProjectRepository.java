@@ -1,8 +1,8 @@
 package dev.jianmu.project.repository;
 
-import java.util.Optional;
-
 import dev.jianmu.project.aggregate.Project;
+
+import java.util.Optional;
 
 /**
  * @class TrashProjectRepository

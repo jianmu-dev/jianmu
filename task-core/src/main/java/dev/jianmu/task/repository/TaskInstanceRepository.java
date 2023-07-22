@@ -3,7 +3,6 @@ package dev.jianmu.task.repository;
 import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 

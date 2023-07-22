@@ -1,5 +1,10 @@
 package dev.jianmu.api.controller;
 
+import dev.jianmu.api.vo.WebhookResult;
+import dev.jianmu.application.service.TriggerApplication;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -10,13 +15,6 @@ import org.springframework.web.servlet.HandlerMapping;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-
-import jakarta.servlet.http.HttpServletRequest;
-
-import dev.jianmu.api.vo.WebhookResult;
-import dev.jianmu.application.service.TriggerApplication;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * @author Ethan Liu
