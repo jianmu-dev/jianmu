@@ -1,14 +1,13 @@
 package dev.jianmu.infrastructure.mybatis.trigger;
 
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
-
 import dev.jianmu.infrastructure.mapper.trigger.TriggerEventMapper;
 import dev.jianmu.infrastructure.mapper.trigger.TriggerEventParameterMapper;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Ethan Liu

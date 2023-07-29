@@ -1,12 +1,11 @@
 package dev.jianmu.api.dto;
 
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 /**
  * @author huangxi

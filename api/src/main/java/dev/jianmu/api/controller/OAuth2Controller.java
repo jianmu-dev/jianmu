@@ -25,9 +25,10 @@ import dev.jianmu.user.aggregate.User;
 import dev.jianmu.user.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,7 +36,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,16 +50,16 @@ import java.util.Optional;
 @Tag(name = "oauth2控制器", description = "oauth2控制器")
 public class OAuth2Controller {
     private final UserRepository userRepository;
-    private final AuthenticationManager authenticationManager;
+    private final AuthenticationProvider authenticationProvider;
     private final JwtProvider jwtProvider;
     private final JwtProperties jwtProperties;
     private final OAuth2Properties oAuth2Properties;
     private final GlobalProperties globalProperties;
 
-    public OAuth2Controller(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties, GlobalProperties globalProperties) {
+    public OAuth2Controller(UserRepository userRepository, AuthenticationProvider authenticationProvider, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties, GlobalProperties globalProperties) {
         this.userRepository = userRepository;
         this.jwtProvider = jwtProvider;
-        this.authenticationManager = authenticationManager;
+        this.authenticationProvider = authenticationProvider;
         this.jwtProperties = jwtProperties;
         this.oAuth2Properties = oAuth2Properties;
         this.globalProperties = globalProperties;
@@ -134,7 +134,7 @@ public class OAuth2Controller {
             this.userRepository.update(user);
         }
 
-        Authentication authentication = this.authenticationManager.authenticate(
+        Authentication authentication = this.authenticationProvider.authenticate(
                 new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(JwtSession.builder()
                         .avatarUrl(user.getAvatarUrl())
                         .id(user.getId())

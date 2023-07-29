@@ -1,13 +1,12 @@
 package dev.jianmu.infrastructure.mapper.project;
 
+import dev.jianmu.project.aggregate.Project;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.Optional;
-
-import dev.jianmu.project.aggregate.Project;
 
 /**
  * @class TrashProjectMapper

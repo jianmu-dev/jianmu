@@ -4,14 +4,15 @@ import dev.jianmu.api.dto.JwtResponse;
 import dev.jianmu.api.dto.LoginDto;
 import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
-import dev.jianmu.infrastructure.jackson2.JsonUtil;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.NotAllowAuthSignInException;
+import dev.jianmu.infrastructure.jackson2.JsonUtil;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.user.repository.UserRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,8 +20,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.validation.Valid;
 
 /**
  * @author Ethan Liu
@@ -32,13 +31,13 @@ import javax.validation.Valid;
 @RequestMapping("auth")
 @Tag(name = "Auth", description = "Auth API")
 public class AuthController {
-    private final AuthenticationManager authenticationManager;
+    private final AuthenticationProvider authenticationProvider;
     private final JwtProvider jwtProvider;
     private final UserRepository userRepository;
     private final JwtProperties jwtProperties;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtProvider jwtProvider, UserRepository userRepository, JwtProperties jwtProperties) {
-        this.authenticationManager = authenticationManager;
+    public AuthController(AuthenticationProvider authenticationProvider, JwtProvider jwtProvider, UserRepository userRepository, JwtProperties jwtProperties) {
+        this.authenticationProvider = authenticationProvider;
         this.jwtProvider = jwtProvider;
         this.userRepository = userRepository;
         this.jwtProperties = jwtProperties;
@@ -50,7 +49,7 @@ public class AuthController {
         var user = this.userRepository.findByUsername(loginDto.getUsername())
                 .orElseThrow(() -> new DataNotFoundException("未找到该用户名"));
 
-        Authentication authentication = this.authenticationManager.authenticate(
+        Authentication authentication = this.authenticationProvider.authenticate(
                 new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(JwtSession.builder()
                         .id(user.getId())
                         .username(user.getUsername())

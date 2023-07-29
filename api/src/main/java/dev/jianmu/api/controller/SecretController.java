@@ -1,23 +1,15 @@
 package dev.jianmu.api.controller;
 
-import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.KVPairDto;
 import dev.jianmu.api.dto.NamespaceDto;
-import dev.jianmu.api.dto.NamespaceSearchDto;
 import dev.jianmu.api.mapper.KVPairDtoMapper;
 import dev.jianmu.api.mapper.NamespaceDtoMapper;
-import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.SecretApplication;
-import dev.jianmu.secret.aggregate.KVPair;
-import dev.jianmu.secret.aggregate.Namespace;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @class SecretController

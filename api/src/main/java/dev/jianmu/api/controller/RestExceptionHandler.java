@@ -3,6 +3,7 @@ package dev.jianmu.api.controller;
 import dev.jianmu.api.vo.ErrorMessage;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.infrastructure.exception.DBException;
+import jakarta.validation.ConstraintViolationException;
 import org.apache.catalina.connector.ClientAbortException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.HandlerMethod;
 
-import javax.validation.ConstraintViolationException;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;

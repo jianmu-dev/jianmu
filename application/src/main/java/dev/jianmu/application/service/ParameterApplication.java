@@ -1,14 +1,11 @@
 package dev.jianmu.application.service;
 
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
-import dev.jianmu.workflow.aggregate.parameter.SecretParameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @class ParameterApplication

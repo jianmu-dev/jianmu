@@ -1,7 +1,7 @@
 package dev.jianmu.infrastructure.mapper.node;
 
-import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.infrastructure.typehandler.NodeParameterListTypeHandler;
+import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

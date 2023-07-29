@@ -1,11 +1,11 @@
 package dev.jianmu.infrastructure.lock.impl;
 
 import dev.jianmu.infrastructure.lock.DistributedLock;
+import jakarta.annotation.Resource;
 import org.redisson.api.RedissonClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.concurrent.locks.Lock;
 
 /**
