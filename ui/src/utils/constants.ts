@@ -21,5 +21,4 @@ export const DEFAULT_DATETIME_FORMAT = 'yyyy-mm-dd HH:MM:ss';
 /**
  * API前缀
  */
-export const API_PREFIX =
-  (import.meta.env.MODE === 'cdn' ? import.meta.env.VITE_JIANMUHUB_API_BASE_URL : '') + '/jianmu_saas';
+export const API_PREFIX = '/jianmu_saas';
