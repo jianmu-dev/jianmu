@@ -7,7 +7,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>dev.jianmu</groupId>
-        <version>0.5.14-saas</version>
+        <version>0.5.15-saas</version>
     </parent>
 
     <artifactId>el</artifactId>
@@ -16,7 +16,7 @@
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>workflow-core</artifactId>
-            <version>0.5.14-saas</version>
+            <version>0.5.15-saas</version>
         </dependency>
     </dependencies>
 
