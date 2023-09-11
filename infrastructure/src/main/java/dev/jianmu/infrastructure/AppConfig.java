@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryListener;
-import org.springframework.retry.listener.RetryListenerSupport;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.web.firewall.HttpFirewall;
@@ -104,7 +103,7 @@ public class AppConfig implements AsyncConfigurer, WebMvcConfigurer {
 
     @Bean
     public RetryListener retryListener() {
-        return new RetryListenerSupport() {
+        return new RetryListener() {
             @Override
             public <T, E extends Throwable> void onError(
                     RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
