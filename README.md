@@ -52,7 +52,9 @@
 
 ![](https://jianmu-blog.assets.dghub.cn/jianmu-blog/1.29.0/assets/blog-source/%E7%AC%AC%E4%B8%80%E5%B1%8F%E5%9B%BE.png)
 
-[ci.jianmu.dev](https://ci.jianmu.dev)
+在线体验：[devops.jianmuhub.com](https://devops.jianmuhub.com)
+
+开源示例：[ci.jianmu.dev](https://ci.jianmu.dev)
 
 #### TL;DR
 
