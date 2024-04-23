@@ -114,9 +114,7 @@ openssl rand -hex 16
 
 若，使用过程中遇到问题，开issue反馈给我们。
 
-* 建木：https://gitee.com/jianmu-dev/jianmu/issues
-* 建木Worker：https://gitee.com/organizations/jianmu-workers/issues
-* 建木节点：https://gitee.com/organizations/jianmu-runners/issues
+* 建木：https://gitcode.com/jianmu-dev/jianmu/issues
 
 [官方示例](https://ci.jianmu.dev)
 
