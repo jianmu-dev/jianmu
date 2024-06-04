@@ -32,7 +32,7 @@ export const baseUrl = {
   parameter: '/view/parameters',
   triggerEvent: '/view/trigger_events',
   trigger: '/view/trigger',
-  version: 'https://jianmu.dev/versions/ci',
+  version: 'https://api.jianmu.dev/versions/ci',
   cache: '/view/caches',
 };
 const hubUrl = import.meta.env.VITE_JIANMU_HUB_API_BASE_URL;
