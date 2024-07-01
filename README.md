@@ -50,7 +50,7 @@
 
 > 建木是一个面向DevOps领域的极易扩展的开源无代码(图形化)/低代码(GitOps)工具。可以帮助用户轻松编排各种DevOps流程并分发到不同平台执行。
 
-![](https://jianmu-blog.assets.dghub.cn/jianmu-blog/1.29.0/assets/blog-source/%E7%AC%AC%E4%B8%80%E5%B1%8F%E5%9B%BE.png)
+![](https://jianmu-blog.assets.dghub.cn/jianmu-blog/1.80.1/assets/blog-source/%E7%AC%AC%E4%B8%80%E5%B1%8F%E5%9B%BE.png)
 
 在线体验：[devops.jianmuhub.com](https://devops.jianmuhub.com)
 
