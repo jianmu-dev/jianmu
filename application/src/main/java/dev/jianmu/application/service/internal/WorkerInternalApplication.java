@@ -284,7 +284,7 @@ public class WorkerInternalApplication {
                     .map(entry -> Map.entry("JIANMU_" + entry.getKey(), entry.getValue()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
-        parameterMap.putAll(this.getEnvVariable(worker, taskInstance.getTriggerId(), taskInstance.getBusinessId(), taskInstance.getDefKey()));
+        parameterMap.putAll(this.getEnvVariable(worker, taskInstance.getTriggerId(), taskInstance.getBusinessId(), taskInstance.getDefKey(), taskInstance.getAsyncTaskRef()));
         this.addFeatureParam(parameterMap);
         parameterMap = parameterMap.entrySet().stream()
                 .filter(entry -> entry.getKey() != null)
@@ -409,7 +409,7 @@ public class WorkerInternalApplication {
      * @param worker
      * @return
      */
-    private HashMap<String, String> getEnvVariable(Worker worker, String triggerId, String businessId, String defKey) {
+    private HashMap<String, String> getEnvVariable(Worker worker, String triggerId, String businessId, String defKey, String taskRef) {
 
         HashMap<String, String> env = new HashMap<>();
         env.put("JM_RESULT_FILE", "/" + triggerId + "/" + businessId);
@@ -421,6 +421,7 @@ public class WorkerInternalApplication {
         env.put("JM_BUSINESS_ID", businessId);
         env.put("JM_TRIGGER_ID", triggerId);
         env.put("JM_DEF_KEY", defKey);
+        env.put("JM_TASK_REF", taskRef);
 
         var triggerEvent = this.triggerEventRepository.findById(triggerId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该触发事件"));
@@ -692,7 +693,7 @@ public class WorkerInternalApplication {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("未找到对应的异步任务实例："));
         envs.put("JM_RESULT_FILE", "/" + asyncTaskInstance.getTriggerId() + "/" + asyncTaskInstance.getId());
-        var map = this.getEnvVariable(worker, asyncTaskInstance.getTriggerId(), asyncTaskInstance.getId(), asyncTaskInstance.getAsyncTaskType());
+        var map = this.getEnvVariable(worker, asyncTaskInstance.getTriggerId(), asyncTaskInstance.getId(), asyncTaskInstance.getAsyncTaskType(), asyncTaskInstance.getAsyncTaskRef());
         envs.putAll(map);
         if (nodeDef.getImage() != null) {
             envs.put("JIANMU_SCRIPT", "JIANMU_SCRIPT");
