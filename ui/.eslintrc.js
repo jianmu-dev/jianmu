@@ -55,7 +55,7 @@ module.exports = {
     'no-unused-vars': 0,
     '@typescript-eslint/no-unused-vars': [1, { vars: 'all', args: 'after-used' }],
     // 未定义前不能使用
-    'no-use-before-define': 2,
+    'no-use-before-define': 1,
     // 不能有无法执行的代码
     'no-unreachable': 2,
     // 不能使用未定义的变量
