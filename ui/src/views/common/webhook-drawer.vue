@@ -101,15 +101,25 @@
         top="5vh"
       >
         <div class="tab-container">
-          <div :class="{ active: payloadTab }" @click="toPayload">触发器</div>
-          <div :class="{ active: !payloadTab }" @click="toTrigger">Payload</div>
+          <div :class="{ active: payloadTab === TabState.TRIGGER }" @click="toPayload">触发器</div>
+          <div :class="{ active: payloadTab === TabState.PAYLOAD }" @click="toTrigger">Payload</div>
+          <div :class="{ active: payloadTab === TabState.JSONVIEW }" @click="toJsonView">JsonView</div>
         </div>
         <!-- 查看payload -->
-        <div class="payload-content" v-if="!payloadTab" v-loading="payloadLoading">
+        <div class="payload-content" v-if="payloadTab === TabState.PAYLOAD" v-loading="payloadLoading">
           <jm-log-viewer v-if="webhookLog" filename="webhook.txt" :value="webhookLog" />
         </div>
+        <!-- 查看JsonView -->
+        <div class="path-bar" v-if="payloadTab === TabState.JSONVIEW">
+          <div id="path-bar-item-label" class="path-bar-item">Json路径:</div>
+          <input id="path-bar-item-input" class="path-bar-item" :value="jsonPath" readonly />
+          <jm-text-copy :value="jsonPath" />
+        </div>
+        <div class="payload-content" v-if="payloadTab === TabState.JSONVIEW" v-loading="payloadLoading">
+          <jm-json-view :data="jsonPayload" rootKey="request" :maxDepth="1" @update:selected="jsonItemSelected" />
+        </div>
         <!-- 触发器 -->
-        <div v-else class="trigger-content" v-loading="triggerParamsLoading">
+        <div v-if="payloadTab === TabState.TRIGGER" class="trigger-content" v-loading="triggerParamsLoading">
           <jm-scrollbar>
             <div style="padding: 20px">
               <!-- 参数列表 -->
@@ -195,6 +205,12 @@ import { ParamTypeEnum } from '@/api/dto/enumeration';
 import JmTextViewer from '@/components/text-viewer/index.vue';
 import ParamValue from '@/views/common/param-value.vue';
 
+enum TabState {
+  TRIGGER = 'TRIGGER',
+  PAYLOAD = 'PAYLOAD',
+  JSONVIEW = 'JSONVIEW',
+}
+
 export default defineComponent({
   components: { JmTextViewer, ParamValue },
   props: {
@@ -221,7 +237,9 @@ export default defineComponent({
     const scrollRef = ref<HTMLDivElement>();
     const webhookDrawerRef = ref<InstanceType<typeof ElScrollbar>>();
     const loadState = ref<StateEnum>(StateEnum.NONE);
-    const payloadTab = ref<boolean>(true);
+    const payloadTab = ref<TabState>(TabState.TRIGGER);
+    // JsonPath
+    const jsonPath = ref<string>('');
     // 列表id
     const webhookListId = ref<string>('');
     // webhook参数详情
@@ -278,6 +296,8 @@ export default defineComponent({
     });
     // 请求列表
     const webhookRequestList = ref<IWebRequestVo[]>([]);
+    // JsonPayload
+    const jsonPayload = ref<any>();
     // 日志
     const webhookLog = ref<string>('');
     // webhookUrl
@@ -429,9 +449,25 @@ export default defineComponent({
     const rowkey = (row: any) => {
       return row.id;
     };
+    const jsonItemSelected = (data: any) => {
+      jsonPath.value = data.path;
+    };
+    // JsonView
+    const toJsonView = async () => {
+      payloadTab.value = TabState.JSONVIEW;
+      try {
+        payloadLoading.value = true;
+        const payloadContent = await getPayloadParams(webhookListId.value);
+        jsonPayload.value = JSON.parse(payloadContent.payload);
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      } finally {
+        payloadLoading.value = false;
+      }
+    };
     // payload
     const toTrigger = async () => {
-      payloadTab.value = false;
+      payloadTab.value = TabState.PAYLOAD;
       try {
         payloadLoading.value = true;
         const payloadContent = await getPayloadParams(webhookListId.value);
@@ -444,14 +480,14 @@ export default defineComponent({
     };
     // 触发器
     const toPayload = () => {
-      payloadTab.value = true;
+      payloadTab.value = TabState.TRIGGER;
       // 还原密钥显示
       secretVisible.value = true;
     };
     // 弹窗关闭
     const dialogClose = () => {
       // 还原tab
-      payloadTab.value = true;
+      payloadTab.value = TabState.TRIGGER;
       // 还原密钥显示
       secretVisible.value = true;
     };
@@ -496,6 +532,10 @@ export default defineComponent({
       retry,
       seePayload,
       payloadDialogVisible,
+      // Json Payload
+      jsonPayload,
+      jsonItemSelected,
+      jsonPath,
       // 日志
       webhookLog,
       btnDown,
@@ -504,8 +544,10 @@ export default defineComponent({
       tableLoading,
       // 切换tab
       payloadTab,
+      TabState,
       toTrigger,
       toPayload,
+      toJsonView,
       // 请求详情
       webhookParamsDetail,
       webhookAuth,
@@ -556,6 +598,7 @@ export default defineComponent({
     background: #eff4f9;
     box-sizing: border-box;
     padding: 20px 25px 0 25px;
+
     // 项目名称
     .project-name {
       margin-bottom: 14px;
@@ -592,6 +635,7 @@ export default defineComponent({
           margin-right: 10px;
           border-radius: 2px;
           display: flex;
+
           // 图标
           .jm-icon-input-hook {
             content: '\e818';
@@ -733,6 +777,15 @@ export default defineComponent({
     }
   }
 
+  ::v-deep(.jm-text-copy) {
+    font-size: 20px;
+
+    .jm-icon-button-copy {
+      color: #082340;
+      opacity: 1;
+    }
+  }
+
   // 查看paload
   ::v-deep(.el-dialog) {
     .el-dialog__header {
@@ -786,6 +839,38 @@ export default defineComponent({
         color: #fff;
         background: #042749;
       }
+    }
+
+    // JsonView
+    .path-bar {
+      align-items: center;
+      display: flex;
+      flex: 1;
+      height: 25px;
+      padding: 20px;
+      border: 1px solid #e6ebf2;
+    }
+
+    .path-bar-item {
+      height: 100%;
+      padding: 0 10px;
+    }
+
+    #path-bar-item-label {
+      align-items: center;
+      display: flex;
+      border-right: 1px solid #ccc;
+    }
+
+    #path-bar-item-input {
+      flex: 1;
+    }
+
+    #path-bar-item-copy {
+      background-color: #fff;
+      height: 25px;
+      width: 70px;
+      border-left: 1px solid #ccc;
     }
 
     // payload/trigger
@@ -880,6 +965,7 @@ export default defineComponent({
         .display-container {
           display: flex;
           align-items: center;
+
           //justify-content: space-between;
           .param-value {
             flex: 1;
