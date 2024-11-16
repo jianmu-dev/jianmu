@@ -76,7 +76,15 @@ public class WorkerController {
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
     public void join(@PathVariable("workerId") String workerId, @RequestBody @Valid WorkerJoiningDto dto) {
-        this.workerApplication.join(workerId, dto.getType(), dto.getName(), dto.getTag());
+        var worker = Worker.Builder.aWorker()
+                .id(workerId)
+                .name(dto.getName())
+                .type(dto.getType())
+                .os(dto.getOs())
+                .arch(dto.getArch())
+                .capacity(dto.getCapacity())
+                .build();
+        this.workerApplication.join(worker);
     }
 
     @PutMapping("{workerId}/online")
