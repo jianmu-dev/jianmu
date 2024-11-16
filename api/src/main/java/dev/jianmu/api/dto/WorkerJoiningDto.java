@@ -25,4 +25,10 @@ public class WorkerJoiningDto {
     private String name;
     @Schema(required = true, description = "tag")
     private String tag;
+    @Schema(description = "capacity")
+    private Integer capacity;
+    @Schema(description = "os")
+    private String os;
+    @Schema(description = "arch")
+    private String arch;
 }
