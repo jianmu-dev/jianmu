@@ -44,6 +44,11 @@ public class WorkerRepositoryImpl implements WorkerRepository {
     }
 
     @Override
+    public List<Worker> findAll() {
+        return this.workerMapper.findAll();
+    }
+
+    @Override
     public Optional<Worker> findById(String workerId) {
         return this.workerMapper.findById(workerId);
     }

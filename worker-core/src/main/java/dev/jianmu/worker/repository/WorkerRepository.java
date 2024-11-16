@@ -21,6 +21,8 @@ public interface WorkerRepository {
 
     void updateTag(Worker worker);
 
+    List<Worker> findAll();
+
     Optional<Worker> findById(String workerId);
 
     Worker findByType(Worker.Type type);
