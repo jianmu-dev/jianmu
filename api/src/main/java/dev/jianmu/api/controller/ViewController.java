@@ -7,6 +7,7 @@ import dev.jianmu.api.vo.*;
 import dev.jianmu.application.dsl.DslParser;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
+import dev.jianmu.application.service.internal.WorkerInternalApplication;
 import dev.jianmu.application.service.internal.WorkflowInternalApplication;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.infrastructure.storage.vo.LogVo;
@@ -16,6 +17,7 @@ import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.aggregate.Volume;
 import dev.jianmu.trigger.event.TriggerEvent;
+import dev.jianmu.worker.aggregate.Worker;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
@@ -59,6 +61,7 @@ public class ViewController {
     private final ProjectGroupApplication projectGroupApplication;
     private final CacheApplication cacheApplication;
     private final WorkflowInternalApplication workflowInternalApplication;
+    private final WorkerApplication workerApplication;
 
     public ViewController(
             ProjectApplication projectApplication,
@@ -72,7 +75,8 @@ public class ViewController {
             StorageService storageService,
             ProjectGroupApplication projectGroupApplication,
             CacheApplication cacheApplication,
-            WorkflowInternalApplication workflowInternalApplication
+            WorkflowInternalApplication workflowInternalApplication,
+            WorkerApplication workerApplication
     ) {
         this.projectApplication = projectApplication;
         this.triggerApplication = triggerApplication;
@@ -86,6 +90,7 @@ public class ViewController {
         this.projectGroupApplication = projectGroupApplication;
         this.cacheApplication = cacheApplication;
         this.workflowInternalApplication = workflowInternalApplication;
+        this.workerApplication = workerApplication;
     }
 
     @GetMapping("/parameters/types")
@@ -631,5 +636,22 @@ public class ViewController {
                 .lastModifiedTime(projectGroup.getLastModifiedTime())
                 .isDefaultGroup(DEFAULT_PROJECT_GROUP_NAME.equals(projectGroup.getName()))
                 .build();
+    }
+
+    @GetMapping("/workers")
+    @Operation(summary = "查询Worker列表", description = "查询Worker列表")
+    public List<WorkerVo> findWorkerList() {
+        var workers = this.workerApplication.findAll();
+        return workers.stream().map(worker -> WorkerVo.builder()
+                        .id(worker.getId())
+                        .name(worker.getName())
+                        .type(worker.getType())
+                        .tags(worker.getTags())
+                        .os(worker.getOs())
+                        .arch(worker.getArch())
+                        .capacity(worker.getCapacity())
+                        .createdTime(worker.getCreatedTime())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
