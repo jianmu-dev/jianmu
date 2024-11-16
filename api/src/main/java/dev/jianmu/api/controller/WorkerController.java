@@ -71,13 +71,32 @@ public class WorkerController {
     }
 
     @PutMapping("{workerId}/join")
-    @Operation(summary = "连接Server接口", description = "连接Server接口")
+    @Operation(summary = "Worker注册接口", description = "Worker注册接口")
     @Parameters({
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
     public void join(@PathVariable("workerId") String workerId, @RequestBody @Valid WorkerJoiningDto dto) {
         this.workerApplication.join(workerId, dto.getType(), dto.getName(), dto.getTag());
     }
+
+    @PutMapping("{workerId}/online")
+    @Operation(summary = "通知Worker已经Online", description = "通知Worker已经Online")
+    @Parameters({
+            @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
+    })
+    public void online(@PathVariable("workerId") String workerId) {
+        this.workerApplication.online(workerId);
+    }
+
+    @PutMapping("{workerId}/offline")
+    @Operation(summary = "通知Worker已经Offline", description = "通知Worker已经Offline")
+    @Parameters({
+            @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
+    })
+    public void offline(@PathVariable("workerId") String workerId) {
+        this.workerApplication.offline(workerId);
+    }
+
 
     @GetMapping("{workerId}/ping")
     @Operation(summary = "ping Server接口", description = "ping Server接口")

@@ -31,6 +31,14 @@ public class Worker {
     private Status status;
     private final LocalDateTime createdTime = LocalDateTime.now();
 
+    public void online() {
+        this.status = Status.ONLINE;
+    }
+
+    public void offline() {
+        this.status = Status.OFFLINE;
+    }
+
     public String getId() {
         return id;
     }

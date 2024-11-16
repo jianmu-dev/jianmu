@@ -154,6 +154,22 @@ public class WorkerInternalApplication {
     }
 
     @Transactional
+    public void online(String workerId) {
+        var worker = this.workerRepository.findById(workerId)
+                .orElseThrow(() -> new RuntimeException("未找到Worker"));
+        worker.online();
+        this.workerRepository.updateStatus(worker);
+    }
+
+    @Transactional
+    public void offline(String workerId) {
+        var worker = this.workerRepository.findById(workerId)
+                .orElseThrow(() -> new RuntimeException("未找到Worker"));
+        worker.offline();
+        this.workerRepository.updateStatus(worker);
+    }
+
+    @Transactional
     public void dispatchTask(TaskInstanceCreatedEvent event) {
         var taskInstance = this.taskInstanceRepository.findById(event.getTaskInstanceId())
                 .orElseThrow(() -> new RuntimeException("未找到任务实例：" + event.getTaskInstanceId()));
