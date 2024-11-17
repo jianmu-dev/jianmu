@@ -25,7 +25,7 @@ export default ({ command, mode }: ConfigEnv): UserConfigExport => {
         // 会话
         '/auth': { target, changeOrigin },
         // worker
-        '/workers': { target, changeOrigin },
+        '/frontend/workers': { target, changeOrigin },
         // 密钥管理
         '/secrets': { target, changeOrigin },
         // 流程定义

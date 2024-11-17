@@ -24,6 +24,15 @@ export default [
       title: '组件库',
     },
   },
+  // Worker管理路由
+  {
+    name: 'worker-manager',
+    path: 'worker-manager',
+    component: () => import('@/views/workers/workers-manager.vue'),
+    meta: {
+      title: 'Worker管理',
+    },
+  },
   // 节点库路由
   {
     name: 'node-library',

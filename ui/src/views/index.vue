@@ -23,6 +23,12 @@
           <!--          </router-link>-->
         </div>
         <div class="right-area">
+          <router-link :to="{ name: 'worker-manager' }">
+            <div class="btn-item">
+              <button class="worker-manager"></button>
+              <span class="text">Worker管理</span>
+            </div>
+          </router-link>
           <router-link :to="{ name: 'node-library' }">
             <div class="btn-item">
               <button class="node-library"></button>
@@ -128,6 +134,10 @@ export default defineComponent({
 
           &.git {
             background-image: url('@/assets/svgs/index/git-btn.svg');
+          }
+
+          &.worker-manager {
+            background-image: url('@/assets/svgs/index/worker-manager-btn.svg');
           }
 
           &.node-library {
