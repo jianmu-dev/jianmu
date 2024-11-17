@@ -33,6 +33,8 @@ public interface TaskInstanceRepository {
 
     List<TaskInstance> findByTriggerId(String triggerId);
 
+    List<TaskInstance> findByWorkerId(String workerId);
+
     List<TaskInstance> findRunningTask();
 
     List<TaskInstance> findByBusinessId(String businessId);
@@ -42,6 +44,8 @@ public interface TaskInstanceRepository {
     void deleteByWorkflowRef(String workflowRef);
 
     void deleteByTriggerId(String triggerId);
+
+    void deleteByWorkerId(String workerId);
 
     Optional<TaskInstance> findByWorkerIdAndTriggerIdLimit(String workerId, String triggerId);
 

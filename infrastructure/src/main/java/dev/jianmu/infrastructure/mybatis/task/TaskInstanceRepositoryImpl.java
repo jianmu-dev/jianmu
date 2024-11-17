@@ -168,6 +168,11 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     }
 
     @Override
+    public List<TaskInstance> findByWorkerId(String workerId) {
+        return this.taskInstanceMapper.findByWorkerId(workerId);
+    }
+
+    @Override
     public List<TaskInstance> findRunningTask() {
         return this.taskInstanceMapper.findRunningTask();
     }
@@ -190,6 +195,11 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     @Override
     public void deleteByTriggerId(String triggerId) {
         this.taskInstanceMapper.deleteByTriggerId(triggerId);
+    }
+
+    @Override
+    public void deleteByWorkerId(String workerId) {
+        this.taskInstanceMapper.deleteByWorkerId(workerId);
     }
 
     @Override
