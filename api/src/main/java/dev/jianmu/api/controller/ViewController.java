@@ -61,7 +61,6 @@ public class ViewController {
     private final ProjectGroupApplication projectGroupApplication;
     private final CacheApplication cacheApplication;
     private final WorkflowInternalApplication workflowInternalApplication;
-    private final WorkerApplication workerApplication;
 
     public ViewController(
             ProjectApplication projectApplication,
@@ -75,8 +74,7 @@ public class ViewController {
             StorageService storageService,
             ProjectGroupApplication projectGroupApplication,
             CacheApplication cacheApplication,
-            WorkflowInternalApplication workflowInternalApplication,
-            WorkerApplication workerApplication
+            WorkflowInternalApplication workflowInternalApplication
     ) {
         this.projectApplication = projectApplication;
         this.triggerApplication = triggerApplication;
@@ -90,7 +88,6 @@ public class ViewController {
         this.projectGroupApplication = projectGroupApplication;
         this.cacheApplication = cacheApplication;
         this.workflowInternalApplication = workflowInternalApplication;
-        this.workerApplication = workerApplication;
     }
 
     @GetMapping("/parameters/types")
@@ -636,22 +633,5 @@ public class ViewController {
                 .lastModifiedTime(projectGroup.getLastModifiedTime())
                 .isDefaultGroup(DEFAULT_PROJECT_GROUP_NAME.equals(projectGroup.getName()))
                 .build();
-    }
-
-    @GetMapping("/workers")
-    @Operation(summary = "查询Worker列表", description = "查询Worker列表")
-    public List<WorkerVo> findWorkerList() {
-        var workers = this.workerApplication.findAll();
-        return workers.stream().map(worker -> WorkerVo.builder()
-                        .id(worker.getId())
-                        .name(worker.getName())
-                        .type(worker.getType())
-                        .tags(worker.getTags())
-                        .os(worker.getOs())
-                        .arch(worker.getArch())
-                        .capacity(worker.getCapacity())
-                        .createdTime(worker.getCreatedTime())
-                        .build())
-                .collect(Collectors.toList());
     }
 }
