@@ -1,0 +1,22 @@
+<svg width="56px" height="56px" viewBox="0 0 56 56" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <title>Worker Management Icon</title>
+    <!-- 背景圆 -->
+    <circle cx="28" cy="28" r="28" fill="#E8E3FF"/>
+    
+    <!-- Worker管理图标 - 使用直接连接线 -->
+    <g transform="translate(4, 4)">
+        <!-- 连接线 - 从中心到各节点 -->
+        <path d="M24 24 L24 10M24 24 L37 30M24 24 L11 30" 
+              stroke="#4B0082" 
+              stroke-width="2.5"
+              fill="none"/>
+              
+        <!-- 主圆圈（代表中心节点） -->
+        <circle cx="24" cy="24" r="7" fill="#4B0082"/>
+        
+        <!-- 三个围绕的小圆点（代表worker节点） -->
+        <circle cx="24" cy="8" r="5" fill="#4B0082"/>
+        <circle cx="38" cy="32" r="5" fill="#4B0082"/>
+        <circle cx="10" cy="32" r="5" fill="#4B0082"/>
+    </g>
+</svg>

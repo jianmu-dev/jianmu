@@ -39,8 +39,13 @@ public class WorkerRepositoryImpl implements WorkerRepository {
     }
 
     @Override
-    public void updateTag(Worker worker) {
-        this.workerMapper.updateTag(worker);
+    public void updateInfo(Worker worker) {
+        this.workerMapper.updateInfo(worker);
+    }
+
+    @Override
+    public List<Worker> findAll() {
+        return this.workerMapper.findAll();
     }
 
     @Override

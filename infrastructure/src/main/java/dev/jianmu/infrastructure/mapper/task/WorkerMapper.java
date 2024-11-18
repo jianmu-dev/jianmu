@@ -24,8 +24,12 @@ public interface WorkerMapper {
     @Update("update worker set status = #{status} where id = #{id}")
     void updateStatus(Worker worker);
 
-    @Update("update worker set tags = #{tags} where id = #{id}")
-    void updateTag(Worker worker);
+    @Update("update worker set name = #{name}, tags = #{tags}, capacity = #{capacity}, os = #{os}, arch = #{arch} where id = #{id}")
+    void updateInfo(Worker worker);
+
+    @Select("select * from worker")
+    @Result(column = "created_time", property = "createdTime")
+    List<Worker> findAll();
 
     @Select("select * from worker where id = #{workerId}")
     @Result(column = "created_time", property = "createdTime")
@@ -41,6 +45,7 @@ public interface WorkerMapper {
             "</script>")
     @Result(column = "created_time", property = "createdTime")
     List<Worker> findByTypeInAndCreatedTimeLessThan(@Param("types") List<Worker.Type> types, @Param("createdTime") LocalDateTime createdTime);
+
     @Select("<script> " +
             "select * from worker" +
             "<where>" +

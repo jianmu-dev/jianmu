@@ -82,7 +82,7 @@ export enum NodeTypeEnum {
   DOCKER = 'DOCKER',
   SHELL = 'SHELL',
   LOCAL = 'LOCAL',
-  COMMUNITY = 'COMMUNITY'
+  COMMUNITY = 'COMMUNITY',
 }
 
 /**
@@ -117,7 +117,7 @@ export enum WebhookRequstStateEnum {
  * 参数类型枚举
  */
 export enum ParamTypeEnum {
-  SECRET = 'SECRET'
+  SECRET = 'SECRET',
 }
 
 /**
@@ -126,7 +126,7 @@ export enum ParamTypeEnum {
 export enum SortTypeEnum {
   DEFAULT_SORT = 'DEFAULT_SORT',
   LAST_MODIFIED_TIME = 'LAST_MODIFIED_TIME',
-  LAST_EXECUTION_TIME = 'LAST_EXECUTION_TIME'
+  LAST_EXECUTION_TIME = 'LAST_EXECUTION_TIME',
 }
 
 /**
@@ -144,4 +144,22 @@ export enum VisibleTypeEnum {
   PUBLIC = 'PUBLIC',
   PRIVATE = 'PRIVATE',
   ORGANIZATION_VISIBLE = 'ORGANIZATION_VISIBLE',
+}
+
+/**
+ * Worker类型枚举
+ */
+export enum WorkerTypeEnum {
+  EMBEDDED = 'EMBEDDED',
+  DOCKER = 'DOCKER',
+  KUBERNETES = 'KUBERNETES',
+  SHELL = 'SHELL',
+}
+
+/**
+ * Worker状态枚举
+ */
+export enum WorkerStatusEnum {
+  ONLINE = 'ONLINE',
+  OFFLINE = 'OFFLINE',
 }

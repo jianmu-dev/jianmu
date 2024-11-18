@@ -19,7 +19,9 @@ public interface WorkerRepository {
 
     void updateStatus(Worker worker);
 
-    void updateTag(Worker worker);
+    void updateInfo(Worker worker);
+
+    List<Worker> findAll();
 
     Optional<Worker> findById(String workerId);
 

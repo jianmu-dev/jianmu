@@ -136,21 +136,30 @@ public class WorkerInternalApplication {
     }
 
     @Transactional
-    public void join(String workerId, Worker.Type type, String name, String tag) {
-        if (this.workerRepository.findById(workerId).isPresent()) {
-            this.workerRepository.updateTag(Worker.Builder.aWorker()
-                    .id(workerId)
-                    .tags(tag)
-                    .build());
-            return;
-        }
-        this.workerRepository.add(Worker.Builder.aWorker()
-                .id(workerId)
-                .name(name)
-                .type(type)
-                .tags(tag)
-                .status(Worker.Status.ONLINE)
-                .build());
+    public void join(Worker worker) {
+        this.workerRepository.findById(worker.getId()).ifPresentOrElse(
+                w -> this.workerRepository.updateInfo(worker),
+                () -> {
+                    worker.online();
+                    this.workerRepository.add(worker);
+                }
+        );
+    }
+
+    @Transactional
+    public void online(String workerId) {
+        var worker = this.workerRepository.findById(workerId)
+                .orElseThrow(() -> new RuntimeException("未找到Worker"));
+        worker.online();
+        this.workerRepository.updateStatus(worker);
+    }
+
+    @Transactional
+    public void offline(String workerId) {
+        var worker = this.workerRepository.findById(workerId)
+                .orElseThrow(() -> new RuntimeException("未找到Worker"));
+        worker.offline();
+        this.workerRepository.updateStatus(worker);
     }
 
     @Transactional

@@ -37,6 +37,9 @@ public interface TaskInstanceMapper {
     @Delete("delete from task_instance where trigger_id = #{triggerId}")
     void deleteByTriggerId(String triggerId);
 
+    @Delete("delete from task_instance where worker_id = #{workerId}")
+    void deleteByWorkerId(String workerId);
+
     @Select("select * from task_instance where id = #{instanceId}")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
@@ -96,6 +99,21 @@ public interface TaskInstanceMapper {
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
     List<TaskInstance> findByTriggerId(String triggerId);
+
+    @Select("select * from task_instance where worker_id = #{workerId}")
+    @Result(column = "serial_no", property = "serialNo")
+    @Result(column = "def_key", property = "defKey")
+    @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
+    @Result(column = "async_task_ref", property = "asyncTaskRef")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "business_id", property = "businessId")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "worker_id", property = "workerId")
+    @Result(column = "_version", property = "version")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "end_time", property = "endTime")
+    List<TaskInstance> findByWorkerId(String workerId);
 
     @Select("select * from task_instance where status = 'RUNNING'")
     @Result(column = "serial_no", property = "serialNo")
