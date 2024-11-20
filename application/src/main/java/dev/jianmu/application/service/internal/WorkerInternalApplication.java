@@ -139,10 +139,7 @@ public class WorkerInternalApplication {
     public void join(Worker worker) {
         this.workerRepository.findById(worker.getId()).ifPresentOrElse(
                 w -> this.workerRepository.updateInfo(worker),
-                () -> {
-                    worker.online();
-                    this.workerRepository.add(worker);
-                }
+                () -> this.workerRepository.add(worker)
         );
     }
 
