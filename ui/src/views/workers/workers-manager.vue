@@ -20,7 +20,7 @@
         ></div>
         <div class="wrapper">
           <div class="top">
-            <span class="id">ID: {{ i.id }}</span>
+            <span class="id">{{ i.id }}</span>
           </div>
           <div class="name">
             <span>名称：</span>
@@ -156,15 +156,21 @@ export default defineComponent({
 
     .item {
       position: relative;
-      margin: 0.5%;
-      width: 19%;
+      box-sizing: border-box;
+      margin: 0.8% 0.8% 0 0;
+      width: 19.2%;
       min-width: 260px;
-      height: 170px;
       background-color: #ffffff;
-      box-shadow: 0px 0px 8px 4px #eff4f9;
+      min-height: 166px;
+      border-radius: 0px 0px 4px 4px;
 
       &:hover {
-        box-shadow: 0px 6px 16px 4px #e6eef6;
+        box-shadow: 0px 0px 12px 4px #edf1f8;
+
+        .wrapper {
+          border: 1px solid transparent;
+          border-top: none;
+        }
 
         .operation {
           display: block;
@@ -185,12 +191,12 @@ export default defineComponent({
       }
 
       .wrapper {
-        padding: 15px;
-        border: 1px solid transparent;
-        height: 138px;
-        color: #6b7b8d;
-        font-size: 13px;
+        min-height: 116px;
         position: relative;
+        padding: 16px 20px 10px 20px;
+        border: 1px solid #dee4eb;
+        border-top: none;
+        border-radius: 0px 0px 4px 4px;
 
         &:hover {
           border-color: #096dd9;
@@ -214,32 +220,39 @@ export default defineComponent({
         }
 
         .name {
-          margin-top: 5px;
-          line-height: 20px;
-
-          &:hover {
-            color: #096dd9;
-          }
+          margin: 6px 0;
+          color: #6b7b8d;
+          font-size: 14px;
         }
 
-        // .tags {
-        //     margin-top: 5px;
-        //     line-height: 20px;
-        // }
+        .tags {
+          margin: 6px 0;
+          color: #6b7b8d;
+          font-size: 14px;
+        }
 
-        // .os {
-        //     margin-top: 5px;
-        //     line-height: 20px;
-        // }
+        .os {
+          margin: 6px 0;
+          color: #6b7b8d;
+          font-size: 14px;
+        }
 
-        // .arch {
-        //     margin-top: 5px;
-        //     line-height: 20px;
-        // }
+        .arch {
+          margin: 6px 0;
+          color: #6b7b8d;
+          font-size: 14px;
+        }
+
+        .type {
+          margin: 6px 0;
+          color: #6b7b8d;
+          font-size: 14px;
+        }
 
         .created-time {
-          position: absolute;
-          bottom: 10px;
+          margin: 6px 0;
+          color: #6b7b8d;
+          font-size: 14px;
         }
       }
 
