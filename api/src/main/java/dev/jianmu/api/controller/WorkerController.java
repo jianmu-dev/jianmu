@@ -2,7 +2,6 @@ package dev.jianmu.api.controller;
 
 import dev.jianmu.api.vo.WorkerVo;
 import dev.jianmu.application.service.WorkerApplication;
-import dev.jianmu.application.service.internal.WorkerInternalApplication;
 import dev.jianmu.worker.aggregate.Worker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,6 +45,7 @@ public class WorkerController {
                         .os(worker.getOs())
                         .arch(worker.getArch())
                         .capacity(worker.getCapacity())
+                        .status(worker.getStatus())
                         .createdTime(worker.getCreatedTime())
                         .build())
                 .collect(Collectors.toList());
