@@ -81,7 +81,7 @@ public class WorkerApi {
         this.workerApplication.join(worker);
     }
 
-    @PutMapping("{workerId}/online")
+    @PatchMapping("{workerId}/online")
     @Operation(summary = "通知Worker已经Online", description = "通知Worker已经Online")
     @Parameters({
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
@@ -90,7 +90,7 @@ public class WorkerApi {
         this.workerApplication.online(workerId);
     }
 
-    @PutMapping("{workerId}/offline")
+    @PatchMapping("{workerId}/offline")
     @Operation(summary = "通知Worker已经Offline", description = "通知Worker已经Offline")
     @Parameters({
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
