@@ -42,16 +42,16 @@ export default /* #__PURE__*/ defineComponent({
   components: { JsonViewItem },
   emits: ['update:selected'],
   methods: {
-    convertKey(key: string): string {
+    convertKey(key: string): [string, boolean] {
       if (Number.isInteger(key)) {
-        return `[${key.toString()}]`;
+        return [`[${key.toString()}]`, true];
       }
 
       if (/[^A-Za-z0-9_$]/.test(key.toString())) {
-        return `["${key}"]`;
+        return [`["${key}"]`, true];
       }
 
-      return `${key}`;
+      return [`${key}`, false];
     },
     build(key: string, val: any, depth: number, path: string, includeKey: boolean): JsonData {
       const children = [];
@@ -84,7 +84,10 @@ export default /* #__PURE__*/ defineComponent({
           children: children,
         };
       } else {
-        let convertedKey = this.convertKey(key);
+        const [convertedKey, needCutDot] = this.convertKey(key);
+        if (needCutDot) {
+          path = path.slice(0, -1);
+        }
         // Build Value
         return {
           key: key,
