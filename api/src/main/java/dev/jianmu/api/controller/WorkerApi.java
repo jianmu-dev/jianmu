@@ -74,6 +74,7 @@ public class WorkerApi {
                 .id(workerId)
                 .name(dto.getName())
                 .type(dto.getType())
+                .tags(dto.getTag())
                 .os(dto.getOs())
                 .arch(dto.getArch())
                 .capacity(dto.getCapacity())
