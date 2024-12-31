@@ -6,9 +6,7 @@ export default [
     name: 'index',
     path: '',
     component: () => import('@/views/index.vue'),
-    props: ({
-      query: { searchName, projectGroupId },
-    }: RouteLocationNormalizedLoaded) => ({
+    props: ({ query: { searchName, projectGroupId } }: RouteLocationNormalizedLoaded) => ({
       searchName,
       projectGroupId,
     }),
@@ -53,8 +51,7 @@ export default [
       {
         name: 'project-group-detail',
         path: 'detail/:id',
-        component: () =>
-          import('@/views/project-group/project-group-detail.vue'),
+        component: () => import('@/views/project-group/project-group-detail.vue'),
         props: ({ params: { id } }: RouteLocationNormalizedLoaded) => ({ id }),
         meta: {
           title: '详情',
@@ -105,9 +102,7 @@ export default [
     name: 'process-template',
     path: 'process-template',
     component: () => import('@/views/process-template/manager.vue'),
-    props: ({
-      query: { processTemplatesName },
-    }: RouteLocationNormalizedLoaded) => ({
+    props: ({ query: { processTemplatesName } }: RouteLocationNormalizedLoaded) => ({
       processTemplatesName,
     }),
     meta: {
