@@ -23,6 +23,10 @@ const messages = {
       lastExecute: '最近触发',
       lastModify: '最近修改',
     },
+    searchProject: {
+      selectGroup: '请选择项目组',
+      inputName: '请输入项目名称',
+    },
   },
 
   en: {
@@ -46,6 +50,10 @@ const messages = {
       default: 'Default Sort',
       lastExecute: 'Recently triggered',
       lastModify: 'Recent changes',
+    },
+    searchProject: {
+      selectGroup: 'Please select a project group',
+      inputName: 'Please enter project name',
     },
   },
 };
