@@ -15,6 +15,14 @@ const messages = {
     dialog: {
       needLoginTip: '未登录状态下，操作内容将会丢失',
     },
+    allProject: {
+      projectList: '项目列表',
+      inputPlaceholder: '请输入项目名称',
+      empty: '暂无项目',
+      default: '默认排序',
+      lastExecute: '最近触发',
+      lastModify: '最近修改',
+    },
   },
 
   en: {
@@ -30,6 +38,14 @@ const messages = {
     },
     dialog: {
       needLoginTip: 'The contents of the operation will be lost if you are not logged in',
+    },
+    allProject: {
+      projectList: 'Project List',
+      inputPlaceholder: 'Please enter project name',
+      empty: 'No Projects',
+      default: 'Default Sort',
+      lastExecute: 'Recently triggered',
+      lastModify: 'Recent changes',
     },
   },
 };
