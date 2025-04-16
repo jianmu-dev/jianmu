@@ -6,12 +6,24 @@ const messages = {
       logout: '退出',
       language: '语言设置',
     },
+    bottom2: {
+      project: '木兰社区孵化项目',
+      about: '关于建木',
+      manual: '使用手册',
+      contact: '联系我们',
+    },
   },
 
   en: {
     top: {
       logout: 'Logout',
       language: 'Language',
+    },
+    bottom2: {
+      project: 'Mulan Incubator',
+      about: 'About Jianmu',
+      manual: 'Documentation',
+      contact: 'Contact Us',
     },
   },
 };

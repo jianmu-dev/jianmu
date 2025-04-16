@@ -1,14 +1,12 @@
 <template>
   <div class="bottom-nav">
-    <a href="https://portal.mulanos.cn" target="_blank" class="mulan"
-    >木兰社区孵化项目</a
-    >
+    <a href="https://portal.mulanos.cn" target="_blank" class="mulan">{{ $t('bottom2.project') }}</a>
     <i class="line"></i>
-    <a href="https://jianmu.dev" target="_blank">关于建木</a>
+    <a href="https://jianmu.dev" target="_blank">{{ $t('bottom2.about') }}</a>
     <i class="line"></i>
-    <a href="https://v2.jianmu.dev" target="_blank">使用手册</a>
+    <a href="https://v2.jianmu.dev" target="_blank">{{ $t('bottom2.manual') }}</a>
     <i class="line"></i>
-    <a href="mailto:support@jianmu.dev">联系我们</a>
+    <a href="mailto:support@jianmu.dev">{{ $t('bottom2.contact') }}</a>
   </div>
 </template>
 
@@ -45,7 +43,7 @@ export default defineComponent({
   .line {
     width: 1px;
     height: 14px;
-    background: #B9CFE6;
+    background: #b9cfe6;
   }
 
   .mulan {
