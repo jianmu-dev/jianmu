@@ -12,6 +12,9 @@ const messages = {
       manual: '使用手册',
       contact: '联系我们',
     },
+    dialog: {
+      needLoginTip: '未登录状态下，操作内容将会丢失',
+    },
   },
 
   en: {
@@ -24,6 +27,9 @@ const messages = {
       about: 'About Jianmu',
       manual: 'Documentation',
       contact: 'Contact Us',
+    },
+    dialog: {
+      needLoginTip: 'The contents of the operation will be lost if you are not logged in',
     },
   },
 };
