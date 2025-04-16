@@ -47,7 +47,30 @@
         </span>
         <template #dropdown>
           <jm-dropdown-menu>
-            <jm-dropdown-item @click="logout">退出</jm-dropdown-item>
+            <jm-dropdown trigger="click" placement="bottom-end">
+              <jm-dropdown-item>
+                <span>
+                  {{ t('top.language') }}
+                  <span style="margin-left: 10px">{{ locale === 'zh' ? '简体中文' : 'English' }}</span>
+                </span>
+                <i class="el-icon-arrow-down el-icon--right"></i>
+              </jm-dropdown-item>
+              <template #dropdown>
+                <jm-dropdown-menu>
+                  <jm-dropdown-item
+                    @click="handleLocaleChange('zh')"
+                    :style="locale === 'zh' ? 'color: #3A8AE1; background: #ECF5FF' : ''"
+                    >简体中文</jm-dropdown-item
+                  >
+                  <jm-dropdown-item
+                    @click="handleLocaleChange('en')"
+                    :style="locale === 'en' ? 'color: #3A8AE1; background: #ECF5FF' : ''"
+                    >English</jm-dropdown-item
+                  >
+                </jm-dropdown-menu>
+              </template>
+            </jm-dropdown>
+            <jm-dropdown-item @click="logout">{{ t('top.logout') }}</jm-dropdown-item>
           </jm-dropdown-menu>
         </template>
       </jm-dropdown>
@@ -66,11 +89,12 @@ import { ISessionVo } from '@/api/dto/session';
 import { version as v } from '@/../package.json';
 import { IRootState } from '@/model';
 import { IVersionVo } from '@/api/dto/common';
-
+import { useLocale } from '@/utils/i18n';
 const { mapMutations } = createNamespacedHelpers(namespace);
 
 export default defineComponent({
   setup() {
+    const { t, locale, handleLocaleChange } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const store = useStore();
@@ -94,6 +118,9 @@ export default defineComponent({
     });
 
     return {
+      t,
+      locale,
+      handleLocaleChange,
       authMode,
       loaded,
       loginType,
