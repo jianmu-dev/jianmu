@@ -9,7 +9,7 @@ import { globalErrorHandler } from './utils/global-error-handler';
 import './utils/operation-btn-position.ts';
 // 安装百度统计
 import './utils/baidu-tongji.ts';
-
+import i18n from './locales';
 // 打印环境变量，用于调试
 console.debug(import.meta.env);
 const app = createApp(App);
@@ -21,10 +21,9 @@ app.use(components);
 app.use(router);
 // 安装vuex
 app.use(store);
-
+app.use(i18n);
 // 注册全局异常处理方法
-app.config.errorHandler = (err, instance, info) =>
-  globalErrorHandler(err as Error, instance, info, router, store);
+app.config.errorHandler = (err, instance, info) => globalErrorHandler(err as Error, instance, info, router, store);
 app.config.globalProperties.$throw = (err: Error, instance: ComponentPublicInstance | null) =>
   globalErrorHandler(err, instance, null, router, store);
 

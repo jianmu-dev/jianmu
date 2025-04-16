@@ -1,0 +1,36 @@
+import { createI18n } from 'vue-i18n';
+
+const messages = {
+  zh: {
+    top: {
+      logout: '退出',
+      language: '语言设置',
+    },
+  },
+
+  en: {
+    top: {
+      logout: 'Logout',
+      language: 'Language',
+    },
+  },
+};
+
+const getDefaultLocale = () => {
+  const saved = localStorage.getItem('JianmuLang');
+  if (saved) return saved;
+
+  const browserLang = navigator.language.split('-')[0];
+  const supportedLangs = ['zh', 'en'];
+  const lang = supportedLangs.includes(browserLang) ? browserLang : 'zh';
+  localStorage.setItem('JianmuLang', lang);
+  return lang;
+};
+
+const i18n = createI18n({
+  locale: getDefaultLocale(),
+  fallbackLocale: 'zh',
+  messages,
+});
+
+export default i18n;
