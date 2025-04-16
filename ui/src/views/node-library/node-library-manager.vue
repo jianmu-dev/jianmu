@@ -10,132 +10,75 @@
       <div class="right-top-btn">
         <router-link :to="{ name: 'index' }">
           <jm-button type="primary" class="jm-icon-button-cancel" size="small"
-          >关闭
-          </jm-button
-          >
+            >{{ $t('nodeLibrary.close') }}
+          </jm-button>
         </router-link>
       </div>
       <div class="menu-bar">
         <button class="add" @click="creationActivated = true">
-          <div class="label">新增本地节点</div>
+          <div class="label">{{ $t('nodeLibrary.addLocalNode') }}</div>
         </button>
       </div>
       <div class="title">
-        <span>建木节点库</span>
-        <span class="desc">（共有 {{ total }} 个节点定义）</span>
+        <span>{{ $t('nodeLibrary.nodeLibraryTitle') }}</span>
+        <span class="desc">{{ $t('nodeLibrary.nodeLibraryCount', { count: total }) }}</span>
       </div>
 
       <div v-loading="firstLoading" class="content">
-        <jm-empty v-if="nodeLibraryListData.length === 0"/>
-        <div
-          v-else
-          v-for="(i, idx) in nodeLibraryListData"
-          :key="idx"
-          class="item"
-        >
+        <jm-empty v-if="nodeLibraryListData.length === 0" />
+        <div v-else v-for="(i, idx) in nodeLibraryListData" :key="idx" class="item">
           <div class="deprecated" v-if="i.deprecated">
             <jm-tooltip placement="top-start">
               <template #content>
-                <div style="line-height: 20px">
-                  由于某些原因，该节点不被推荐使用（如该节点可<br/>能会导致一些已知问题或有更好的节点可替代它）
-                </div>
+                <div style="line-height: 20px">v-html="t('nodeLibrary.tooltipDeprecated')"</div>
               </template>
-              <img src="~@/assets/svgs/node-library/deprecated.svg" alt="">
+              <img src="~@/assets/svgs/node-library/deprecated.svg" alt="" />
             </jm-tooltip>
           </div>
           <div class="item-t">
-            <span
-              class="item-t-t"
-              v-if="i.ownerType === OwnerTypeEnum.LOCAL"
-            >
-              <jm-text-viewer :value="i.name"/>
-            </span
-            >
-            <a
-              v-else
-              target="_blank"
-              class="item-t-t"
-              :href="`https://jianmuhub.com/${i.ownerRef}/${i.ref}`"
-            >
-              <jm-text-viewer :value="i.name"/>
-            </a
-            >
+            <span class="item-t-t" v-if="i.ownerType === OwnerTypeEnum.LOCAL">
+              <jm-text-viewer :value="i.name" />
+            </span>
+            <a v-else target="_blank" class="item-t-t" :href="`https://jianmuhub.com/${i.ownerRef}/${i.ref}`">
+              <jm-text-viewer :value="i.name" />
+            </a>
             <p class="item-t-mid">
-              <jm-text-viewer :value="`${i.ownerName} / ${i.ref}`"/>
+              <jm-text-viewer :value="`${i.ownerName} / ${i.ref}`" />
             </p>
             <p class="item-t-btm">
-              <jm-text-viewer :value="`${i.description || '无'}`"/>
+              <jm-text-viewer :value="`${i.description || '无'}`" />
             </p>
           </div>
-          <div
-            class="item-mid"
-            :class="{ 'is-background': !i.isDirectionDown }"
-          >
-            <i
-              @click="clickVersion(i)"
-              class="down"
-              :class="{ 'direction-down': i.isDirectionDown }"
-            ></i>
+          <div class="item-mid" :class="{ 'is-background': !i.isDirectionDown }">
+            <i @click="clickVersion(i)" class="down" :class="{ 'direction-down': i.isDirectionDown }"></i>
             <jm-scrollbar max-height="75px">
-              <div
-                class="item-mid-items"
-                :class="{ 'is-scroll': i.isDirectionDown }"
-              >
-                <div
-                  v-for="(version, versionIdx) in i.versions"
-                  :key="versionIdx"
-                  class="item-mid-item"
-                >
+              <div class="item-mid-items" :class="{ 'is-scroll': i.isDirectionDown }">
+                <div v-for="(version, versionIdx) in i.versions" :key="versionIdx" class="item-mid-item">
                   <span v-if="i.ownerType === OwnerTypeEnum.LOCAL">
-                   {{ version }}
-                  </span>
-                  <a
-                    v-else
-                    target="_blank"
-                    :href="`https://jianmuhub.com/${i.ownerRef}/${i.ref}/${version}`"
-                  >
                     {{ version }}
-                  </a
-                  >
+                  </span>
+                  <a v-else target="_blank" :href="`https://jianmuhub.com/${i.ownerRef}/${i.ref}/${version}`">
+                    {{ version }}
+                  </a>
                 </div>
               </div>
             </jm-scrollbar>
           </div>
           <div v-show="!i.isDirectionDown" class="item-btm">
             <div>
-              <jm-tooltip
-                v-if="i.ownerType !== OwnerTypeEnum.LOCAL"
-                content="同步"
-                placement="top"
-              >
-                <button
-                  @click="syncNode(i)"
-                  @keypress.enter.prevent
-                  class="sync"
-                  :class="{ doing: i.isSync }"
-                ></button>
+              <jm-tooltip v-if="i.ownerType !== OwnerTypeEnum.LOCAL" :content="$t('nodeLibrary.sync')" placement="top">
+                <button @click="syncNode(i)" @keypress.enter.prevent class="sync" :class="{ doing: i.isSync }"></button>
               </jm-tooltip>
-              <jm-tooltip content="删除" placement="top">
-                <button
-                  @click="deleteNode(i)"
-                  @keypress.enter.prevent
-                  class="del"
-                  :class="{ doing: i.isDel }"
-                ></button>
+              <jm-tooltip :content="$t('nodeLibrary.delete')" placement="top">
+                <button @click="deleteNode(i)" @keypress.enter.prevent class="del" :class="{ doing: i.isDel }"></button>
               </jm-tooltip>
             </div>
             <div class="item-btm-r">
-              <jm-text-viewer :value="`by ${i.creatorName}`"/>
+              <jm-text-viewer :value="`by ${i.creatorName}`" />
             </div>
           </div>
-          <div
-            class="item-pos"
-            :class="{ 'node-definition-default-icon': !i.icon, 'deprecated-icon':i.deprecated}"
-          >
-            <img
-              v-if="i.icon"
-              :src="`${i.icon}?imageMogr2/thumbnail/81x/sharpen/1`"
-            />
+          <div class="item-pos" :class="{ 'node-definition-default-icon': !i.icon, 'deprecated-icon': i.deprecated }">
+            <img v-if="i.icon" :src="`${i.icon}?imageMogr2/thumbnail/81x/sharpen/1`" />
           </div>
         </div>
       </div>
@@ -144,24 +87,13 @@
       <div class="load-more">
         <jm-load-more :state="loadState" :load-more="btnDown"></jm-load-more>
       </div>
-      <node-editor
-        v-if="creationActivated"
-        @closed="creationActivated = false"
-        @completed="handleCreation"
-      />
+      <node-editor v-if="creationActivated" @closed="creationActivated = false" @completed="handleCreation" />
     </div>
   </jm-scrollbar>
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  getCurrentInstance,
-  reactive,
-  ref,
-  Ref,
-  inject,
-} from 'vue';
+import { defineComponent, getCurrentInstance, reactive, ref, Ref, inject } from 'vue';
 import { fetchNodeLibrary, fetchNodeLibraryList } from '@/api/view-no-auth';
 import { deleteNodeLibrary, syncNodeLibrary } from '@/api/node-library';
 import { INode } from '@/model/modules/node-library';
@@ -220,12 +152,7 @@ export default defineComponent({
           proxy.$throw(err, proxy);
         });
     };
-    nodeListData(
-      nodeLibraryListData,
-      nodeLibraryListParameter,
-      firstLoading,
-      total,
-    );
+    nodeListData(nodeLibraryListData, nodeLibraryListParameter, firstLoading, total);
 
     // 加载更多
     const loadMore = () => {
@@ -235,12 +162,7 @@ export default defineComponent({
           loadState.value = StateEnum.LOADING;
           nodeLibraryListParameter.pageNum++;
           bottomLoading.value = true;
-          nodeListData(
-            nodeLibraryListData,
-            nodeLibraryListParameter,
-            bottomLoading,
-            total,
-          );
+          nodeListData(nodeLibraryListData, nodeLibraryListParameter, bottomLoading, total);
         }
       };
       return {
@@ -342,12 +264,7 @@ export default defineComponent({
         nodeLibraryListParameter.pageSize = 12;
         firstLoading.value = true;
         total.value = 0;
-        nodeListData(
-          nodeLibraryListData,
-          nodeLibraryListParameter,
-          firstLoading,
-          total,
-        );
+        nodeListData(nodeLibraryListData, nodeLibraryListParameter, firstLoading, total);
       },
       OwnerTypeEnum,
     };
@@ -611,7 +528,7 @@ export default defineComponent({
         overflow: hidden;
 
         &.deprecated-icon {
-          opacity: .4;
+          opacity: 0.4;
         }
 
         img {

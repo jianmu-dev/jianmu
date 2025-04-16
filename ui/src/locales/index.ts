@@ -40,6 +40,23 @@ const messages = {
     httpStatus: {
       backHome: '返回首页',
     },
+    nodeLibrary: {
+      addLocalNode: '新增本地节点',
+      name: '名称',
+      inputName: '请输入名称',
+      description: '描述',
+      inputDescription: '请输入描述',
+      note: '注意事项：ref为xxx/xxx或xxx时，统一处理成local/xxx，在流程或管道dsl中以local/xxx:xxx方式引用。',
+      cancel: '取消',
+      confirm: '确定',
+      close: '关闭',
+      nodeLibraryTitle: '建木节点库',
+      nodeLibraryCount: '（共有 { count } 个节点定义）',
+      tooltipDeprecated:
+        '由于某些原因，该节点不被推荐使用（如该节点可<br/>能会导致一些已知问题或有更好的节点可替代它）',
+      sync: '同步',
+      delete: '删除',
+    },
   },
 
   en: {
@@ -79,6 +96,22 @@ const messages = {
     },
     httpStatus: {
       backHome: 'Back to Home',
+    },
+    nodeLibrary: {
+      addLocalNode: 'Add Local Node',
+      name: 'Name',
+      inputName: 'Please enter name',
+      description: 'Description',
+      inputDescription: 'Please enter description',
+      note: 'Note: When ref is xxx/xxx or xxx, it is uniformly handled as local/xxx and referenced as local/xxx:xxx in the process or pipeline dsl.',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      close: 'Close',
+      nodeLibraryTitle: 'Jianmu Node Library',
+      nodeLibraryCount: '(Total { count } node definitions)',
+      tooltipDeprecated: 'This node is not recommended due to known issues or a better alternative',
+      sync: 'Sync',
+      delete: 'Delete',
     },
   },
 };
