@@ -6,7 +6,7 @@ const messages = {
       logout: '退出',
       language: '语言设置',
     },
-    bottom2: {
+    bottom: {
       project: '木兰社区孵化项目',
       about: '关于建木',
       manual: '使用手册',
@@ -19,7 +19,7 @@ const messages = {
       logout: 'Logout',
       language: 'Language',
     },
-    bottom2: {
+    bottom: {
       project: 'Mulan Incubator',
       about: 'About Jianmu',
       manual: 'Documentation',

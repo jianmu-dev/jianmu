@@ -1,12 +1,12 @@
 <template>
   <div class="bottom-nav">
-    <a href="https://portal.mulanos.cn" target="_blank" class="mulan">{{ $t('bottom2.project') }}</a>
+    <a href="https://portal.mulanos.cn" target="_blank" class="mulan">{{ $t('bottom.project') }}</a>
     <i class="line"></i>
-    <a href="https://jianmu.dev" target="_blank">{{ $t('bottom2.about') }}</a>
+    <a href="https://jianmu.dev" target="_blank">{{ $t('bottom.about') }}</a>
     <i class="line"></i>
-    <a href="https://v2.jianmu.dev" target="_blank">{{ $t('bottom2.manual') }}</a>
+    <a href="https://v2.jianmu.dev" target="_blank">{{ $t('bottom.manual') }}</a>
     <i class="line"></i>
-    <a href="mailto:support@jianmu.dev">{{ $t('bottom2.contact') }}</a>
+    <a href="mailto:support@jianmu.dev">{{ $t('bottom.contact') }}</a>
   </div>
 </template>
 
