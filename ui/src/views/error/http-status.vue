@@ -1,12 +1,12 @@
 <template>
-  <div :class="{'http-status-error': true, [`_${status}`]: true}">
+  <div :class="{ 'http-status-error': true, [`_${status}`]: true }">
     <div class="desc">{{ message }}</div>
     <div class="back">
       <router-link to="/">
-        <jm-button type="primary" class="jm-icon-button-back" size="small">返回首页</jm-button>
+        <jm-button type="primary" class="jm-icon-button-back" size="small"> {{ $t('httpStatus.backHome') }}</jm-button>
       </router-link>
     </div>
-    <bottom-nav/>
+    <bottom-nav />
   </div>
   <div class="right-bottom">
     <div class="bg-graph"></div>
@@ -100,7 +100,7 @@ export default defineComponent({
     width: 500px;
     height: 280px;
     position: absolute;
-    background-color: #D9EBFF;
+    background-color: #d9ebff;
     border-top-left-radius: 111px;
     transform: rotate(-67deg);
   }

@@ -1,3 +1,4 @@
+import httpStatusVue from '@/views/error/http-status.vue';
 import { createI18n } from 'vue-i18n';
 
 const messages = {
@@ -27,6 +28,18 @@ const messages = {
       selectGroup: '请选择项目组',
       inputName: '请输入项目名称',
     },
+    network: {
+      title: '你的设备没有接入互联网',
+      desc: '无法显示此页面，因为你的电脑目前已离线',
+      backHome: '返回首页',
+    },
+    browserVersion: {
+      unsupported: '抱歉，不支持此浏览器',
+      backHome: '返回首页',
+    },
+    httpStatus: {
+      backHome: '返回首页',
+    },
   },
 
   en: {
@@ -54,6 +67,18 @@ const messages = {
     searchProject: {
       selectGroup: 'Please select a project group',
       inputName: 'Please enter project name',
+    },
+    network: {
+      title: 'Your device is not connected to the internet',
+      desc: 'This page cannot be displayed because your computer is currently offline',
+      backHome: 'Back to Home',
+    },
+    browserVersion: {
+      unsupported: 'Sorry, this browser is not supported',
+      backHome: 'Back to Home',
+    },
+    httpStatus: {
+      backHome: 'Back to Home',
     },
   },
 };
