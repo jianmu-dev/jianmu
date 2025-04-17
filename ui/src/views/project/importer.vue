@@ -3,15 +3,15 @@
     <div class="steps">
       <div>
         <jm-steps :active="step" finish-status="success">
-          <jm-step title="克隆Git仓库"/>
-          <jm-step title="选择DSL文件"/>
+          <jm-step :title="$t('importer.cloneGitRepo')" />
+          <jm-step :title="$t('importer.selectDSL')" />
         </jm-steps>
       </div>
     </div>
     <div class="step">
       <jm-scrollbar>
-        <step-one v-show="step === 0"/>
-        <step-two v-if="step === 1" :data="stepTwoData"/>
+        <step-one v-show="step === 0" />
+        <step-two v-if="step === 1" :data="stepTwoData" />
       </jm-scrollbar>
     </div>
   </div>

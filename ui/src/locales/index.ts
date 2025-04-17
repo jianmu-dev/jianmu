@@ -115,6 +115,10 @@ const messages = {
       save: '保存',
       selectDsl: '请选择DSL文件',
       importSuccess: '导入成功',
+    },
+    "importer": {
+      "cloneGitRepo": "克隆Git仓库",
+      "selectDSL": "选择DSL文件"
     }
 
   },
@@ -230,6 +234,10 @@ const messages = {
       save: 'Save',
       selectDsl: 'Please select DSL file',
       importSuccess: 'Import Successful',
+    },
+    "importer": {
+      "cloneGitRepo": "Clone Git Repository",
+      "selectDSL": "Select DSL File"
     }
   },
 };
