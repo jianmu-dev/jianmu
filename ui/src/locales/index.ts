@@ -109,6 +109,14 @@ const messages = {
       mustSelectUsername: '请选择用户名',
       mustSelectPassword: '请选择密码',
     },
+    importStepTwo: {
+      cancel: '取消',
+      previous: '上一步',
+      save: '保存',
+      selectDsl: '请选择DSL文件',
+      importSuccess: '导入成功',
+    }
+
   },
 
   en: {
@@ -216,6 +224,13 @@ const messages = {
       mustSelectUsername: 'Please select username',
       mustSelectPassword: 'Please select password',
     },
+    importStepTwo: {
+      cancel: 'Cancel',
+      previous: 'Previous Step',
+      save: 'Save',
+      selectDsl: 'Please select DSL file',
+      importSuccess: 'Import Successful',
+    }
   },
 };
 
