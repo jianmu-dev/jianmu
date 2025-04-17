@@ -98,7 +98,7 @@
               </div>
             </div>
             <div class="description">
-              <jm-text-viewer class="text-viewer" :value="(i.description || '无')"/>
+              <jm-text-viewer class="text-viewer" :value="(i.description || t('projectGroupManager.none'))"/>
             </div>
             <div class="update-time">
               <span>{{ t('projectGroupManager.lastModified') }}</span>

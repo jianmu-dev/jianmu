@@ -1,7 +1,7 @@
 <template>
   <jm-dialog v-model="dialogVisible" width="776px" :destroy-on-close="true">
     <template #title>
-      <div class="editor-title">编辑项目分组</div>
+      <div class="editor-title">{{ t('projectGroupEditor.title') }}</div>
     </template>
     <jm-form
       :model="editorForm"
@@ -9,33 +9,33 @@
       ref="editorFormRef"
       @submit.prevent
     >
-      <jm-form-item label="分组名称" label-position="top" prop="name">
+      <jm-form-item :label="t('projectGroupEditor.name')" label-position="top" prop="name">
         <jm-input
           :disabled="defaultGroup"
           v-model="editorForm.name"
           clearable
-          placeholder="请输入分组名称"
+          :placeholder="t('projectGroupEditor.namePlaceholder')"
         />
       </jm-form-item>
       <jm-form-item
-        label="首页展示"
+        :label="t('projectGroupEditor.isShow')"
         label-position="top"
         prop="isShow"
         class="is-show"
       >
         <jm-switch v-model="editorForm.isShow" active-color="#096DD9"/>
       </jm-form-item>
-      <jm-form-item label="描述" label-position="top" prop="description">
+      <jm-form-item :label="t('projectGroupEditor.description')" label-position="top" prop="description">
         <jm-input
           type="textarea"
           v-model="editorForm.description"
           clearable
           maxlength="256"
           show-word-limit
-          placeholder="请输入描述"
+          :placeholder="t('projectGroupEditor.descriptionPlaceholder')"
           :autosize="{ minRows: 6, maxRows: 10 }"
         />
-        <div class="tips">描述信息不超过 256个字符</div>
+        <div class="tips">{{ t('projectGroupEditor.descriptionTips') }}</div>
       </jm-form-item>
     </jm-form>
     <template #footer>
@@ -43,14 +43,14 @@
         <jm-button
           size="small"
           @click="dialogVisible = false"
-        >取消</jm-button
+        >{{ t('projectGroupEditor.cancel') }}</jm-button
         >
         <jm-button
           size="small"
           type="primary"
           @click="save"
           :loading="loading"
-        >保存</jm-button
+        >{{ t('projectGroupEditor.save') }}</jm-button
         >
       </span>
     </template>
@@ -67,6 +67,7 @@ import {
 } from 'vue';
 import { IProjectGroupEditFrom } from '@/model/modules/project-group';
 import { editProjectGroup } from '@/api/project-group';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   emits: ['completed'],
@@ -89,6 +90,7 @@ export default defineComponent({
     },
   },
   setup(props, { emit }: SetupContext) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const dialogVisible = ref<boolean>(true);
     const editorFormRef = ref<any>(null);
@@ -97,7 +99,7 @@ export default defineComponent({
       isShow: true,
     });
     const editorRule = ref<object>({
-      name: [{ required: true, message: '分组名称不能为空', trigger: 'blur' }],
+      name: [{ required: true, message: t('projectGroupEditor.nameRequired'), trigger: 'blur' }],
     });
     const loading = ref<boolean>(false);
     onMounted(() => {
@@ -118,7 +120,7 @@ export default defineComponent({
             description,
             isShow,
           });
-          proxy.$success('项目分组修改成功');
+          proxy.$success(t('projectGroupEditor.success'));
           emit('completed');
           dialogVisible.value = false;
         } catch (err) {
@@ -129,6 +131,7 @@ export default defineComponent({
       });
     };
     return {
+      t,
       dialogVisible,
       editorFormRef,
       editorForm,

@@ -143,6 +143,19 @@ const messages = {
       confirm: "确定",
       cancel: "取消",
       deleteSuccess: "项目分组删除成功"
+    },
+    projectGroupEditor: {
+      title: '编辑项目分组',
+      name: '分组名称',
+      namePlaceholder: '请输入分组名称',
+      isShow: '首页展示',
+      description: '描述',
+      descriptionPlaceholder: '请输入描述',
+      descriptionTips: '描述信息不超过 256个字符',
+      cancel: '取消',
+      save: '保存',
+      nameRequired: '分组名称不能为空',
+      success: '项目分组修改成功',
     }
   },
 
@@ -285,6 +298,19 @@ const messages = {
       confirm: "Confirm",
       cancel: "Cancel",
       deleteSuccess: "Project Group Delete Successful"
+    },
+    projectGroupEditor: {
+      title: 'Edit project grouping',
+      name: 'Grouping name',
+      namePlaceholder: 'Please enter the name of the grouping',
+      isShow: 'Home display',
+      description: 'Description',
+      descriptionPlaceholder: 'Please enter the description',
+      descriptionTips: 'The description information is not more than 256 characters',
+      cancel: 'Cancel',
+      save: 'Save',
+      nameRequired: 'The grouping name can not be empty',
+      success: 'Project grouping modification successful',
     }
   },
 };
