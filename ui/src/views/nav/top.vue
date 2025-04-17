@@ -144,7 +144,7 @@ export default defineComponent({
           proxy.deleteSession();
           // 退出登录时，将临时登录模式内容清空
           localStorage.removeItem('temp-login-mode');
-          proxy.$success('退出成功');
+          proxy.$success(t('top.LogoutSuccessful'));
 
           router.push(LOGIN_INDEX);
         } catch (err) {

@@ -7,6 +7,7 @@ const messages = {
     top: {
       logout: '退出',
       language: '语言设置',
+      LogoutSuccessful: '退出成功',
     },
     bottom: {
       project: '木兰社区孵化项目',
@@ -40,6 +41,9 @@ const messages = {
     },
     httpStatus: {
       backHome: '返回首页',
+      noPermission: '没有权限访问该页面',
+      pageNotFound: '找不到页面',
+      serverError: '服务器出错',
     },
     nodeLibrary: {
       addLocalNode: '新增本地节点',
@@ -86,6 +90,7 @@ const messages = {
     top: {
       logout: 'Logout',
       language: 'Language',
+      LogoutSuccessful: 'Logout Successful',
     },
     bottom: {
       project: 'Mulan Incubator',
@@ -119,6 +124,9 @@ const messages = {
     },
     httpStatus: {
       backHome: 'Back to Home',
+      noPermission: 'No permission to access this page',
+      pageNotFound: 'Page not found',
+      serverError: 'Server Error',
     },
     nodeLibrary: {
       addLocalNode: 'Add Local Node',

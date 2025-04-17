@@ -16,7 +16,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import BottomNav from '@/views/nav/bottom.vue';
-
+import { useLocale } from '@/utils/i18n';
 export default defineComponent({
   components: { BottomNav },
   props: {
@@ -26,17 +26,18 @@ export default defineComponent({
     },
     errMessage: {
       type: String,
-      default: '没有权限访问该页面',
+      default: '',
     },
   },
   setup(props) {
+    const { t } = useLocale();
     let status = +props.value;
     const messages: {
       [key: number]: string;
     } = {
-      404: '找不到页面',
-      500: '服务器出错',
-      403: props.errMessage,
+      404: t('errorPage.pageNotFound'),
+      500: t('errorPage.serverError'),
+      403: props.errMessage || t('errorPage.noPermission'),
       // TODO 待完善其他错误码
     };
     if (isNaN(status)) {
