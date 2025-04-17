@@ -1,36 +1,35 @@
 <template>
   <div class="project-group-detail">
     <div class="right-top-btn">
-      <jm-button type="primary" class="jm-icon-button-cancel" size="small" @click="close">关闭</jm-button>
+      <jm-button type="primary" class="jm-icon-button-cancel" size="small" @click="close">{{
+        $t('projectGroupDetail.close')
+      }}</jm-button>
     </div>
     <div class="top-card" v-loading="loadingTop">
       <div class="top-title">
         <div class="name">{{ projectGroupDetail?.name }}</div>
         <div class="count">
-          （共有 {{ projectGroupDetail?.projectCount }} 个项目）
+          {{ $t('projectGroupDetail.totalProjects', { count: projectGroupDetail?.projectCount }) }}
         </div>
       </div>
       <div class="description">
-        <span v-html="(projectGroupDetail?.description || '无').replace(/\n/g, '<br/>')"/>
+        <span v-html="(projectGroupDetail?.description || $t('projectGroupDetail.none')).replace(/\n/g, '<br/>')" />
       </div>
     </div>
     <div class="content">
       <div class="menu-bar">
         <button class="add" @click="add">
-          <div class="label">添加项目</div>
+          <div class="label">{{ $t('projectGroupDetail.addProject') }}</div>
         </button>
       </div>
       <div class="title">
         <div>
-          <span>项目列表</span>
+          <span>{{ $t('projectGroupDetail.projectList') }}</span>
         </div>
-        <jm-tooltip content="关闭排序" placement="top" v-if="isActive">
-          <div
-            :class="['move', isActive ? 'active' : '']"
-            @click="() => (isActive = !isActive)"
-          ></div>
+        <jm-tooltip :content="$t('projectGroupDetail.closeSorting')" placement="top" v-if="isActive">
+          <div :class="['move', isActive ? 'active' : '']" @click="() => (isActive = !isActive)"></div>
         </jm-tooltip>
-        <jm-tooltip content="排序" placement="top" v-else>
+        <jm-tooltip :content="$t('projectGroupDetail.sorting')" placement="top" v-else>
           <div class="move" @click="() => (isActive = !isActive)"></div>
         </jm-tooltip>
       </div>
@@ -44,12 +43,7 @@
         />
       </div>
     </div>
-    <project-adder
-      :id="id"
-      v-if="creationActivated"
-      @closed="creationActivated = false"
-      @completed="addCompleted"
-    />
+    <project-adder :id="id" v-if="creationActivated" @closed="creationActivated = false" @completed="addCompleted" />
   </div>
 </template>
 
