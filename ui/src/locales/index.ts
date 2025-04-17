@@ -125,6 +125,25 @@ const messages = {
       createSuccess: '新增成功',
       saveSuccess: '保存成功',
     },
+    projectGroupManager: {
+      close: "关闭",
+      newGroup: "新建分组",
+      projectGroup: "项目分组",
+      totalGroups: "（共有 { total } 个组）",
+      closeSorting: "关闭排序",
+      sorting: "排序",
+      none: "无",
+      lastModified: "最后修改时间：",
+      total: "共",
+      items: "条项目",
+      homeShow: "首页展示",
+      confirmDeleteGroup: "确定要删除分组吗?",
+      name: "名称：",
+      deleteGroup: "删除分组",
+      confirm: "确定",
+      cancel: "取消",
+      deleteSuccess: "项目分组删除成功"
+    }
   },
 
   en: {
@@ -244,10 +263,29 @@ const messages = {
       selectDSL: 'Select DSL File',
     },
     pipelineEditor: {
-      unnamedProject: 'Unnamed Project',
+      unnamedProject: 'Untitled Project',
       createSuccess: 'Created successfully',
       saveSuccess: 'Saved successfully',
     },
+    projectGroupManager: {
+      close: "Close",
+      newGroup: "New Group",
+      projectGroup: "Project Group",
+      totalGroups: "(Total { total } groups)",
+      closeSorting: "Close Sorting",
+      sorting: "Sorting",
+      none: "None",
+      lastModified: "Last Modified:  ",
+      total: "Total ",
+      items: " items",
+      homeShow: "Home Show",
+      confirmDeleteGroup: "Sure you want to delete the group?",
+      name: "Name:",
+      deleteGroup: "Delete Group",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      deleteSuccess: "Project Group Delete Successful"
+    }
   },
 };
 
