@@ -116,11 +116,15 @@ const messages = {
       selectDsl: '请选择DSL文件',
       importSuccess: '导入成功',
     },
-    "importer": {
-      "cloneGitRepo": "克隆Git仓库",
-      "selectDSL": "选择DSL文件"
-    }
-
+    importer: {
+      cloneGitRepo: '克隆Git仓库',
+      selectDSL: '选择DSL文件',
+    },
+    pipelineEditor: {
+      unnamedProject: '未命名项目',
+      createSuccess: '新增成功',
+      saveSuccess: '保存成功',
+    },
   },
 
   en: {
@@ -221,9 +225,9 @@ const messages = {
       selectUsernameAgain: 'Please select the username',
       privateKey: 'Private Key',
       selectPrivateKey: 'Please select the private key',
-      uriRequired: "URI can't be null",
-      groupRequired: "Project grouping can't be null",
-      branchRequired: "Branching can't be null",
+      uriRequired: 'URI can\'t be null',
+      groupRequired: 'Project grouping can\'t be null',
+      branchRequired: 'Branching can\'t be null',
       mustSelectType: 'Please Select type',
       mustSelectUsername: 'Please select username',
       mustSelectPassword: 'Please select password',
@@ -235,10 +239,15 @@ const messages = {
       selectDsl: 'Please select DSL file',
       importSuccess: 'Import Successful',
     },
-    "importer": {
-      "cloneGitRepo": "Clone Git Repository",
-      "selectDSL": "Select DSL File"
-    }
+    importer: {
+      cloneGitRepo: 'Clone Git Repository',
+      selectDSL: 'Select DSL File',
+    },
+    pipelineEditor: {
+      unnamedProject: 'Unnamed Project',
+      createSuccess: 'Created successfully',
+      saveSuccess: 'Saved successfully',
+    },
   },
 };
 
