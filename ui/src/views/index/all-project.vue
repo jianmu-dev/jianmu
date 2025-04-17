@@ -31,7 +31,7 @@
           />
         </template>
         <div class="project-empty" v-else>
-          <jm-empty description="$t('allProject.empty')" :image-size="98" />
+          <jm-empty :description="$t('allProject.empty')" :image-size="98" />
         </div>
       </template>
     </div>
