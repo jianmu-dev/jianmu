@@ -1,5 +1,5 @@
 <template>
-  <el-empty :description="description" :image="image">
+  <el-empty :description="$t('noData')" :image="image">
   </el-empty>
 </template>
 
@@ -7,7 +7,6 @@
 import { defineComponent } from 'vue';
 import { ElEmpty } from 'element-plus';
 import img from './svgs/no-data.svg';
-
 export default defineComponent({
   name: 'jm-empty',
   props: {

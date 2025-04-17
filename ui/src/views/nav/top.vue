@@ -47,7 +47,7 @@
         </span>
         <template #dropdown>
           <jm-dropdown-menu>
-            <jm-dropdown trigger="click" placement="bottom-end">
+            <jm-dropdown trigger="click" placement="bottom-start">
               <jm-dropdown-item>
                 <span>
                   {{ t('top.language') }}

@@ -102,12 +102,13 @@ import { OwnerTypeEnum } from '@/api/dto/enumeration';
 import { StateEnum } from '@/components/load-more/enumeration';
 import { Mutable } from '@/utils/lib';
 import { START_PAGE_NUM } from '@/utils/constants';
-
+import { useLocale } from '@/utils/i18n';
 export default defineComponent({
   components: {
     NodeEditor,
   },
   setup() {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const nodeLibraryListParameter = reactive<{
       pageNum: number;
@@ -183,13 +184,13 @@ export default defineComponent({
         return;
       }
 
-      let msg = '<div>确定要删除节点吗?</div>';
-      msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${i.name}</div>`;
+      let msg = `<div>${t('nodeLibrary.deleteConfirm')}</div>`;
+      msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">${t('nodeLibrary.name')}：${i.name}</div>`;
 
       proxy
-        .$confirm(msg, '删除节点', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+        .$confirm(msg, t('nodeLibrary.deleteNodeTitle'), {
+          confirmButtonText: t('nodeLibrary.confirm'),
+          cancelButtonText: t('nodeLibrary.cancel'),
           type: 'warning',
           dangerouslyUseHTMLString: true,
         })
@@ -197,7 +198,7 @@ export default defineComponent({
           i.isDel = true;
           deleteNodeLibrary(i.ownerRef, i.ref)
             .then(() => {
-              proxy.$success('删除成功');
+              proxy.$success(t('nodeLibrary.successDelete'));
               deleteNodeLibraryListData(i);
             })
             .catch((err: Error) => {
@@ -217,16 +218,16 @@ export default defineComponent({
     // 同步
     const syncNode = (i: INode) => {
       proxy
-        .$confirm('确定要同步吗?', '同步DSL', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+        .$confirm(t('nodeLibrary.syncConfirm'), t('nodeLibrary.dslSyncTitle'), {
+          confirmButtonText: t('nodeLibrary.confirm'),
+          cancelButtonText: t('nodeLibrary.cancel'),
           type: 'info',
         })
         .then(() => {
           i.isSync = true;
           syncNodeLibrary(i.ownerRef, i.ref)
             .then(() => {
-              proxy.$success('同步成功');
+              proxy.$success(t('nodeLibrary.successSync'));
             })
             .catch((err: Error) => {
               proxy.$throw(err, proxy);

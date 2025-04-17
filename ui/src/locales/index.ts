@@ -3,6 +3,7 @@ import { createI18n } from 'vue-i18n';
 
 const messages = {
   zh: {
+    noData: 'No data',
     top: {
       logout: '退出',
       language: '语言设置',
@@ -56,6 +57,15 @@ const messages = {
         '由于某些原因，该节点不被推荐使用（如该节点可<br/>能会导致一些已知问题或有更好的节点可替代它）',
       sync: '同步',
       delete: '删除',
+      nameRequired: '名称不能为空',
+      dslRequired: 'DSL不能为空',
+      createSuccess: '新增成功',
+      deleteNodeTitle: '删除节点',
+      deleteConfirm: '确定要删除节点吗?',
+      deleteSuccess: '删除成功',
+      syncTitle: '同步DSL',
+      syncConfirm: '确定要同步吗?',
+      syncSuccess: '同步成功',
     },
     editor: {
       cancel: '取消',
@@ -125,6 +135,15 @@ const messages = {
       tooltipDeprecated: 'This node is not recommended due to known issues or a better alternative',
       sync: 'Sync',
       delete: 'Delete',
+      nameRequired: 'Name cannot be empty',
+      dslRequired: 'DSL cannot be empty',
+      createSuccess: 'Created successfully',
+      deleteNodeTitle: 'Delete Node',
+      deleteConfirm: 'Are you sure you want to delete the node?',
+      deleteSuccess: 'Deleted successfully',
+      syncTitle: 'Sync DSL',
+      syncConfirm: 'Are you sure you want to sync?',
+      syncSuccess: 'Synced successfully',
     },
     editor: {
       cancel: 'Cancel',

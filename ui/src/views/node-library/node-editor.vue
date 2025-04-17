@@ -38,10 +38,11 @@
 import { defineComponent, getCurrentInstance, ref, SetupContext } from 'vue';
 import { ICreateNodeForm } from '@/model/modules/node-library';
 import { createNode } from '@/api/node-library';
-
+import { useLocale } from '@/utils/i18n';
 export default defineComponent({
   emits: ['completed'],
   setup(_, { emit }: SetupContext) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const dialogVisible = ref<boolean>(true);
 
@@ -52,10 +53,10 @@ export default defineComponent({
     });
     const editorRule = ref<object>({
       name: [
-        { required: true, message: '名称不能为空', trigger: 'blur' },
+        { required: true, message: t('nodeLibrary.nameRequired'), trigger: 'blur' },
       ],
       dsl: [
-        { required: true, message: 'DSL不能为空', trigger: 'blur' },
+        { required: true, message: t('nodeLibrary.dslRequired'), trigger: 'blur' },
       ],
     });
     const loading = ref<boolean>(false);
@@ -83,7 +84,7 @@ export default defineComponent({
               // 发已完成事件，用于后续处理
               emit('completed');
 
-              proxy.$success('新增成功');
+              proxy.$success(t('nodeLibrary.createSuccess'));
 
               dialogVisible.value = false;
             })
