@@ -35,9 +35,9 @@ export default defineComponent({
     const messages: {
       [key: number]: string;
     } = {
-      404: t('errorPage.pageNotFound'),
-      500: t('errorPage.serverError'),
-      403: props.errMessage || t('errorPage.noPermission'),
+      404: t('httpStatus.pageNotFound'),
+      500: t('httpStatus.serverError'),
+      403: props.errMessage || t('httpStatus.noPermission'),
       // TODO 待完善其他错误码
     };
     if (isNaN(status)) {
