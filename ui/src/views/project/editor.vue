@@ -3,26 +3,26 @@
     <!-- loading时的加载页面 -->
     <div class="loading-over" v-show="loading" v-loading="loading"></div>
     <div class="right-top-btn">
-      <jm-button class="jm-icon-button-cancel" size="small" @click="close">取消</jm-button>
+      <jm-button class="jm-icon-button-cancel" size="small" @click="close">{{ $t('editor.cancel') }}</jm-button>
       <jm-button
         v-if="source === 'processTemplates'"
         type="primary"
         class="jm-icon-button-previous"
         size="small"
         @click="previousStep"
-        >上一步
+        >{{ $t('editor.previousStep') }}
       </jm-button>
       <jm-button class="jm-icon-button-preserve" size="small" @click="save(true)" :loading="loading"
-        >保存并返回
+        >{{ $t('editor.saveAndBack') }}
       </jm-button>
       <jm-button type="primary" class="jm-icon-button-preserve" size="small" @click="save(false)" :loading="loading"
-        >保存
+        >{{ $t('editor.save') }}
       </jm-button>
     </div>
     <div class="form">
       <jm-form :model="editorForm" :rules="rules" ref="form">
-        <jm-form-item label="选择项目组" prop="projectGroupId">
-          <jm-select v-model="editorForm.projectGroupId" placeholder="请选择项目组">
+        <jm-form-item :label="$t('editor.selectProjectGroup')" prop="projectGroupId">
+          <jm-select v-model="editorForm.projectGroupId" :placeholder="$t('editor.pleaseSelectProjectGroup')">
             <jm-option v-for="item in projectGroupList" :key="item.id" :label="item.name" :value="item.id"></jm-option>
           </jm-select>
         </jm-form-item>
@@ -30,7 +30,7 @@
     </div>
     <jm-tabs v-model="activatedTab" class="tabs">
       <jm-tab-pane name="dsl" lazy>
-        <template #label><i class="jm-icon-tab-dsl"></i> DSL模式</template>
+        <template #label><i class="jm-icon-tab-dsl"></i>{{ $t('editor.dslMode') }}</template>
         <div class="dsl-editor">
           <jm-dsl-editor v-model:value="editorForm.dslText" />
         </div>
@@ -52,12 +52,14 @@ import { IRootState } from '@/model';
 import { namespace } from '@/store/modules/session';
 import yaml from 'yaml';
 import LoginVerify from '@/views/login/dialog.vue';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   props: {
     id: String,
   },
   setup(props: any) {
+    const { t } = useLocale();
     const { proxy, appContext } = getCurrentInstance() as any;
     const router = useRouter();
     const store = useStore();
@@ -88,7 +90,7 @@ export default defineComponent({
     });
 
     const rules = {
-      projectGroupId: [{ required: true, message: '请选择项目组', trigger: 'change' }],
+      projectGroupId: [{ required: true, message: t('editor.validationProjectGroup'), trigger: 'change' }],
     };
     // 没有登录时做的弹框判断
     if (!sessionState.session) {
@@ -161,6 +163,7 @@ export default defineComponent({
     };
 
     return {
+      t,
       projectGroupList,
       form,
       rules,
@@ -179,7 +182,7 @@ export default defineComponent({
             return false;
           }
           if (editorForm.value.dslText === '') {
-            proxy.$error('DSL不能为空');
+            proxy.$error(t('editor.dslEmptyError'));
             return;
           }
           // 开启loading
@@ -190,7 +193,7 @@ export default defineComponent({
               // 关闭loading
               loading.value = false;
 
-              proxy.$success(editMode ? '保存成功' : '新增成功');
+              proxy.$success(editMode ? t('editor.saveSuccess') : t('editor.createSuccess'));
 
               if (returnFlag) {
                 close();
