@@ -204,6 +204,18 @@ const messages = {
       confirm: '确定',
       cancel: '取消',
       success: '删除成功',
+    },
+    skEditor: {
+      title: '新增密钥',
+      name: '名称',
+      namePlaceholder: '请输入名称',
+      value: '值',
+      valuePlaceholder: '请输入值',
+      cancel: '取消',
+      confirm: '确定',
+      nameRequired: '名称不能为空',
+      valueRequired: '值不能为空',
+      success: '新增成功'
     }
   },
 
@@ -407,6 +419,18 @@ const messages = {
       confirm: 'Confirm',
       cancel: 'Cancel',
       success: 'Delete Successful',
+    },
+    skEditor: {
+      title: 'Add Secret Key',
+      name: 'Name',
+      namePlaceholder: 'Please enter a name',
+      value: 'Value',
+      valuePlaceholder: 'Please enter a value',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      nameRequired: "Name can't be empty",
+      valueRequired: "Value can't be empty",
+      success: 'Add success'
     }
   },
 };
