@@ -350,6 +350,13 @@ const messages = {
       groupManager: '分组管理',
       secretKeyManager: '密钥管理',
     },
+    main: {
+      componentLib: '组件库',
+      loginPage: '登录页',
+      errorPage: '错误页：',
+      browserVersion: '浏览器版本',
+      network: '网络',
+    },
   },
 
   en: {
@@ -697,6 +704,13 @@ const messages = {
       localNode: 'Local Nodes',
       groupManager: 'Group Management',
       secretKeyManager: 'Secret Key Management',
+    },
+    main: {
+      componentLib: 'Component Library',
+      loginPage: 'Login Page',
+      errorPage: 'Error Page:  ',
+      browserVersion: 'Browser Version',
+      network: 'Web',
     },
   },
 };
