@@ -337,6 +337,11 @@ const messages = {
       notTriggered: '尚未触发',
       manualTriggerLog: '此次为手动触发，无webhook日志',
     },
+    workflow: {
+      taskLogTitle: '查看任务执行日志',
+      processLogTitle: '查看流程日志',
+      webhookLogTitle: '查看Webhook日志',
+    },
   },
 
   en: {
@@ -671,6 +676,11 @@ const messages = {
       paramValue: 'Parameter Value',
       notTriggered: 'Not Triggered Yet',
       manualTriggerLog: 'This time manually triggered, no webhook logs',
+    },
+    workflow: {
+      taskLogTitle: 'View Task Execution Log',
+      processLogTitle: 'View Process Log',
+      webhookLogTitle: 'View Webhook Log',
     },
   },
 };

@@ -11,25 +11,25 @@
       @click-webhook-node="openWebhookLog"
     />
     <jm-drawer
-      title="查看任务执行日志"
+      :title="t('workflow.taskLogTitle')"
       :size="850"
       v-model="taskLogForm.drawerVisible"
       direction="rtl"
       destroy-on-close
     >
-      <task-log :dsl="dslSourceCode" :business-id="taskLogForm.id" :tab-type="taskLogForm.tabType"/>
+      <task-log :dsl="dslSourceCode" :business-id="taskLogForm.id" :tab-type="taskLogForm.tabType" />
     </jm-drawer>
     <jm-drawer
-      title="查看流程日志"
+      :title="t('workflow.processLogTitle')"
       :size="850"
       v-model="processLogDrawer"
       direction="rtl"
       destroy-on-close
     >
-      <process-log/>
+      <process-log />
     </jm-drawer>
     <jm-drawer
-      title="查看Webhook日志"
+      :title="t('workflow.webhookLogTitle')"
       :size="850"
       v-model="webhookLogForm.drawerVisible"
       direction="rtl"
@@ -59,10 +59,12 @@ import { INodeDefVo, IProjectDetailVo } from '@/api/dto/project';
 import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/model/data/enumeration';
 import { IRootState } from '@/model';
 import { ignoreTask, retryTask } from '@/api/workflow-execution-record';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   components: { TaskLog, ProcessLog, WebhookLog },
   setup() {
+    const { t } = useLocale();
     const loadData = inject('loadData') as (refreshing?: boolean) => void;
     const workflowRef = ref<HTMLElement>();
     const router = useRouter();
@@ -89,11 +91,10 @@ export default defineComponent({
     }>(() => state.recordDetail);
 
     return {
+      t,
       workflowRef,
       data,
-      dslSourceCode: computed<string | undefined>(
-        () => state.recordDetail.recordDsl,
-      ),
+      dslSourceCode: computed<string | undefined>(() => state.recordDetail.recordDsl),
       nodeInfos: computed<INodeDefVo[]>(() => state.recordDetail.nodeInfos),
       taskLogForm,
       webhookLogForm,
