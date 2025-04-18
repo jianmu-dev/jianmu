@@ -6,13 +6,13 @@
           <router-link :to="{ name: 'create-pipeline' }">
             <div class="btn-item">
               <button class="graph"></button>
-              <span class="text">图形项目</span>
+              <span class="text">{{ $t('index.graphProject') }}</span>
             </div>
           </router-link>
           <router-link :to="{ name: 'create-project' }">
             <div class="btn-item">
               <button class="code"></button>
-              <span class="text">代码项目</span>
+              <span class="text">{{ $t('index.codeProject') }}</span>
             </div>
           </router-link>
           <!--          <router-link :to="{ name: 'import-project' }">-->
@@ -26,25 +26,25 @@
           <router-link :to="{ name: 'worker-manager' }">
             <div class="btn-item">
               <button class="worker-manager"></button>
-              <span class="text">Worker管理</span>
+              <span class="text">{{ $t('index.workerManager') }}</span>
             </div>
           </router-link>
           <router-link :to="{ name: 'node-library' }">
             <div class="btn-item">
               <button class="node-library"></button>
-              <span class="text">本地节点</span>
+              <span class="text">{{ $t('index.localNode') }}</span>
             </div>
           </router-link>
           <router-link :to="{ name: 'project-group' }">
             <div class="btn-item">
               <button class="group"></button>
-              <span class="text">分组管理</span>
+              <span class="text">{{ $t('index.groupManager') }}</span>
             </div>
           </router-link>
           <router-link :to="{ name: 'secret-key' }">
             <div class="btn-item secret-key">
               <button class="secret-key"></button>
-              <span class="text">密钥管理</span>
+              <span class="text">{{ $t('index.secretKeyManager') }}</span>
             </div>
           </router-link>
         </div>

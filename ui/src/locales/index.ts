@@ -342,6 +342,14 @@ const messages = {
       processLogTitle: '查看流程日志',
       webhookLogTitle: '查看Webhook日志',
     },
+    index: {
+      graphProject: '图形项目',
+      codeProject: '代码项目',
+      workerManager: 'Worker管理',
+      localNode: '本地节点',
+      groupManager: '分组管理',
+      secretKeyManager: '密钥管理',
+    },
   },
 
   en: {
@@ -681,6 +689,14 @@ const messages = {
       taskLogTitle: 'View Task Execution Log',
       processLogTitle: 'View Process Log',
       webhookLogTitle: 'View Webhook Log',
+    },
+    index: {
+      graphProject: 'Graphics Projects',
+      codeProject: 'Code Projects',
+      workerManager: 'Worker Management',
+      localNode: 'Local Nodes',
+      groupManager: 'Group Management',
+      secretKeyManager: 'Secret Key Management',
     },
   },
 };
