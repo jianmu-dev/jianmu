@@ -166,6 +166,19 @@ const messages = {
       closeSorting: '关闭排序',
       sorting: '排序',
     },
+    projectGroupCreator: {
+      title: '新建项目分组',
+      name: '分组名称',
+      namePlaceholder: '请输入分组名称',
+      isShow: '首页展示',
+      description: '描述',
+      descriptionPlaceholder: '请输入描述',
+      descriptionTips: '描述信息不超过 256个字符',
+      cancel: '取消',
+      confirm: '确定',
+      nameRequired: '分组名称不能为空',
+      success: '项目分组创建成功',
+    }
   },
 
   en: {
@@ -323,13 +336,26 @@ const messages = {
     },
     projectGroupDetail: {
       close: 'Close',
-      totalProjects: '(Total { count } projects)',
+      totalProjects: '（Total { count } projects）',
       none: 'None',
       addProject: 'add project',
       projectList: 'project list',
       closeSorting: 'close sorting',
       sorting: 'sorting',
     },
+    projectGroupCreator: {
+      title: 'New project grouping',
+      name: 'Grouping name',
+      namePlaceholder: 'Please enter the name of the grouping',
+      isShow: 'Home display',
+      description: 'Description',
+      descriptionPlaceholder: 'Please enter the description',
+      descriptionTips: 'The description information is not more than 256 characters',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      nameRequired: 'The grouping name must not be empty',
+      success: 'The project grouping was created successfully',
+    }
   },
 };
 
