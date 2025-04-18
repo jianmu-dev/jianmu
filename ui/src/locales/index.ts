@@ -216,7 +216,21 @@ const messages = {
       nameRequired: '名称不能为空',
       valueRequired: '值不能为空',
       success: '新增成功'
-    }
+    },
+    nsManager: {
+      close: '关闭',
+      add: '新增命名空间',
+      title: '命名空间',
+      total: '（共有 { length } 个命名空间）',
+      none: '无',
+      lastModified: '最后修改时间：',
+      confirmDelete: '确定要删除命名空间吗?',
+      nameLabel: '名称：',
+      deleteTitle: '删除命名空间',
+      confirm: '确定',
+      cancel: '取消',
+      success: '删除成功',
+    },
   },
 
   en: {
@@ -431,7 +445,21 @@ const messages = {
       nameRequired: "Name can't be empty",
       valueRequired: "Value can't be empty",
       success: 'Add success'
-    }
+    },
+    nsManager: {
+      close: 'Close',
+      add: 'New Namespace',
+      title: 'Namespaces',
+      total: '(Total { length } namespaces)',
+      none: 'None',
+      lastModified: 'Last modified:  ',
+      confirmDelete: 'Sure you want to delete namespace?',
+      nameLabel: 'Name:  ',
+      deleteTitle: 'Delete Namespace',
+      confirm: 'Confirm',
+      cancel: 'Cancel',
+      success: 'Delete Successful',
+    },
   },
 };
 

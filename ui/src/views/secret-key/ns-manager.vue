@@ -4,19 +4,19 @@
     <div class="right-top-btn">
       <router-link :to="{ name: 'index' }">
         <jm-button type="primary" class="jm-icon-button-cancel" size="small"
-        >关闭
+        >{{ t('nsManager.close') }}
         </jm-button
         >
       </router-link>
     </div>
     <div class="menu-bar">
       <button class="add" @click="add">
-        <div class="label">新增命名空间</div>
+        <div class="label">{{ t('nsManager.add') }}</div>
       </button>
     </div>
     <div class="title">
-      <span>命名空间</span>
-      <span class="desc">（共有 {{ namespaces.length }} 个命名空间）</span>
+      <span>{{ t('nsManager.title') }}</span>
+      <span class="desc">{{ t('nsManager.total', { length: namespaces.length }) }}</span>
     </div>
     <div class="content" v-loading="loading">
       <jm-empty v-if="namespaces.length === 0"/>
@@ -33,10 +33,10 @@
                 </div>
               </router-link>
               <div class="description">
-                <jm-text-viewer :value="(ns.description || '无')" class="text-viewer"/>
+                <jm-text-viewer :value="(ns.description || t('nsManager.none'))" class="text-viewer"/>
               </div>
               <div class="time">
-                最后修改时间：{{ datetimeFormatter(ns.lastModifiedTime) }}
+                {{ t('nsManager.lastModified') }}{{ datetimeFormatter(ns.lastModifiedTime) }}
               </div>
             </div>
             <div class="operation">
@@ -102,6 +102,7 @@ import { deleteNamespace } from '@/api/secret-key';
 import NsEditor from './ns-editor.vue';
 import { datetimeFormatter } from '@/utils/formatter';
 import { CredentialManagerTypeEnum } from '@/api/dto/enumeration';
+import { useLocale } from '@/utils/i18n';
 
 const { mapMutations, mapActions } = createNamespacedHelpers(namespace);
 
@@ -117,6 +118,7 @@ export default defineComponent({
     NsEditor,
   },
   setup() {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const state = useStore().state[namespace] as IState;
     const loading = ref<boolean>(false);
@@ -142,6 +144,7 @@ export default defineComponent({
     onBeforeRouteUpdate(to => changeView(childRoute, to));
 
     return {
+      t,
       CredentialManagerTypeEnum,
       ...toRefs(state),
       childRoute,
@@ -164,13 +167,13 @@ export default defineComponent({
           return;
         }
 
-        let msg = '<div>确定要删除命名空间吗?</div>';
-        msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
+        let msg = `<div>${t('nsManager.confirmDelete')}</div>`;
+        msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">${t('nsManager.nameLabel')}${name}</div>`;
 
         proxy
-          .$confirm(msg, '删除命名空间', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+          .$confirm(msg, t('nsManager.deleteTitle'), {
+            confirmButtonText: t('nsManager.confirm'),
+            cancelButtonText: t('nsManager.cancel'),
             type: 'warning',
             dangerouslyUseHTMLString: true,
           })
@@ -179,7 +182,7 @@ export default defineComponent({
 
             deleteNamespace(name)
               .then(() => {
-                proxy.$success('删除成功');
+                proxy.$success(t('nsManager.success'));
 
                 delete deletings.value[name];
 
