@@ -231,6 +231,17 @@ const messages = {
       cancel: '取消',
       success: '删除成功',
     },
+    nsEditor: {
+      title: '新增密钥命名空间',
+      name: '命名空间',
+      namePlaceholder: '请输入命名空间',
+      description: '描述',
+      descriptionPlaceholder: '请输入描述',
+      cancel: '取消',
+      confirm: '确定',
+      nameRequired: '命名空间不能为空',
+      success: '新增成功'
+    }
   },
 
   en: {
@@ -460,6 +471,17 @@ const messages = {
       cancel: 'Cancel',
       success: 'Delete Successful',
     },
+    nsEditor: {
+      title: 'Add Secret Key Namespace',
+      name: 'Namespace',
+      namePlaceholder: 'Please enter the namespace',
+      description: 'Description',
+      descriptionPlaceholder: 'Please enter the description',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      nameRequired: 'Namespace can\'t be empty',
+      success: 'New Successful'
+    }
   },
 };
 
