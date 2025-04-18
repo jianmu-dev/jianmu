@@ -178,6 +178,19 @@ const messages = {
       confirm: '确定',
       nameRequired: '分组名称不能为空',
       success: '项目分组创建成功',
+    },
+    projectAdder: {
+      title: '添加项目',
+      selectGroup: '选择项目组',
+      selectGroupPlaceholder: '请选择项目组',
+      selectedProject: '已选项目',
+      inputPlaceholder: '请输入项目名称或描述',
+      none: '无',
+      cancel: '取消',
+      confirm: '确定',
+      selectGroupRequired: '请选择项目组',
+      addProjectRequired: '请添加项目',
+      success: '项目添加成功',
     }
   },
 
@@ -355,6 +368,19 @@ const messages = {
       confirm: 'Confirm',
       nameRequired: 'The grouping name must not be empty',
       success: 'The project grouping was created successfully',
+    },
+    projectAdder: {
+      title: 'Add project',
+      selectGroup: 'Select project group',
+      selectGroupPlaceholder: 'Please select project group',
+      selectedProject: 'Selected project',
+      inputPlaceholder: 'Please enter project name or description',
+      none: 'None',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      selectGroupRequired: 'Please select project group',
+      addProjectRequired: 'Please add project',
+      success: 'Project added successfully',
     }
   },
 };

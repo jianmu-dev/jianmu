@@ -5,12 +5,12 @@
         <div class="edit-icon">
           <img src="~@/assets/svgs/btn/edit.svg" alt="" />
         </div>
-        <span>添加项目</span>
+        <span>{{ t('projectAdder.title') }}</span>
       </div>
     </template>
     <jm-form :model="createForm" :rules="editorRule" ref="createFormRef" @submit.prevent>
-      <jm-form-item label="选择项目组" label-position="top" class="project-group" prop="projectGroupId">
-        <jm-select @change="selectChange" v-model="createForm.projectGroupId" placeholder="请选择项目组">
+      <jm-form-item :label="t('projectAdder.selectGroup')" label-position="top" class="project-group" prop="projectGroupId">
+        <jm-select @change="selectChange" v-model="createForm.projectGroupId" :placeholder="t('projectAdder.selectGroupPlaceholder')">
           <jm-option
             v-for="item in projectGroupList"
             :disabled="id === item.id"
@@ -22,7 +22,7 @@
         </jm-select>
       </jm-form-item>
       <div class="selected-list">
-        <div class="title">已选项目</div>
+        <div class="title">{{ t('projectAdder.selectedProject') }}</div>
         <div class="selected-list-wrapper">
           <div class="selected-item" v-for="(i, index) in compSelectedList" :key="i.id">
             <!--            <span class="item-name">{{ i.name }}</span>-->
@@ -32,7 +32,7 @@
         </div>
       </div>
       <jm-input
-        placeholder="请输入项目名称或描述"
+        :placeholder="t('projectAdder.inputPlaceholder')"
         type="text"
         class="search-input"
         v-model.trim="keyword"
@@ -56,7 +56,7 @@
             <jm-text-viewer :value="i.name" />
           </div>
           <div class="project-desc">
-            {{ i.description || '无' }}
+            {{ i.description || t('projectAdder.none') }}
           </div>
           <div class="selected"></div>
         </div>
@@ -74,8 +74,8 @@
     </jm-form>
     <template #footer>
       <span>
-        <jm-button size="small" @click="dialogVisible = false">取消</jm-button>
-        <jm-button size="small" type="primary" @click="create" :loading="loading">确定</jm-button>
+        <jm-button size="small" @click="dialogVisible = false">{{ t('projectAdder.cancel') }}</jm-button>
+        <jm-button size="small" type="primary" @click="create" :loading="loading">{{ t('projectAdder.confirm') }}</jm-button>
       </span>
     </template>
   </jm-dialog>
@@ -91,6 +91,7 @@ import { Mutable } from '@/utils/lib';
 import { defineComponent, ref, onMounted, getCurrentInstance, computed } from 'vue';
 import { addProject } from '@/api/project-group';
 import { START_PAGE_NUM } from '@/utils/constants';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   emits: ['completed'],
@@ -101,6 +102,7 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const dialogVisible = ref<boolean>(true);
     const createFormRef = ref<any>(null);
@@ -113,7 +115,7 @@ export default defineComponent({
     const selectedList = ref<Mutable<IProjectVo[]>>([]);
     const compSelectedList = computed(() => selectedList.value);
     const editorRule = ref<Record<string, any>>({
-      projectGroupId: [{ required: true, message: '请选择项目组', trigger: 'change' }],
+      projectGroupId: [{ required: true, message: t('projectAdder.selectGroupRequired'), trigger: 'change' }],
     });
     const projectGroupList = ref<IProjectGroupVo[]>([]);
     // 已选择的项目数组
@@ -141,7 +143,7 @@ export default defineComponent({
     };
     const search = async () => {
       if (!createForm.value.projectGroupId) {
-        proxy.$error('请选择项目组');
+        proxy.$error(t('projectAdder.selectGroupRequired'));
         return;
       }
       projectList.value = await queryProject({
@@ -168,7 +170,7 @@ export default defineComponent({
         compSelectedList.value.forEach(item => projectIds.push(item.id));
         try {
           if (projectIds.length === 0) {
-            proxy.$error('请添加项目');
+            proxy.$error(t('projectAdder.addProjectRequired'));
             return;
           }
           loading.value = true;
@@ -176,7 +178,7 @@ export default defineComponent({
             projectGroupId: props.id,
             projectIds,
           });
-          proxy.$success('项目添加成功');
+          proxy.$success(t('projectAdder.success'));
           emit('completed');
           dialogVisible.value = false;
         } catch (err) {
@@ -187,6 +189,7 @@ export default defineComponent({
       });
     };
     return {
+      t,
       createFormRef,
       compSelectedList,
       projectList,
