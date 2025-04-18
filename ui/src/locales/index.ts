@@ -325,6 +325,18 @@ const messages = {
       unavailable: '不可用',
       requiredField: '必填项',
     },
+    webhookLog: {
+      processName: '流程名称：',
+      nodeName: '节点名称：',
+      startTime: '启动时间：',
+      log: '日志',
+      businessParams: '业务参数',
+      paramKey: '参数唯一标识',
+      paramType: '参数类型',
+      paramValue: '参数值',
+      notTriggered: '尚未触发',
+      manualTriggerLog: '此次为手动触发，无webhook日志',
+    },
   },
 
   en: {
@@ -647,6 +659,18 @@ const messages = {
       available: 'Available',
       unavailable: 'Unavailable',
       requiredField: 'Required fields',
+    },
+    webhookLog: {
+      processName: 'Process Name:  ',
+      nodeName: 'Node Name:  ',
+      startTime: 'Start Time:  ',
+      log: 'Log',
+      businessParams: 'Business Parameters',
+      paramKey: 'Parameter Unique Identifier',
+      paramType: 'Parameter Type',
+      paramValue: 'Parameter Value',
+      notTriggered: 'Not Triggered Yet',
+      manualTriggerLog: 'This time manually triggered, no webhook logs',
     },
   },
 };
