@@ -2,12 +2,12 @@
   <div class="worker-manager">
     <div class="right-top-btn">
       <router-link :to="{ name: 'index' }">
-        <jm-button type="primary" class="jm-icon-button-cancel" size="small">关闭 </jm-button>
+        <jm-button type="primary" class="jm-icon-button-cancel" size="small">{{ t('workersManager.close') }}</jm-button>
       </router-link>
     </div>
     <div class="title">
-      <span>Worker列表</span>
-      <span class="desc">（共有 {{ workerListData.length }} 个Worker）</span>
+      <span>{{ t('workersManager.title') }}</span>
+      <span class="desc">{{ t('workersManager.total', { length: workerListData.length }) }}</span>
     </div>
     <div class="content">
       <jm-empty v-if="workerListData.length === 0" />
@@ -23,27 +23,27 @@
             <span class="id">{{ i.id }}</span>
           </div>
           <div class="name">
-            <span>名称：</span>
+            <span>{{ t('workersManager.name') }}</span>
             <span>{{ i.name }}</span>
           </div>
           <div class="tags">
-            <span>标签：</span>
-            <span>{{ i.tags || '无' }}</span>
+            <span>{{ t('workersManager.label') }}</span>
+            <span>{{ i.tags || t('workersManager.none') }}</span>
           </div>
           <div class="os">
-            <span>操作系统：</span>
+            <span>{{ t('workersManager.os') }}</span>
             <span>{{ i.os }}</span>
           </div>
           <div class="arch">
-            <span>架构：</span>
+            <span>{{ t('workersManager.arch') }}</span>
             <span>{{ i.arch }}</span>
           </div>
           <div class="type">
-            <span>类型：</span>
+            <span>{{ t('workersManager.type') }}</span>
             <span>{{ i.type }}</span>
           </div>
           <div class="created-time">
-            <span>注册时间：</span>
+            <span>{{ t('workersManager.time') }}</span>
             <span>{{ datetimeFormatter(i.createdTime) }}</span>
           </div>
         </div>
@@ -61,9 +61,11 @@ import { Mutable } from '@/utils/lib';
 import { IWorkerVo } from '@/api/dto/worker';
 import { fetchWorkerList, deleteWorker } from '@/api/worker';
 import { datetimeFormatter } from '@/utils/formatter';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   setup() {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const deletings = ref<{ [name: string]: boolean }>({});
 
@@ -76,6 +78,7 @@ export default defineComponent({
       await fetchWorkers();
     });
     return {
+      t,
       deletings,
       workerListData,
       datetimeFormatter,
@@ -84,12 +87,12 @@ export default defineComponent({
           return;
         }
 
-        let msg = '<div>确定要删除Worker吗?</div>';
+        let msg = `<div>${t('workersManager.confirmDeleteMsg')}</div>`;
         msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">ID：${id}</div>`;
         proxy
-          .$confirm(msg, '删除Worker', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+          .$confirm(msg, t('workersManager.confirmDeleteTitle'), {
+            confirmButtonText: t('workersManager.confirm'),
+            cancelButtonText: t('workersManager.cancel'),
             type: 'warning',
             dangerouslyUseHTMLString: true,
           })
@@ -97,7 +100,7 @@ export default defineComponent({
             deletings.value[id] = true;
             deleteWorker(id)
               .then(() => {
-                proxy.$success('删除成功');
+                proxy.$success(t('workersManager.success'));
                 delete deletings.value[id];
                 const index = workerListData.value.findIndex(item => item.id === id);
                 workerListData.value.splice(index, 1);

@@ -215,7 +215,7 @@ const messages = {
       confirm: '确定',
       nameRequired: '名称不能为空',
       valueRequired: '值不能为空',
-      success: '新增成功'
+      success: '新增成功',
     },
     nsManager: {
       close: '关闭',
@@ -240,8 +240,25 @@ const messages = {
       cancel: '取消',
       confirm: '确定',
       nameRequired: '命名空间不能为空',
-      success: '新增成功'
-    }
+      success: '新增成功',
+    },
+    workersManager: {
+      close: '关闭',
+      title: 'Worker列表',
+      total: '（共有 { length } 个Worker）',
+      name: '名称：',
+      label: '标签：',
+      none: '无',
+      os: '操作系统：',
+      arch: '架构：',
+      type: '类型：',
+      time: '注册时间：',
+      confirmDeleteMsg: '确定要删除Worker吗?',
+      confirmDeleteTitle: '删除Worker',
+      confirm: '确定',
+      cancel: '取消',
+      success: '删除成功',
+    },
   },
 
   en: {
@@ -453,9 +470,9 @@ const messages = {
       valuePlaceholder: 'Please enter a value',
       cancel: 'Cancel',
       confirm: 'Confirm',
-      nameRequired: "Name can't be empty",
-      valueRequired: "Value can't be empty",
-      success: 'Add success'
+      nameRequired: 'Name can\'t be empty',
+      valueRequired: 'Value can\'t be empty',
+      success: 'Add success',
     },
     nsManager: {
       close: 'Close',
@@ -480,8 +497,25 @@ const messages = {
       cancel: 'Cancel',
       confirm: 'Confirm',
       nameRequired: 'Namespace can\'t be empty',
-      success: 'New Successful'
-    }
+      success: 'New Successful',
+    },
+    workersManager: {
+      close: 'Close',
+      title: 'Worker list',
+      total: '(Total { length } Workers)',
+      name: 'Name:  ',
+      label: 'Label:  ',
+      none: 'None',
+      os: 'Operating System:  ',
+      arch: 'Architecture:  ',
+      type: 'Type:  ',
+      time: 'Registered:  ',
+      confirmDeleteMsg: 'Sure you want to delete a Worker?',
+      confirmDeleteTitle: 'Delete Worker',
+      confirm: 'Confirm',
+      cancel: 'Cancel',
+      success: 'Delete Successful',
+    },
   },
 };
 
