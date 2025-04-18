@@ -3,73 +3,73 @@
     <div class="basic-section">
       <div class="item">
         <div>
-          <div class="param-key">流程名称</div>
+          <div class="param-key">{{ t('taskLog.processName') }}</div>
           <div class="param-value">
             <jm-text-viewer :value="workflowName" :tip-append-to-body="false" />
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
-          <div class="title">执行次数</div>
+          <div class="title">{{ t('taskLog.executionCount') }}</div>
           <div class="total times">{{ statusParams.total }}</div>
         </div>
       </div>
       <div class="item">
         <div>
-          <div class="param-key">节点名称</div>
+          <div class="param-key">{{ t('taskLog.nodeName') }}</div>
           <div class="param-value">
             <jm-text-viewer :value="nodeName" :tip-append-to-body="false" />
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
-          <div class="title">成功次数</div>
+          <div class="title">{{ t('taskLog.successCount') }}</div>
           <div class="success times">{{ statusParams.successNum }}</div>
         </div>
       </div>
       <div class="item">
         <div>
-          <div class="param-key">节点定义</div>
+          <div class="param-key">{{ t('taskLog.nodeDefinition') }}</div>
           <div class="param-value">
             <jm-text-viewer :value="nodeDef" :tip-append-to-body="false" />
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
-          <div class="title">失败次数</div>
+          <div class="title">{{ t('taskLog.failureCount') }}</div>
           <div class="fail times">{{ statusParams.failNum }}</div>
         </div>
       </div>
       <div class="item">
         <div>
-          <div class="param-key">启动时间</div>
+          <div class="param-key">{{ t('taskLog.startTime') }}</div>
           <div class="param-value">
             <jm-text-viewer :value="datetimeFormatter(task.startTime)" :tip-append-to-body="false" />
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
-          <div class="title">跳过次数</div>
+          <div class="title">{{ t('taskLog.skipCount') }}</div>
           <div class="skip times">{{ statusParams.skipNum }}</div>
         </div>
       </div>
       <div class="item">
         <div>
-          <div class="param-key">执行时长</div>
+          <div class="param-key">{{ t('taskLog.executionDuration') }}</div>
           <div class="param-value">
             <jm-timer :start-time="task.startTime" :end-time="task.endTime" :tip-append-to-body="false" />
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
-          <div class="title">挂起次数</div>
+          <div class="title">{{ t('taskLog.suspendedCount') }}</div>
           <div class="suspend times">{{ statusParams.suspendNum }}</div>
         </div>
       </div>
       <div class="item">
         <div>
-          <div class="param-key">执行状态</div>
+          <div class="param-key">{{ t('taskLog.executionStatus') }}</div>
           <div>
             <jm-task-state :value="task.status" />
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
-          <div class="title">忽略次数</div>
+          <div class="title">{{ t('taskLog.ignoreCount') }}</div>
           <div class="ignore times">{{ statusParams.ignoreNum }}</div>
         </div>
       </div>
@@ -79,12 +79,12 @@
       <jm-tabs v-model="tabActiveName">
         <jm-tab-pane name="log" lazy>
           <template #label>
-            <div class="tab">日志</div>
+            <div class="tab">{{ t('taskLog.log') }}</div>
           </template>
           <div class="tab-content">
             <div :class="[tasks.length > 1 ? 'tasks-log' : 'task-log']" class="log">
               <div class="loading" v-if="executing">
-                <jm-button type="text" size="small" :loading="executing"> 加载中...</jm-button>
+                <jm-button type="text" size="small" :loading="executing">{{ t('taskLog.loading') }}</jm-button>
               </div>
               <jm-log-viewer
                 v-if="currentInstanceId"
@@ -98,13 +98,15 @@
         </jm-tab-pane>
         <jm-tab-pane name="params" lazy>
           <template #label>
-            <div class="tab">业务参数</div>
+            <div class="tab" style="min-width: 180px; text-align: center">
+              {{ t('taskLog.businessParams') }}
+            </div>
           </template>
           <div class="tab-content">
             <div :class="[tasks.length > 1 ? 'tasks-params' : 'task-params']" class="params">
               <jm-scrollbar>
                 <div class="content">
-                  <div class="title">输入参数</div>
+                  <div class="title">{{ t('taskLog.inputParams') }}</div>
                   <jm-table
                     :data="taskInputParams"
                     :border="true"
@@ -112,7 +114,12 @@
                       ({ row, columnIndex }) => (row.required && columnIndex === 0 ? 'required-cell' : '')
                     "
                   >
-                    <jm-table-column label="参数唯一标识" header-align="center" width="200px" prop="ref">
+                    <jm-table-column header-align="center" width="200px" prop="ref">
+                      <template #header>
+                        <div style="white-space: normal; text-align: center; word-break: keep-all">
+                          {{ t('taskLog.paramKey') }}
+                        </div>
+                      </template>
                       <template #default="scope">
                         <div
                           :style="{
@@ -127,40 +134,43 @@
                               @loaded="({ contentMaxWidth }) => getTotalWidth(contentMaxWidth, scope.row.ref)"
                             />
                           </div>
-                          <jm-tooltip content="必填项" placement="top" :appendToBody="false" v-if="scope.row.required">
+                          <jm-tooltip
+                            :content="t('taskLog.requiredField')"
+                            placement="top"
+                            :appendToBody="false"
+                            v-if="scope.row.required"
+                          >
                             <img src="~@/assets/svgs/task-log/required.svg" alt="" />
                           </jm-tooltip>
                         </div>
                       </template>
                     </jm-table-column>
-                    <jm-table-column
-                      header-align="center"
-                      label="参数类型"
-                      width="110px"
-                      align="center"
-                      prop="valueType"
-                    >
+                    <jm-table-column header-align="center" width="110px" align="center" prop="valueType">
+                      <template #header>
+                        <div style="white-space: normal; text-align: center; word-break: keep-all">
+                          {{ t('taskLog.paramType') }}
+                        </div>
+                      </template>
                     </jm-table-column>
-                    <jm-table-column
-                      label="是/否必填"
-                      header-align="center"
-                      align="center"
-                      width="110px"
-                      prop="required"
-                    >
+                    <jm-table-column header-align="center" align="center" width="110px" prop="required">
+                      <template #header>
+                        <div style="white-space: normal; text-align: center; word-break: keep-all">
+                          {{ t('taskLog.requiredOrNot') }}
+                        </div>
+                      </template>
                       <template #default="scope">
                         <span :class="[scope.row.required ? 'is-required' : '']">
-                          {{ scope.row.required ? '是' : '否' }}
+                          {{ scope.row.required ? t('taskLog.yes') : t('taskLog.no') }}
                         </span>
                       </template>
                     </jm-table-column>
-                    <jm-table-column label="参数值" header-align="center">
+                    <jm-table-column :label="t('taskLog.paramValue')" header-align="center">
                       <template #default="scope">
                         <param-value :value="scope.row.value" :tip-append-to-body="false" :type="scope.row.valueType" />
                       </template>
                     </jm-table-column>
                   </jm-table>
-                  <div class="title separator">输出参数</div>
+                  <div class="title separator">{{ t('taskLog.outputParams') }}</div>
                   <jm-table
                     :data="taskOutputParams"
                     :border="true"
@@ -168,7 +178,12 @@
                       ({ row, columnIndex }) => (row.required && columnIndex === 0 ? 'required-cell' : '')
                     "
                   >
-                    <jm-table-column header-align="center" label="参数唯一标识" width="200px" prop="ref">
+                    <jm-table-column header-align="center" width="200px" prop="ref">
+                      <template #header>
+                        <div style="white-space: normal; text-align: center; word-break: keep-all">
+                          {{ t('taskLog.paramKey') }}
+                        </div>
+                      </template>
                       <template #default="scope">
                         <div
                           :style="{
@@ -183,34 +198,37 @@
                               @loaded="({ contentMaxWidth }) => getTotalWidth(contentMaxWidth, scope.row.ref)"
                             />
                           </div>
-                          <jm-tooltip content="必填项" placement="top" :appendToBody="false" v-if="scope.row.required">
+                          <jm-tooltip
+                            :content="t('taskLog.requiredField')"
+                            placement="top"
+                            :appendToBody="false"
+                            v-if="scope.row.required"
+                          >
                             <img src="~@/assets/svgs/task-log/required.svg" alt="" />
                           </jm-tooltip>
                         </div>
                       </template>
                     </jm-table-column>
-                    <jm-table-column
-                      header-align="center"
-                      label="参数类型"
-                      align="center"
-                      width="110px"
-                      prop="valueType"
-                    >
+                    <jm-table-column header-align="center" align="center" width="110px" prop="valueType">
+                      <template #header>
+                        <div style="white-space: normal; text-align: center; word-break: keep-all">
+                          {{ t('taskLog.paramType') }}
+                        </div>
+                      </template>
                     </jm-table-column>
-                    <jm-table-column
-                      header-align="center"
-                      label="是/否必填"
-                      width="110px"
-                      align="center"
-                      prop="required"
-                    >
+                    <jm-table-column header-align="center" width="110px" align="center" prop="required">
+                      <template #header>
+                        <div style="white-space: normal; text-align: center; word-break: keep-all">
+                          {{ t('taskLog.requiredOrNot') }}
+                        </div>
+                      </template>
                       <template #default="scope">
                         <span :class="[scope.row.required ? 'is-required' : '']">
-                          {{ scope.row.required ? '是' : '否' }}
+                          {{ scope.row.required ? t('taskLog.yes') : t('taskLog.no') }}
                         </span>
                       </template>
                     </jm-table-column>
-                    <jm-table-column label="参数值" header-align="center">
+                    <jm-table-column :label="t('taskLog.paramValue')" header-align="center">
                       <template #default="scope">
                         <param-value :value="scope.row.value" :tip-append-to-body="false" :type="scope.row.valueType" />
                       </template>
@@ -223,7 +241,7 @@
         </jm-tab-pane>
         <jm-tab-pane name="cache" v-if="showCache" lazy>
           <template #label>
-            <div class="tab">缓存</div>
+            <div class="tab">{{ t('taskLog.cache') }}</div>
           </template>
           <div class="tab-content">
             <div class="params">
@@ -231,12 +249,12 @@
                 <div class="content">
                   <div class="cache-table">
                     <jm-table :data="nodeCaches" :border="true">
-                      <jm-table-column header-align="center" label="缓存" prop="name">
+                      <jm-table-column header-align="center" :label="t('taskLog.cache')" prop="name">
                         <template #default="scope">
                           <jm-text-viewer :value="scope.row.name" />
                         </template>
                       </jm-table-column>
-                      <jm-table-column label="挂载目录" header-align="center" prop="path">
+                      <jm-table-column :label="t('taskLog.mountPath')" header-align="center" prop="path">
                         <template #default="scope">
                           <jm-text-viewer :value="scope.row.path" />
                         </template>
@@ -244,11 +262,11 @@
                       <jm-table-column header-align="center" class-name="status" prop="available">
                         <template #header>
                           <div class="wrapper">
-                            <span>状态</span>
+                            <span>{{ t('taskLog.status') }}</span>
                             <jm-tooltip>
                               <template #content>
-                                <p>对于不可用的缓存，可到项目卡片-</p>
-                                <p style="margin-top: 5px">更多-缓存中清理或项目编辑页删除</p>
+                                <p>{{ t('taskLog.unavailableTipLine1') }}</p>
+                                <p style="margin-top: 5px">{{ t('taskLog.unavailableTipLine2') }}</p>
                               </template>
                               <i class="icon jm-icon-button-help"></i>
                             </jm-tooltip>
@@ -256,9 +274,11 @@
                         </template>
                         <template #default="scope">
                           <div class="enable" v-if="scope.row.available">
-                            可用<i class="jm-icon-button-success icon"></i>
+                            {{ t('taskLog.available') }}<i class="jm-icon-button-success icon"></i>
                           </div>
-                          <div class="disabled" v-else>不可用<i class="jm-icon-button-warning icon"></i></div>
+                          <div class="disabled" v-else>
+                            {{ t('taskLog.unavailable') }}<i class="jm-icon-button-warning icon"></i>
+                          </div>
                         </template>
                       </jm-table-column>
                     </jm-table>
@@ -300,6 +320,7 @@ import { sortTasks } from '@/components/workflow/workflow-viewer/model/util';
 import { downloadNodeLogs } from '@/api/workflow-execution-record';
 import ParamValue from '@/views/common/param-value.vue';
 import { INodeCacheVo } from '@/api/dto/cache';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   components: { TaskList, ParamValue },
@@ -318,6 +339,7 @@ export default defineComponent({
     },
   },
   setup(props: any) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const { pipeline, workflow } = yaml.parse(props.dsl);
     const state = useStore().state[namespace] as IState;
@@ -537,6 +559,7 @@ export default defineComponent({
       }
     };
     return {
+      t,
       showCache,
       nodeCaches,
       ParamTypeEnum,
