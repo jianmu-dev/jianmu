@@ -191,6 +191,19 @@ const messages = {
       selectGroupRequired: '请选择项目组',
       addProjectRequired: '请添加项目',
       success: '项目添加成功',
+    },
+    skManager: {
+      close: '关闭',
+      title: '密钥列表',
+      total: '（共有 { keys } 个密钥）',
+      add: '新增密钥',
+      none: '无',
+      confirmDelete: '确定要删除密钥吗?',
+      name: '名称：',
+      delete: '删除密钥',
+      confirm: '确定',
+      cancel: '取消',
+      success: '删除成功',
     }
   },
 
@@ -381,6 +394,19 @@ const messages = {
       selectGroupRequired: 'Please select project group',
       addProjectRequired: 'Please add project',
       success: 'Project added successfully',
+    },
+    skManager: {
+      close: 'Close',
+      title: 'Secret Key List',
+      total: '(Total { keys } Secret Keys)',
+      add: 'New Secret Key',
+      none: 'None',
+      confirmDelete: 'Are you sure you want to delete the secret key?',
+      name: 'Name:',
+      delete: 'Delete Secret Key',
+      confirm: 'Confirm',
+      cancel: 'Cancel',
+      success: 'Delete Successful',
     }
   },
 };

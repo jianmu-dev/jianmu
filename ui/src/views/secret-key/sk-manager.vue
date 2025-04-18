@@ -3,7 +3,7 @@
     <div class="right-top-btn">
       <router-link :to="{ name: 'secret-key' }">
         <jm-button type="primary" class="jm-icon-button-cancel" size="small"
-        >关闭
+        >{{ t('skManager.close') }}
         </jm-button
         >
       </router-link>
@@ -17,12 +17,12 @@
     </div>
     <div class="keys">
       <div class="title">
-        <span>密钥列表</span>
-        <span class="desc">（共有 {{ keys.length }} 个密钥）</span>
+        <span>{{ t('skManager.title') }}</span>
+        <span class="desc">{{ t('skManager.total', { keys: keys.length }) }}</span>
       </div>
       <div class="menu-bar">
         <button class="add" @click="add">
-          <div class="label">新增密钥</div>
+          <div class="label">{{ t('skManager.add') }}</div>
         </button>
       </div>
       <div class="content" v-loading="loading">
@@ -61,6 +61,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/secret-key';
 import { IState } from '@/model/modules/secret-key';
+import { useLocale } from '@/utils/i18n';
 
 interface IKeyType {
   id: string;
@@ -78,9 +79,10 @@ export default defineComponent({
     },
   },
   setup(props: any) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const state = useStore().state[namespace] as IState;
-    const description = ref<string>('无');
+    const description = ref<string>(t('skManager.none'));
     const keys = ref<IKeyType[]>([]);
     const loading = ref<boolean>(false);
     const creationActivated = ref<boolean>(false);
@@ -92,7 +94,7 @@ export default defineComponent({
         loading.value = true;
 
         const { description: desc } = await fetchNamespaceDetail(props.ns);
-        description.value = (desc || '无').replace(/\n/g, '<br/>');
+        description.value = (desc || t('skManager.none')).replace(/\n/g, '<br/>');
 
         keys.value = (await listSecretKey(props.ns)).map(item => ({
           id: uuidv4(),
@@ -106,6 +108,7 @@ export default defineComponent({
     });
 
     return {
+      t,
       description,
       keys,
       loading,
@@ -122,13 +125,13 @@ export default defineComponent({
           return;
         }
 
-        let msg = '<div>确定要删除密钥吗?</div>';
-        msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
+        let msg = `<div>${t('skManager.confirmDelete')}</div>`;
+        msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">${t('skManager.name')}${name}</div>`;
 
         proxy
-          .$confirm(msg, '删除密钥', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+          .$confirm(msg, t('skManager.delete'), {
+            confirmButtonText: t('skManager.confirm'),
+            cancelButtonText: t('skManager.cancel'),
             type: 'warning',
             dangerouslyUseHTMLString: true,
           })
@@ -137,7 +140,7 @@ export default defineComponent({
 
             deleteSecretKey(props.ns, name)
               .then(() => {
-                proxy.$success('删除成功');
+                proxy.$success(t('skManager.success'));
 
                 delete deletings.value[name];
 
