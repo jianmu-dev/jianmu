@@ -504,6 +504,16 @@ const messages = {
       param: '参数',
       cache: '缓存',
     },
+    taskState: {
+      INIT: '待启动',
+      WAITING: '排队中',
+      RUNNING: '执行中',
+      SKIPPED: '已跳过',
+      FAILED: '执行失败',
+      SUCCEEDED: '执行成功',
+      SUSPENDED: '已挂起',
+      IGNORED: '已忽略',
+    },
   },
 
   en: {
@@ -1006,6 +1016,16 @@ const messages = {
       log: 'Log',
       param: 'Parameters',
       cache: 'Cache',
+    },
+    taskState: {
+      INIT: 'Pending startup',
+      WAITING: 'In queue',
+      RUNNING: 'Executing',
+      SKIPPED: 'Skipped',
+      FAILED: 'Failed to execute',
+      SUCCEEDED: 'Successful',
+      SUSPENDED: 'Pending',
+      IGNORED: 'Ignored',
     },
   },
 };

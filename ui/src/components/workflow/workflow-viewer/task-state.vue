@@ -6,13 +6,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onUpdated, ref, SetupContext } from 'vue';
+import { defineComponent, onUpdated, ref, SetupContext, computed } from 'vue';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
+import { useLocale } from '@/utils/i18n';
 
 const states: {
   [key: string]: {
-    signal: string,
-    label: string,
+    signal: string;
+    label: string;
   };
 } = {
   [TaskStatusEnum.INIT]: {
@@ -62,8 +63,11 @@ export default defineComponent({
   },
   emit: ['change'],
   setup(props, { emit }: SetupContext) {
+    const { t } = useLocale();
     const state = states[props.status];
-    const { signal, label } = state;
+    const signal = state.signal;
+
+    const label = computed(() => t(`taskState.${props.status}`));
 
     const amount = ref<number>(props.count);
     onUpdated(() => {
@@ -75,6 +79,7 @@ export default defineComponent({
     });
 
     return {
+      t,
       amount,
       signal,
       label,
@@ -100,7 +105,6 @@ export default defineComponent({
   }
 
   .label {
-
   }
 }
 </style>
