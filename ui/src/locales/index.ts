@@ -541,6 +541,18 @@ const messages = {
       nameRequired: '请输入项目名称',
       groupRequired: '请选择项目分组',
     },
+    topToolbar: {
+      zoomOut: '缩小',
+      zoomIn: '放大',
+      center: '居中',
+      cache: '缓存',
+      maxConcurrent: '最大并发数',
+      concurrentTip: '单个流程中可同时执行/挂起的实例数',
+      saveAndBack: '保存并返回',
+      save: '保存',
+      saveModification: '保存此次修改',
+      noSave: '不保存',
+    },
   },
 
   en: {
@@ -1080,6 +1092,18 @@ const messages = {
       confirm: 'Confirm',
       nameRequired: 'Please enter the project name',
       groupRequired: 'Please select the project grouping',
+    },
+    topToolbar: {
+      zoomOut: 'Zoom out',
+      zoomIn: 'Zoom in',
+      center: 'Center',
+      cache: 'Cache',
+      maxConcurrent: 'Maximum number of concurrency',
+      concurrentTip: 'Number of instances that can Execute/Suspend simultaneously in a single process',
+      saveAndBack: 'Save and return',
+      save: 'Save',
+      saveModification: 'Save this modification',
+      noSave: 'Do not save',
     },
   },
 };

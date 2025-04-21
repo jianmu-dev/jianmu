@@ -7,24 +7,24 @@
     </div>
     <div class="right">
       <div class="tools">
-        <jm-tooltip content="缩小" placement="bottom" :appendToBody="false">
+        <jm-tooltip :content="t('topToolbar.zoomOut')" placement="bottom" :appendToBody="false">
           <button class="jm-icon-workflow-zoom-out" @click="zoom(ZoomTypeEnum.OUT)"></button>
         </jm-tooltip>
         <div class="ratio">{{ zoomPercentage }}</div>
-        <jm-tooltip content="放大" placement="bottom" :appendToBody="false">
+        <jm-tooltip :content="t('topToolbar.zoomIn')" placement="bottom" :appendToBody="false">
           <button class="jm-icon-workflow-zoom-in" @click="zoom(ZoomTypeEnum.IN)"></button>
         </jm-tooltip>
-        <jm-tooltip content="居中" placement="bottom" :appendToBody="false">
+        <jm-tooltip :content="t('topToolbar.center')" placement="bottom" :appendToBody="false">
           <button class="jm-icon-workflow-zoom-center" @click="zoom(ZoomTypeEnum.CENTER)"></button>
         </jm-tooltip>
       </div>
       <div class="cache" @click="openCachePanel">
         <i class="jm-icon-workflow-cache" />
-        <span>缓存</span>
+        <span>{{ t('topToolbar.cache') }}</span>
         <i class="cache-icon" v-if="cacheIconVisible" />
       </div>
       <div class="configs">
-        最大并发数
+        {{ t('topToolbar.maxConcurrent') }}
         <i class="jm-icon-button-help" @mouseover="tooltipVisible = true" @mouseout="tooltipVisible = false"></i>
         <jm-select
           ref="concurrentRef"
@@ -38,13 +38,15 @@
           <jm-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
         </jm-select>
         <div class="tooltip-popper" v-show="tooltipVisible">
-          <span class="popper-description">单个流程中可同时执行/挂起的实例数</span>
+          <span class="popper-description">{{ t('topToolbar.concurrentTip') }}</span>
           <img src="../../svgs/concurrent-example.svg" class="concurrent-example" />
         </div>
       </div>
       <div class="operations">
-        <jm-button class="save-return" @click="save(true)" @keypress.enter.prevent>保存并返回</jm-button>
-        <jm-button type="primary" @click="save(false)" @keypress.enter.prevent>保存</jm-button>
+        <jm-button class="save-return" @click="save(true)" @keypress.enter.prevent>{{
+          t('topToolbar.saveAndBack')
+        }}</jm-button>
+        <jm-button type="primary" @click="save(false)" @keypress.enter.prevent>{{ t('topToolbar.save') }}</jm-button>
       </div>
     </div>
     <project-panel v-if="projectPanelVisible" v-model="projectPanelVisible" :workflow-data="workflowData" />
@@ -62,6 +64,7 @@ import { WorkflowValidator } from '../../model/workflow-validator';
 import { cloneDeep } from 'lodash';
 import { compare } from '../../model/util/object';
 import { Global } from '../../model/data/global';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   components: { ProjectPanel },
@@ -73,6 +76,7 @@ export default defineComponent({
   },
   emits: ['back', 'save', 'open-cache-panel'],
   setup(props, { emit }) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     let workflowBackUp = cloneDeep(props.workflowData);
     const workflowForm = ref<IWorkflow>(props.workflowData);
@@ -155,6 +159,7 @@ export default defineComponent({
     };
 
     return {
+      t,
       ZoomTypeEnum,
       workflowForm,
       projectPanelVisible,
@@ -175,9 +180,9 @@ export default defineComponent({
           !compare(JSON.stringify(workflowBackUp.global), JSON.stringify(workflowForm.value.global))
         ) {
           proxy
-            .$confirm(' ', '保存此次修改', {
-              confirmButtonText: '保存',
-              cancelButtonText: '不保存',
+            .$confirm(' ', t('topToolbar.saveModification'), {
+              confirmButtonText: t('topToolbar.save'),
+              cancelButtonText: t('topToolbar.noSave'),
               distinguishCancelAndClose: true,
               type: 'info',
             })
