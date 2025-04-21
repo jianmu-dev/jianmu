@@ -372,6 +372,12 @@ const messages = {
       passwordEmpty: '密码不能为空',
       success: '登录成功',
     },
+    projectGroup: {
+      viewMore: '查看更多',
+      noProjects: '没有项目',
+      noResult: '没有找到相关结果',
+      totalProjects: '共有 { count } 个项目',
+    },
   },
 
   en: {
@@ -741,6 +747,12 @@ const messages = {
       usernameEmpty: 'Username can\'t be empty',
       passwordEmpty: 'Password can\'t be empty',
       success: 'Login successful',
+    },
+    projectGroup: {
+      viewMore: 'View More',
+      noProjects: 'No Projects',
+      noResult: 'No related results were found',
+      totalProjects: '（Total { count } projects）',
     },
   },
 };
