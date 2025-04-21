@@ -553,6 +553,15 @@ const messages = {
       saveModification: '保存此次修改',
       noSave: '不保存',
     },
+    nodeGroup: {
+      networkError: '网络开小差啦',
+      reload: '重新加载',
+      trigger: '触发器',
+      builtIn: '内置节点',
+      local: '本地节点',
+      official: '官方节点',
+      community: '社区节点',
+    }
   },
 
   en: {
@@ -1105,6 +1114,15 @@ const messages = {
       saveModification: 'Save this modification',
       noSave: 'Do not save',
     },
+    nodeGroup: {
+      networkError: 'Network Error',
+      reload: 'Reload',
+      trigger: 'Trigger',
+      builtIn: 'Built-in nodes',
+      local: 'Local nodes',
+      official: 'Official nodes',
+      community: 'Community nodes',
+    }
   },
 };
 
