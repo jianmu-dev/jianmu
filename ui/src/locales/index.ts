@@ -493,6 +493,17 @@ const messages = {
       confirm: '确认',
       selectPlaceholder: '请选择参数值',
     },
+    nodeToolbar: {
+      confirmRetry: '确定要重试吗？',
+      confirmIgnore: '确定要忽略吗？',
+      confirm: '确认',
+      cancel: '取消',
+      retry: '重试',
+      ignore: '忽略',
+      log: '日志',
+      param: '参数',
+      cache: '缓存',
+    },
   },
 
   en: {
@@ -984,6 +995,17 @@ const messages = {
       cancel: 'Cancel',
       confirm: 'Confirm',
       selectPlaceholder: 'Please select the parameter value',
+    },
+    nodeToolbar: {
+      confirmRetry: 'Sure you want to retry?',
+      confirmIgnore: 'Sure you want to ignore?',
+      confirm: 'Confirm',
+      cancel: 'Cancel',
+      retry: 'Retry',
+      ignore: 'Ignore',
+      log: 'Log',
+      param: 'Parameters',
+      cache: 'Cache',
     },
   },
 };

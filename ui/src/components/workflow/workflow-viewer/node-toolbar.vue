@@ -31,10 +31,10 @@
       <div class="operation">
         <template v-if="status === TaskStatusEnum.SUSPENDED">
           <jm-popconfirm
-            title="确定要重试吗？"
+            :title="$t('nodeToolbar.confirmRetry')"
             icon="jm-icon-warning"
-            confirmButtonText="确定"
-            cancelButtonText="取消"
+            :confirmButtonText="$t('nodeToolbar.confirm')"
+            :cancelButtonText="$t('nodeToolbar.cancel')"
             confirmButtonIcon="jm-icon-button-confirm"
             cancelButtonIcon="jm-icon-button-cancel"
             @confirm="handleClick(NodeToolbarTabTypeEnum.RETRY)"
@@ -44,16 +44,16 @@
             <template #reference>
               <div class="item">
                 <div class="icon retry"></div>
-                <div class="txt">重试</div>
+                <div class="txt">{{ $t('nodeToolbar.retry') }}</div>
               </div>
             </template>
           </jm-popconfirm>
           <div class="separator"></div>
           <jm-popconfirm
-            title="确定要忽略吗？"
+            :title="$t('nodeToolbar.confirmIgnore')"
             icon="jm-icon-warning"
-            confirmButtonText="确定"
-            cancelButtonText="取消"
+            :confirmButtonText="$t('nodeToolbar.confirm')"
+            :cancelButtonText="$t('nodeToolbar.cancel')"
             confirmButtonIcon="jm-icon-button-confirm"
             cancelButtonIcon="jm-icon-button-cancel"
             @confirm="handleClick(NodeToolbarTabTypeEnum.IGNORE)"
@@ -63,7 +63,7 @@
             <template #reference>
               <div class="item">
                 <div class="icon ignore"></div>
-                <div class="txt">忽略</div>
+                <div class="txt">{{ $t('nodeToolbar.ignore') }}</div>
               </div>
             </template>
           </jm-popconfirm>
@@ -71,17 +71,17 @@
         </template>
         <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.LOG)">
           <div class="icon view-log" />
-          <div class="txt">日志</div>
+          <div class="txt">{{ $t('nodeToolbar.log') }}</div>
         </div>
         <div class="separator"></div>
         <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.PARAMS)">
           <div class="icon view-params" />
-          <div class="txt">参数</div>
+          <div class="txt">{{ $t('nodeToolbar.param') }}</div>
         </div>
         <div class="separator" v-if="taskCaches"></div>
         <div class="item" v-if="taskCaches" @click="handleClick(NodeToolbarTabTypeEnum.CACHE)">
           <div class="icon view-cache" />
-          <div class="txt">缓存</div>
+          <div class="txt">{{ $t('nodeToolbar.cache') }}</div>
         </div>
       </div>
     </jm-popover>
@@ -230,6 +230,10 @@ export default defineComponent({
     .item {
       user-select: none;
       cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
 
       &:active {
         .icon {
@@ -271,6 +275,7 @@ export default defineComponent({
         font-size: 12px;
         color: #082340;
         line-height: 20px;
+        min-width: max-content;
       }
     }
 
