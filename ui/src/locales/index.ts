@@ -391,6 +391,9 @@ const messages = {
       confirm: '确定',
       clearSuccess: '清理成功',
     },
+    cacheDrawer: {
+      viewCache: '查看缓存',
+    },
   },
 
   en: {
@@ -779,6 +782,9 @@ const messages = {
       cancel: 'Cancel',
       confirm: 'Confirm',
       clearSuccess: 'Clear Successful',
+    },
+    cacheDrawer: {
+      viewCache: 'View Cache',
     },
   },
 };

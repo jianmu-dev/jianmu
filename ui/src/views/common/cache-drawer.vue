@@ -11,7 +11,7 @@
         <div class="left">
           <div class="cache-t">
             <i class="jm-icon-workflow-cache icon"></i>
-            <span>查看缓存</span>
+            <span>{{ $t('cacheDrawer.viewCache') }}</span>
           </div>
           <div class="cache-n">
             <jm-text-viewer :value="currentProjectName" />
