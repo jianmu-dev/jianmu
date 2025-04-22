@@ -567,6 +567,9 @@ const messages = {
       noResult: '没有搜到相关结果',
       submitRequest: '欢迎提交节点需求',
     },
+    cacheEditor: {
+      placeholder: '请输入缓存唯一标识',
+    },
   },
 
   en: {
@@ -1132,6 +1135,9 @@ const messages = {
       search: 'Search',
       noResult: 'Did not yield any relevant results',
       submitRequest: 'Welcome to submit node requests',
+    },
+    cacheEditor: {
+      placeholder: 'Please enter a unique cache ID',
     },
   },
 };
