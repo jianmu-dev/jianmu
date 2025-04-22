@@ -221,6 +221,7 @@ export default defineComponent({
       line-height: 18px;
       color: #79879c;
       margin-top: 4px;
+      margin-bottom: 8px;
     }
   }
 
