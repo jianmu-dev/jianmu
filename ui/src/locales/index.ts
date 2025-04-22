@@ -561,7 +561,12 @@ const messages = {
       local: '本地节点',
       official: '官方节点',
       community: '社区节点',
-    }
+    },
+    nodePanel: {
+      search: '搜索',
+      noResult: '没有搜到相关结果',
+      submitRequest: '欢迎提交节点需求',
+    },
   },
 
   en: {
@@ -1122,7 +1127,12 @@ const messages = {
       local: 'Local nodes',
       official: 'Official nodes',
       community: 'Community nodes',
-    }
+    },
+    nodePanel: {
+      search: 'Search',
+      noResult: 'Did not yield any relevant results',
+      submitRequest: 'Welcome to submit node requests',
+    },
   },
 };
 
