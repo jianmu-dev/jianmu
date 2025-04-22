@@ -637,6 +637,9 @@ const messages = {
       example4: '0 15 10 ? * MON-FRI 周一至周五的上午10:15触发',
       example5: '0 * 10 * * ? 每天上午10点到10:59期间，每分钟触发一次',
     },
+    nodeConfigPanel: {
+      title: '节点配置面板',
+    },
   },
 
   en: {
@@ -1273,6 +1276,9 @@ const messages = {
       example3: '0 0 1 ? * SAT Triggered at 1am every Saturday',
       example4: '0 15 10 ? * MON-FRI Triggered at 10:15am Monday to Friday',
       example5: '0 * 10 * * ? Triggered every minute between 10:00 a.m. and 10:59 a.m. every day',
+    },
+    nodeConfigPanel: {
+      title: 'Node Configuration Panel',
     },
   },
 };

@@ -1,5 +1,5 @@
 <template>
-  <jm-drawer title="节点配置面板" :size="410" direction="rtl" destroy-on-close @closed="save">
+  <jm-drawer :title="$t('nodeConfigPanel.title')" :size="410" direction="rtl" destroy-on-close @closed="save">
     <template #title>
       <div>
         <span>{{ nodeData.getName() }}</span>
