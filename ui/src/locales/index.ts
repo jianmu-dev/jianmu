@@ -615,6 +615,17 @@ const messages = {
       noDescription: '暂无描述',
       noOutput: '无输出参数',
     },
+    cachePanel: {
+      title: '缓存',
+      description: '添加缓存后可在节点中挂载，避免下次执行节点时重复下载依赖，提高执行速度。',
+      unique: '唯一标识',
+      uniqueRule: '以英文字母或下划线开头，支持下划线、数字、英文字母',
+      addCache: '添加缓存',
+      deleteTitle: '确定删除当前缓存？',
+      deleteTip: '删除后已引用该缓存的节点将会报错',
+      cancel: '取消',
+      confirm: '确认',
+    },
   },
 
   en: {
@@ -1228,6 +1239,18 @@ const messages = {
       description: 'Description:',
       noDescription: 'No description',
       noOutput: 'No output parameter',
+    },
+    cachePanel: {
+      title: 'Cache',
+      description:
+        'Add cache can be mounted in the node to avoid downloading the dependency repeatedly in the next execution of the node and improve the execution speed.',
+      unique: 'Unique identifier',
+      uniqueRule: 'Begin with an English letter or underscore, underscore, numbers, English letters are supported',
+      addCache: 'Add Cache',
+      deleteTitle: 'Sure to delete the current cache?',
+      deleteTip: 'Nodes that already refer to this cache will report an error after deletion',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
     },
   },
 };
