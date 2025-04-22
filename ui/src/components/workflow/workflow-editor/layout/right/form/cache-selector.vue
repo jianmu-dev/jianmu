@@ -15,6 +15,8 @@
                 justify-content: center;
                 font-size: 14px;
                 color: #79879c;
+                padding: 0 16px; /* 增加左右内边距 */
+                text-align: center; /* 保证多行居中 */
               "
             >
               {{ $t('cacheSelector.empty') }}

@@ -1167,7 +1167,7 @@ const messages = {
     },
     cacheSelector: {
       empty: 'There is no cache at the moment, please go to the top of the cache module to add a cache',
-      placeholder: 'Please enter the directory where the cache is to be mounted, starting with /',
+      placeholder: 'Mount directory, start with /',
     },
     shellEnv: {
       name: 'Variable name',
