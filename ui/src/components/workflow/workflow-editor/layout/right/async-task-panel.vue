@@ -2,15 +2,25 @@
   <div class="jm-workflow-editor-async-task-panel">
     <jm-form :model="form" label-position="top" ref="formRef" @submit.prevent>
       <div class="set-padding">
-        <jm-form-item label="节点名称" prop="name" class="name-item" :rules="nodeData.getFormRules().name">
+        <jm-form-item
+          :label="$t('asyncTaskPanel.name')"
+          prop="name"
+          class="name-item"
+          :rules="nodeData.getFormRules().name"
+        >
           <jm-input v-model="form.name" show-word-limit :maxlength="36" />
         </jm-form-item>
-        <jm-form-item label="节点版本" prop="version" :rules="nodeData.getFormRules().version" class="node-item">
+        <jm-form-item
+          :label="$t('asyncTaskPanel.version')"
+          prop="version"
+          :rules="nodeData.getFormRules().version"
+          class="node-item"
+        >
           <jm-select
             v-loading="versionLoading"
             :disabled="versionLoading"
             v-model="form.version"
-            placeholder="请选择节点版本"
+            :placeholder="$t('asyncTaskPanel.versionPlaceholder')"
             @change="changeVersion"
           >
             <jm-option v-for="item in versionList.versions" :key="item" :label="item" :value="item" />
@@ -24,11 +34,11 @@
       <div v-if="form.version">
         <div class="tab-container">
           <div :class="{ 'input-tab': true, 'selected-tab': tabFlag }" @click="tabFlag = true">
-            输入参数
+            {{ $t('asyncTaskPanel.inputParam') }}
             <div class="checked-underline" v-if="tabFlag"></div>
           </div>
           <div :class="{ 'output-tab': true, 'selected-tab': !tabFlag }" @click="tabFlag = false">
-            输出参数
+            {{ $t('asyncTaskPanel.outputParam') }}
             <div class="checked-underline" v-if="!tabFlag"></div>
           </div>
         </div>
@@ -49,19 +59,19 @@
             <secret-key-selector
               v-if="item.type === ParamTypeEnum.SECRET"
               v-model="item.value"
-              :placeholder="item.description ? item.description : '请选择' + item.name"
+              :placeholder="item.description ? item.description : $t('asyncTaskPanel.select') + item.name"
             />
             <expression-editor
               v-else
               v-model="item.value"
               :node-id="nodeId"
-              :placeholder="item.description ? item.description : '请输入' + item.name"
+              :placeholder="item.description ? item.description : $t('asyncTaskPanel.enter') + item.name"
             />
           </jm-form-item>
           <div class="cache-item">
             <div class="cache-label">
-              缓存挂载
-              <jm-tooltip placement="top" :append-to-body="false" content="在顶部缓存模块中添加缓存后，在此挂载">
+              {{ $t('asyncTaskPanel.cacheMount') }}
+              <jm-tooltip placement="top" :append-to-body="false" :content="$t('asyncTaskPanel.cacheMountTip')">
                 <i class="jm-icon-button-help"></i>
               </jm-tooltip>
             </div>
@@ -82,7 +92,7 @@
             <div class="add-select-cache-btn">
               <span class="add-link" @click="addSelector">
                 <i class="jm-icon-button-add" />
-                <span>添加</span>
+                <span>{{ $t('asyncTaskPanel.add') }}</span>
               </span>
             </div>
           </div>
@@ -94,8 +104,8 @@
             v-if="failureVisible"
           >
             <jm-radio-group v-model="form.failureMode">
-              <jm-radio :label="'suspend'">挂起</jm-radio>
-              <jm-radio :label="'ignore'">忽略</jm-radio>
+              <jm-radio :label="'suspend'">{{ $t('asyncTaskPanel.suspend') }}</jm-radio>
+              <jm-radio :label="'ignore'">{{ $t('asyncTaskPanel.ignore') }}</jm-radio>
             </jm-radio-group>
           </jm-form-item>
         </div>
@@ -107,8 +117,8 @@
                 {{ item.name }}
                 <jm-tooltip placement="top" :append-to-body="false">
                   <template #content>
-                    类型：{{ item.type }}<br />
-                    <span v-if="item.value">描述：{{ item.description }}</span>
+                    {{ $t('asyncTaskPanel.type') }}{{ item.type }}<br />
+                    <span v-if="item.value">{{ $t('asyncTaskPanel.description') }}{{ item.description }}</span>
                   </template>
                   <i class="jm-icon-button-help"></i>
                 </jm-tooltip>
@@ -120,12 +130,12 @@
                 <template v-else-if="item.description">
                   {{ item.description }}
                 </template>
-                <template v-else>暂无描述</template>
+                <template v-else>{{ $t('asyncTaskPanel.noDescription') }}</template>
               </div>
             </div>
           </div>
           <div v-if="!form.outputs[0]">
-            <jm-empty description="无输出参数" :image="noParamImage"></jm-empty>
+            <jm-empty :description="$t('asyncTaskPanel.noOutput')" :image="noParamImage"></jm-empty>
           </div>
         </div>
       </div>
@@ -399,6 +409,7 @@ export default defineComponent({
       flex-direction: column;
       align-items: center;
       cursor: pointer;
+      width: auto;
 
       .checked-underline {
         width: 37px;
