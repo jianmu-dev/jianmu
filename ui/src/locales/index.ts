@@ -570,6 +570,10 @@ const messages = {
     cacheEditor: {
       placeholder: '请输入缓存唯一标识',
     },
+    cacheSelector: {
+      empty: '暂无缓存，请先到顶部缓存模块添加缓存',
+      placeholder: '请输入缓存要挂载的目录,以/开头',
+    },
   },
 
   en: {
@@ -1138,6 +1142,10 @@ const messages = {
     },
     cacheEditor: {
       placeholder: 'Please enter a unique cache ID',
+    },
+    cacheSelector: {
+      empty: 'There is no cache at the moment, please go to the top of the cache module to add a cache',
+      placeholder: 'Please enter the directory where the cache is to be mounted, starting with /',
     },
   },
 };
