@@ -574,6 +574,12 @@ const messages = {
       empty: '暂无缓存，请先到顶部缓存模块添加缓存',
       placeholder: '请输入缓存要挂载的目录,以/开头',
     },
+    shellEnv: {
+      name: '变量名称',
+      placeholderName: '请输入变量名称',
+      value: '变量值',
+      placeholderValue: '请输入变量值',
+    },
   },
 
   en: {
@@ -1146,6 +1152,12 @@ const messages = {
     cacheSelector: {
       empty: 'There is no cache at the moment, please go to the top of the cache module to add a cache',
       placeholder: 'Please enter the directory where the cache is to be mounted, starting with /',
+    },
+    shellEnv: {
+      name: 'Variable name',
+      placeholderName: 'Please enter variable name',
+      value: 'Variable value',
+      placeholderValue: 'Please enter variable value',
     },
   },
 };
