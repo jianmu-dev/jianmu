@@ -626,6 +626,17 @@ const messages = {
       cancel: '取消',
       confirm: '确认',
     },
+    cronPanel: {
+      placeholder: '请输入cron表达式',
+      meaningTitle: 'Cron表达式的7个部分从左到右代表的含义如下：',
+      meaningContent: '秒 分 时 日 月 周 年（可选，留空）',
+      exampleTitle: '常见表达式例子：',
+      example1: '0 0 12 * * ? 每天中午12点触发',
+      example2: '0 15 10 * * ? 每天上午10:15触发',
+      example3: '0 0 1 ? * SAT 每周六凌晨1点触发',
+      example4: '0 15 10 ? * MON-FRI 周一至周五的上午10:15触发',
+      example5: '0 * 10 * * ? 每天上午10点到10:59期间，每分钟触发一次',
+    },
   },
 
   en: {
@@ -1251,6 +1262,17 @@ const messages = {
       deleteTip: 'Nodes that already refer to this cache will report an error after deletion',
       cancel: 'Cancel',
       confirm: 'Confirm',
+    },
+    cronPanel: {
+      placeholder: 'Please enter a cron expression',
+      meaningTitle: 'The 7 parts of a Cron expression are represented from left to right as follows:',
+      meaningContent: 'Seconds Minutes Hours Days Months Weeks Years (optional, leave blank)',
+      exampleTitle: 'Examples of common expressions:',
+      example1: '0 0 12 * * ? Triggered at 12:00 noon every day',
+      example2: '0 15 10 * * ? Triggered every day at 10:15 a.m.',
+      example3: '0 0 1 ? * SAT Triggered at 1am every Saturday',
+      example4: '0 15 10 ? * MON-FRI Triggered at 10:15am Monday to Friday',
+      example5: '0 * 10 * * ? Triggered every minute between 10:00 a.m. and 10:59 a.m. every day',
     },
   },
 };
