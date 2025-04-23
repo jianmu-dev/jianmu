@@ -702,6 +702,13 @@ const messages = {
       addProject: '新增项目',
       Details: '详情',
     },
+    workflowValidator: {
+      noNodes: '未存在任何节点',
+      atLeastOneShellOrTaskNode: '至少有一个shell或任务节点',
+      nodeNotConnected: '节点：尚未连接任何其他节点',
+      node: '节点：',
+      onlyOneTrigger: '只能有一个触发器',
+    },
   },
 
   en: {
@@ -1403,6 +1410,13 @@ const messages = {
       secretKey: 'Secret Key Management',
       addProject: 'Add New Project',
       Details: 'Details',
+    },
+    workflowValidator: {
+      noNodes: 'No nodes exist',
+      atLeastOneShellOrTaskNode: 'There is at least one shell or task node',
+      nodeNotConnected: 'Node: no other nodes connected yet',
+      node: 'Node: ',
+      onlyOneTrigger: 'There can only be one trigger',
     },
   },
 };
