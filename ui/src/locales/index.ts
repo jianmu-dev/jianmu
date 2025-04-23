@@ -728,6 +728,10 @@ const messages = {
       enterTokenValue: '请输入token值',
       selectKey: '请选择密钥',
     },
+    cron: {
+      scheduleNotEmpty: 'schedule不能为空',
+      invalidCronExpression: '请输入正确的cron表达式',
+    }
   },
 
   en: {
@@ -1456,6 +1460,10 @@ const messages = {
       enterTokenValue: 'Please enter the token value',
       selectKey: 'Please select the key',
     },
+    cron: {
+      scheduleNotEmpty: 'schedule cannot be empty',
+      invalidCronExpression: 'Please enter the correct cron expression',
+    }
   },
 };
 
