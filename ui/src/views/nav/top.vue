@@ -79,7 +79,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, ref, watch } from 'vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { namespace } from '@/store/modules/session';
@@ -115,6 +115,9 @@ export default defineComponent({
       }
 
       return rootState.versions[0];
+    });
+    watch(locale, () => {
+      window.location.reload(); // 切换语言强制刷新
     });
 
     return {
