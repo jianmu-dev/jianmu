@@ -693,6 +693,15 @@ const messages = {
       show: '显示更多',
       noMore: '没有更多了',
     },
+    breadcrumb: {
+      home: '首页',
+      worker: 'Worker管理',
+      localNode: '本地节点库',
+      group: '分组管理',
+      secretKey: '密钥管理',
+      addProject: '新增项目',
+      Details: '详情',
+    },
   },
 
   en: {
@@ -1385,6 +1394,15 @@ const messages = {
     loadMore: {
       show: 'Show More',
       noMore: 'No More',
+    },
+    breadcrumb: {
+      home: 'Home',
+      worker: 'Worker Management',
+      localNode: 'Local Node Library',
+      group: 'Group Management',
+      secretKey: 'Secret Key Management',
+      addProject: 'Add New Project',
+      Details: 'Details',
     },
   },
 };

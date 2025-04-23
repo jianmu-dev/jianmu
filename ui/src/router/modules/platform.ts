@@ -1,5 +1,5 @@
 import { RouteLocationNormalizedLoaded, RouteRecordRaw } from 'vue-router';
-
+import { globalT as t } from '@/utils/i18n';
 export default [
   // 首页
   {
@@ -28,7 +28,7 @@ export default [
     path: 'worker-manager',
     component: () => import('@/views/workers/workers-manager.vue'),
     meta: {
-      title: 'Worker管理',
+      title: t('breadcrumb.worker'),
     },
   },
   // 节点库路由
@@ -37,7 +37,7 @@ export default [
     path: 'node-library',
     component: () => import('@/views/node-library/node-library-manager.vue'),
     meta: {
-      title: '本地节点库',
+      title: t('breadcrumb.localNode'),
     },
   },
   {
@@ -45,7 +45,7 @@ export default [
     path: 'project-group',
     component: () => import('@/views/project-group/project-group-manager.vue'),
     meta: {
-      title: '分组管理',
+      title: t('breadcrumb.group'),
     },
     children: [
       {
@@ -66,7 +66,7 @@ export default [
     path: 'secret-key',
     component: () => import('@/views/secret-key/ns-manager.vue'),
     meta: {
-      title: '密钥管理',
+      title: t('breadcrumb.secretKey'),
     },
     children: [
       {
@@ -77,7 +77,7 @@ export default [
           ns: namespace,
         }),
         meta: {
-          title: '详情',
+          title: t('breadcrumb.Details'),
         },
       },
     ],
@@ -95,7 +95,7 @@ export default [
     path: 'project/editor',
     component: () => import('@/views/project/editor.vue'),
     meta: {
-      title: '新增项目',
+      title: t('breadcrumb.addProject'),
     },
   },
   {
