@@ -680,6 +680,15 @@ const messages = {
     paramButton: {
       label: '参数',
     },
+    workflowNodeToolbar: {
+      confirmDelete: '你确认要删除吗?',
+      name: '名称: ',
+      delete: '删除',
+      node: '节点',
+      trigger: '触发器',
+      confirm: '确认',
+      cancel: '取消',
+    }
   },
 
   en: {
@@ -1360,6 +1369,15 @@ const messages = {
     paramButton: {
       label: 'parameter',
     },
+    workflowNodeToolbar: {
+      confirmDelete: 'Are you sure you want to delete?',
+      name: 'Name: ',
+      delete: 'Delete ',
+      node: 'Node',
+      trigger: 'Trigger',
+      confirm: 'Confirm',
+      cancel: 'Cancel',
+    }
   },
 };
 
@@ -1381,3 +1399,4 @@ const i18n = createI18n({
 });
 
 export default i18n;
+export const globalT = i18n.global.t;

@@ -1,4 +1,5 @@
 import { useI18n } from 'vue-i18n';
+import { globalT } from '@/locales';
 
 export function useLocale() {
   const { locale, t } = useI18n();
@@ -14,3 +15,4 @@ export function useLocale() {
     handleLocaleChange,
   };
 }
+export { globalT };
