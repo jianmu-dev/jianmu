@@ -688,7 +688,11 @@ const messages = {
       trigger: '触发器',
       confirm: '确认',
       cancel: '取消',
-    }
+    },
+    loadMore: {
+      show: '显示更多',
+      noMore: '没有更多了',
+    },
   },
 
   en: {
@@ -1377,7 +1381,11 @@ const messages = {
       trigger: 'Trigger',
       confirm: 'Confirm',
       cancel: 'Cancel',
-    }
+    },
+    loadMore: {
+      show: 'Show More',
+      noMore: 'No More',
+    },
   },
 };
 

@@ -1,15 +1,10 @@
 <template>
   <div class="jm-load-more" v-if="haveMore || noMore">
-    <jm-button
-      v-if="haveMore"
-      class="have-more"
-      @click="loadMore"
-      :loading="moreLoading"
-      type="text"
-      >显示更多
+    <jm-button v-if="haveMore" class="have-more" @click="loadMore" :loading="moreLoading" type="text"
+      >{{ $t('loadMore.show') }}
       <div class="icon" v-if="iconVisible"></div>
     </jm-button>
-    <div class="no-more" v-if="noMore">没有更多了</div>
+    <div class="no-more" v-if="noMore">{{ $t('loadMore.noMore') }}</div>
   </div>
 </template>
 <script lang="ts">
@@ -88,7 +83,7 @@ export default defineComponent({
   color: #7b8c9c;
   .have-more {
     position: relative;
-    color:#7b8c9c;
+    color: #7b8c9c;
     ::v-deep(.el-icon-loading) {
       position: absolute;
       right: -17px;
