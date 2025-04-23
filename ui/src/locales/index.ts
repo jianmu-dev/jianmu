@@ -717,6 +717,17 @@ const messages = {
       enterDirectoryBeginningWithSlash: '请输入以/开头的目录',
       selectOrEnterMirrorImage: '请选择或输入镜像',
     },
+    webhook: {
+      enterParamName: '请输入参数名称',
+      paramNamePattern: '以英文字母或下划线开头，支持下划线、数字、英文字母',
+      selectParamType: '请选择参数类型',
+      enterParamExpression: '请输入参数表达式',
+      selectParamDefaultValue: '请选择参数默认值',
+      enterParamDefaultValue: '请输入参数默认值',
+      triggerParamNotExist: '触发器参数不存在',
+      enterTokenValue: '请输入token值',
+      selectKey: '请选择密钥',
+    },
   },
 
   en: {
@@ -1429,10 +1440,21 @@ const messages = {
     shell: {
       enterVariableName: 'Please enter a variable name',
       enterVariableValue: 'Please enter a variable value',
-      selectCache: 'Please select a cache',
-      enterDirectory: 'Please enter a directory',
+      selectCache: 'Please select a cache ',
+      enterDirectory: 'Please enter a directory ',
       enterDirectoryBeginningWithSlash: 'Please enter a directory beginning with /',
       selectOrEnterMirrorImage: 'Please select or enter a mirror image',
+    },
+    webhook: {
+      enterParamName: 'Please enter the parameter name',
+      paramNamePattern: 'Start with an English letter or underscore, support underscore, numbers, English letters',
+      selectParamType: 'Please select the parameter type',
+      enterParamExpression: 'Please enter the parameter expression',
+      selectParamDefaultValue: 'Please select the parameter default value',
+      enterParamDefaultValue: 'Please enter the parameter default value',
+      triggerParamNotExist: 'Trigger parameter does not exist',
+      enterTokenValue: 'Please enter the token value',
+      selectKey: 'Please select the key',
     },
   },
 };
