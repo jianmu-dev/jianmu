@@ -2,7 +2,7 @@
   <div class="jm-log-viewer" ref="logViewerRef">
     <div class="operation">
       <jm-tooltip
-        :content="downloading ? '下载中，请稍后...' : '下载'"
+        :content="downloading ? $t('logViewer.downloading') : $t('logViewer.download')"
         :placement="downloading ? 'top-end' : 'top'"
         :append-to-body="false"
       >
@@ -18,7 +18,7 @@
     ></div>
     <div class="no-bg" :style="{ width: `${noWidth}px` }"></div>
     <div class="content">
-      <div v-if="moreLog" class="more-line">日志过大，更多日志请下载查看</div>
+      <div v-if="moreLog" class="more-line">{{ $t('logViewer.moreLog') }}</div>
       <div class="line" v-for="(txt, idx) in data" :key="idx" :style="{ marginLeft: `${noWidth}px` }">
         <div class="no" :style="{ left: `${-1 * noWidth}px`, width: `${noWidth}px` }">
           {{ idx + 1 }}

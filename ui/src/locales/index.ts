@@ -731,7 +731,12 @@ const messages = {
     cron: {
       scheduleNotEmpty: 'schedule不能为空',
       invalidCronExpression: '请输入正确的cron表达式',
-    }
+    },
+    logViewer: {
+      downloading: '下载中，请稍后...',
+      download: '下载',
+      moreLog: '日志过大，更多日志请下载查看',
+    },
   },
 
   en: {
@@ -1463,7 +1468,12 @@ const messages = {
     cron: {
       scheduleNotEmpty: 'schedule cannot be empty',
       invalidCronExpression: 'Please enter the correct cron expression',
-    }
+    },
+    logViewer: {
+      downloading: 'Downloading, please wait...',
+      download: 'Download',
+      moreLog: 'log is too large, more logs please download to view',
+    },
   },
 };
 
