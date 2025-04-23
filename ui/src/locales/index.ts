@@ -677,6 +677,9 @@ const messages = {
       onlyLink: '运算表达式',
       onlyPlaceholder: '请输入匹配规则',
     },
+    paramButton: {
+      label: '参数',
+    },
   },
 
   en: {
@@ -1353,6 +1356,9 @@ const messages = {
       onlyTip: 'can currently only refer to the trigger parameter. See ',
       onlyLink: 'Arithmetic Expressions',
       onlyPlaceholder: 'Please enter a matching rule',
+    },
+    paramButton: {
+      label: 'parameter',
     },
   },
 };
