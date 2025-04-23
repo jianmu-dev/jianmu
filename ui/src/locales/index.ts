@@ -709,6 +709,14 @@ const messages = {
       node: '节点：',
       onlyOneTrigger: '只能有一个触发器',
     },
+    shell: {
+      enterVariableName: '请输入变量名',
+      enterVariableValue: '请输入变量值',
+      selectCache: '请选择缓存',
+      enterDirectory: '请输入目录',
+      enterDirectoryBeginningWithSlash: '请输入以/开头的目录',
+      selectOrEnterMirrorImage: '请选择或输入镜像',
+    },
   },
 
   en: {
@@ -1417,6 +1425,14 @@ const messages = {
       nodeNotConnected: 'Node: no other nodes connected yet',
       node: 'Node: ',
       onlyOneTrigger: 'There can only be one trigger',
+    },
+    shell: {
+      enterVariableName: 'Please enter a variable name',
+      enterVariableValue: 'Please enter a variable value',
+      selectCache: 'Please select a cache',
+      enterDirectory: 'Please enter a directory',
+      enterDirectoryBeginningWithSlash: 'Please enter a directory beginning with /',
+      selectOrEnterMirrorImage: 'Please select or enter a mirror image',
     },
   },
 };

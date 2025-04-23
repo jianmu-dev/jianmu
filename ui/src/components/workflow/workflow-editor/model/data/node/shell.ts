@@ -3,7 +3,7 @@ import { FailureModeEnum, NodeRefEnum, NodeTypeEnum, RefTypeEnum } from '../enum
 import icon from '../../../svgs/shape/shell.svg';
 import { CustomRule, ValidateCacheFn, ValidateParamFn } from '../common';
 import { checkDuplicate } from '../../util/reference';
-
+import { globalT as t } from '@/utils/i18n';
 export interface IShellEnv {
   key: string;
   name: string;
@@ -66,7 +66,7 @@ export class Shell extends BaseNode {
         required: true,
         fields: {
           name: [
-            { required: true, message: '请输入变量名', trigger: 'blur' },
+            { required: true, message: t('shell.enterVariableName'), trigger: 'blur' },
             {
               validator: (rule: any, value: any, callback: any) => {
                 if (!value) {
@@ -90,7 +90,7 @@ export class Shell extends BaseNode {
             },
           ],
           value: [
-            { required: true, message: '请输入变量值', trigger: 'blur' },
+            { required: true, message: t('shell.enterVariableValue'), trigger: 'blur' },
             {
               validator: (rule: any, value: any, callback: any) => {
                 if (value && this.validateParam) {
@@ -117,7 +117,7 @@ export class Shell extends BaseNode {
         required: true,
         fields: {
           name: [
-            { required: true, message: '请选择缓存', trigger: 'change' },
+            { required: true, message: t('shell.selectCache'), trigger: 'change' },
             {
               validator: (rule: any, name: any, callback: any) => {
                 if (name && this.validateCache) {
@@ -134,10 +134,10 @@ export class Shell extends BaseNode {
             },
           ],
           value: [
-            { required: true, message: '请输入目录', trigger: 'blur' },
+            { required: true, message: t('shell.enterDirectory'), trigger: 'blur' },
             {
               pattern: /^\//,
-              message: '请输入以/开头的目录',
+              message: t('shell.enterDirectoryBeginningWithSlash'),
               trigger: 'blur',
             },
             {
@@ -168,7 +168,7 @@ export class Shell extends BaseNode {
 
     return {
       ...rules,
-      image: [{ required: true, message: '请选择或输入镜像', trigger: 'change' }],
+      image: [{ required: true, message: t('shell.selectOrEnterMirrorImage'), trigger: 'change' }],
       envs: {
         type: 'array',
         required: false,
