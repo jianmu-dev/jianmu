@@ -737,6 +737,13 @@ const messages = {
       download: '下载',
       moreLog: '日志过大，更多日志请下载查看',
     },
+    textCopy: {
+      copy: '复制',
+      valueEmpty: '值为空',
+      copied: '已复制',
+      copyFailed: '复制失败',
+      cause: '原因：',
+    },
   },
 
   en: {
@@ -1473,6 +1480,13 @@ const messages = {
       downloading: 'Downloading, please wait...',
       download: 'Download',
       moreLog: 'log is too large, more logs please download to view',
+    },
+    textCopy: {
+      copy: 'Copy',
+      valueEmpty: 'value is null',
+      copied: 'copied',
+      copyFailed: 'copy failed',
+      cause: 'cause: ',
     },
   },
 };
