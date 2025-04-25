@@ -573,6 +573,7 @@ const messages = {
     cacheSelector: {
       empty: '暂无缓存，请先到顶部缓存模块添加缓存',
       placeholder: '请输入缓存要挂载的目录,以/开头',
+      selectPlaceholder: '请选择'
     },
     shellEnv: {
       name: '变量名称',
@@ -743,6 +744,9 @@ const messages = {
       copied: '已复制',
       copyFailed: '复制失败',
       cause: '原因：',
+    },
+    baseNode: {
+      nameEmpty: '节点名称不能为空',
     },
   },
 
@@ -1316,6 +1320,7 @@ const messages = {
     cacheSelector: {
       empty: 'There is no cache at the moment, please go to the top of the cache module to add a cache',
       placeholder: 'Mount directory, start with /',
+      selectPlaceholder: 'Select'
     },
     shellEnv: {
       name: 'Variable name',
@@ -1487,6 +1492,9 @@ const messages = {
       copied: 'copied',
       copyFailed: 'copy failed',
       cause: 'cause: ',
+    },
+    baseNode: {
+      nameEmpty: 'Node name cannot be empty',
     },
   },
 };

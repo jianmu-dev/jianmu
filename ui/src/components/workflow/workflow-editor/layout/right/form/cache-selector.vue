@@ -2,7 +2,7 @@
   <div class="cache-selector">
     <div class="selector-container">
       <jm-form-item :prop="`${formModelName}.${index}.name`" :rules="rules.name">
-        <jm-select v-model="cacheVal" @change="changeCache">
+        <jm-select v-model="cacheVal" @change="changeCache" :placeholder="$t('cacheSelector.selectPlaceholder')">
           <template #empty>
             <div
               style="
