@@ -8,7 +8,7 @@
     ></div>
     <div class="content">
       <div class="content-top">
-        <span class="concurrent" v-if="concurrentVal">可并发</span>
+        <span class="concurrent" v-if="concurrentVal">{{ t('projectItem.concurrent') }}</span>
         <router-link
           :to="{
             name: 'workflow-execution-record-detail',
@@ -38,9 +38,7 @@
               popper-class="tip"
               :append-to-body="false"
               :content="
-                project.status === ProjectStatusEnum.INIT
-                  ? '前序流程正在执行或已挂起，待执行完毕或手动终止后，本次流程将开始执行。 或开启并发执行，开启后，多次可同时执行。'
-                  : '当前流程中某个节点执行失败，流程处于暂停状态，需要手动 重试/忽略 挂起节点。'
+                project.status === ProjectStatusEnum.INIT ? t('projectItem.tipInit') : t('projectItem.tipSuspended')
               "
               v-if="
                 (project.status === ProjectStatusEnum.INIT && project.serialNo !== 0 && !concurrentVal) ||
@@ -51,11 +49,13 @@
             </jm-tooltip>
             <div class="count" v-if="project.serialNo !== 0">#{{ executeCount }}</div>
           </div>
-          <span class="stop-btn" v-show="isShowStopBtn" @click="stopProcess(project.workflowInstanceId)">终止</span>
+          <span class="stop-btn" v-show="isShowStopBtn" @click="stopProcess(project.workflowInstanceId)">{{
+            t('projectItem.terminate')
+          }}</span>
         </div>
         <div class="time">
           <div class="init" v-if="isShowNextTime">
-            <span>距离下次执行还有</span>
+            <span>{{ t('projectItem.nextTime') }}</span>
             <jm-timer :abbr="true" :end-time="project.nextTime" class="timer" />
           </div>
           <div class="executed" v-else-if="project.status !== ProjectStatusEnum.INIT">
@@ -63,7 +63,13 @@
               <jm-time-viewer :value="project.startTime" />
             </span>
             <span class="duration">
-              <span>{{ project.status === ProjectStatusEnum.SUSPENDED ? '挂起' : '执行' }}时长</span>
+              <span
+                >{{
+                  project.status === ProjectStatusEnum.SUSPENDED
+                    ? t('projectItem.suspended')
+                    : t('projectItem.running')
+                }}{{ t('projectItem.duration') }}</span
+              >
               <jm-timer
                 :abbr="true"
                 :start-time="project.startTime"
@@ -93,30 +99,45 @@
       </div>
       <div class="content-bottom">
         <div class="operation">
-          <jm-tooltip :content="`${enabled ? '' : '已禁用，不可'}触发`" placement="bottom">
+          <jm-tooltip
+            :content="`${enabled ? '' : t('projectItem.disabled')}${t('projectItem.trigger')}`"
+            placement="bottom"
+          >
             <button
               :class="{ execute: true, doing: !enabled || executing }"
               @click="execute(project.id)"
               @keypress.enter.prevent
             ></button>
           </jm-tooltip>
-          <jm-tooltip v-if="project.source === DslSourceEnum.LOCAL" content="编辑" placement="bottom">
+          <jm-tooltip v-if="project.source === DslSourceEnum.LOCAL" :content="t('projectItem.edit')" placement="bottom">
             <button class="edit" @click="edit(project.id)"></button>
           </jm-tooltip>
-          <jm-tooltip v-else content="同步DSL" placement="bottom">
+          <jm-tooltip v-else :content="t('projectItem.sync')" placement="bottom">
             <button
               :class="{ sync: true, doing: synchronizing }"
               @click="sync(project.id)"
               @keypress.enter.prevent
             ></button>
           </jm-tooltip>
-          <jm-tooltip v-if="project.source === DslSourceEnum.GIT" content="打开git仓库" placement="bottom">
+          <jm-tooltip
+            v-if="project.source === DslSourceEnum.GIT"
+            :content="t('projectItem.openGit')"
+            placement="bottom"
+          >
             <button class="git-label" @click="openGit(project.gitRepoId)"></button>
           </jm-tooltip>
-          <jm-tooltip v-if="project.dslType === DslTypeEnum.WORKFLOW" content="预览流程" placement="bottom">
+          <jm-tooltip
+            v-if="project.dslType === DslTypeEnum.WORKFLOW"
+            :content="t('projectItem.previewWorkflow')"
+            placement="bottom"
+          >
             <button class="workflow-label" @click="dslDialogFlag = true"></button>
           </jm-tooltip>
-          <jm-tooltip v-else-if="project.dslType === DslTypeEnum.PIPELINE" content="预览管道" placement="bottom">
+          <jm-tooltip
+            v-else-if="project.dslType === DslTypeEnum.PIPELINE"
+            :content="t('projectItem.previewPipeline')"
+            placement="bottom"
+          >
             <button class="pipeline-label" @click="dslDialogFlag = true"></button>
           </jm-tooltip>
           <jm-tooltip v-if="project.triggerType === TriggerTypeEnum.WEBHOOK" content="Webhook" placement="bottom">
@@ -135,12 +156,15 @@
                     href="javascript: void(0)"
                     :class="enabled ? 'jm-icon-button-disable' : 'jm-icon-button-off'"
                     style="width: 90px; display: inline-block"
-                    >{{ enabled ? '禁用' : '启用' }}</a
+                    >{{ enabled ? t('projectItem.disable') : t('projectItem.enable') }}</a
                   >
                 </jm-dropdown-item>
                 <jm-dropdown-item :disabled="deleting" @click="del(project.id)">
-                  <a href="javascript: void(0)" class="jm-icon-button-delete" style="width: 90px; display: inline-block"
-                    >删除</a
+                  <a
+                    href="javascript: void(0)"
+                    class="jm-icon-button-delete"
+                    style="width: 90px; display: inline-block"
+                    >{{ t('projectItem.delete') }}</a
                   >
                 </jm-dropdown-item>
               </jm-dropdown-menu>
@@ -167,7 +191,7 @@
     ></div>
     <div class="content">
       <div class="content-top">
-        <span class="concurrent" v-if="concurrentVal">可并发</span>
+        <span class="concurrent" v-if="concurrentVal">{{ t('projectItem.concurrent') }}</span>
         <router-link
           :to="{
             name: 'workflow-execution-record-detail',
@@ -197,9 +221,7 @@
               popper-class="tip"
               :append-to-body="false"
               :content="
-                project.status === ProjectStatusEnum.INIT
-                  ? '前序流程正在执行或已挂起，待执行完毕或手动终止后，本次流程将开始执行。 或开启并发执行，开启后，多次可同时执行。'
-                  : '当前流程中某个节点执行失败，流程处于暂停状态，需要手动 重试/忽略 挂起节点。'
+                project.status === ProjectStatusEnum.INIT ? t('projectItem.tipInit') : t('projectItem.tipSuspended')
               "
               v-if="
                 (project.status === ProjectStatusEnum.INIT && project.serialNo !== 0 && !concurrentVal) ||
@@ -210,11 +232,13 @@
             </jm-tooltip>
             <div class="count" v-if="project.serialNo !== 0">#{{ executeCount }}</div>
           </div>
-          <span class="stop-btn" v-show="isShowStopBtn" @click="stopProcess(project.workflowInstanceId)">终止</span>
+          <span class="stop-btn" v-show="isShowStopBtn" @click="stopProcess(project.workflowInstanceId)">{{
+            t('projectItem.terminate')
+          }}</span>
         </div>
         <div class="time">
           <div class="init" v-if="isShowNextTime">
-            <span>距离下次执行还有</span>
+            <span>{{ t('projectItem.nextTime') }}</span>
             <jm-timer :abbr="true" :end-time="project.nextTime" class="timer" />
           </div>
           <div class="executed" v-else-if="project.status !== ProjectStatusEnum.INIT">
@@ -222,7 +246,13 @@
               <jm-time-viewer :value="startTime" />
             </span>
             <span class="duration">
-              <span>{{ project.status === ProjectStatusEnum.SUSPENDED ? '挂起' : '执行' }}时长</span>
+              <span
+                >{{
+                  project.status === ProjectStatusEnum.SUSPENDED
+                    ? t('projectItem.suspended')
+                    : t('projectItem.running')
+                }}{{ t('projectItem.duration') }}</span
+              >
               <jm-timer
                 :abbr="true"
                 :start-time="project.startTime"
@@ -252,30 +282,45 @@
       </div>
       <div class="content-bottom">
         <div class="operation">
-          <jm-tooltip :content="`${enabled ? '' : '已禁用，不可'}触发`" placement="bottom">
+          <jm-tooltip
+            :content="`${enabled ? '' : t('projectItem.disabled')}${t('projectItem.trigger')}`"
+            placement="bottom"
+          >
             <button
               :class="{ execute: true, doing: !enabled || executing }"
               @click="execute(project.id)"
               @keypress.enter.prevent
             ></button>
           </jm-tooltip>
-          <jm-tooltip v-if="project.source === DslSourceEnum.LOCAL" content="编辑" placement="bottom">
+          <jm-tooltip v-if="project.source === DslSourceEnum.LOCAL" :content="t('projectItem.edit')" placement="bottom">
             <button class="edit" @click="edit(project.id)"></button>
           </jm-tooltip>
-          <jm-tooltip v-else content="同步DSL" placement="bottom">
+          <jm-tooltip v-else :content="t('projectItem.sync')" placement="bottom">
             <button
               :class="{ sync: true, doing: synchronizing }"
               @click="sync(project.id)"
               @keypress.enter.prevent
             ></button>
           </jm-tooltip>
-          <jm-tooltip v-if="project.source === DslSourceEnum.GIT" content="打开git仓库" placement="bottom">
+          <jm-tooltip
+            v-if="project.source === DslSourceEnum.GIT"
+            :content="t('projectItem.openGit')"
+            placement="bottom"
+          >
             <button class="git-label" @click="openGit(project.gitRepoId)"></button>
           </jm-tooltip>
-          <jm-tooltip v-if="project.dslType === DslTypeEnum.WORKFLOW" content="预览流程" placement="bottom">
+          <jm-tooltip
+            v-if="project.dslType === DslTypeEnum.WORKFLOW"
+            :content="t('projectItem.previewWorkflow')"
+            placement="bottom"
+          >
             <button class="workflow-label" @click="dslDialogFlag = true"></button>
           </jm-tooltip>
-          <jm-tooltip v-else-if="project.dslType === DslTypeEnum.PIPELINE" content="预览管道" placement="bottom">
+          <jm-tooltip
+            v-else-if="project.dslType === DslTypeEnum.PIPELINE"
+            :content="t('projectItem.previewPipeline')"
+            placement="bottom"
+          >
             <button class="pipeline-label" @click="dslDialogFlag = true"></button>
           </jm-tooltip>
           <jm-tooltip v-if="project.triggerType === TriggerTypeEnum.WEBHOOK" content="Webhook" placement="bottom">
@@ -294,7 +339,7 @@
                     href="javascript: void(0)"
                     class="jm-icon-workflow-cache"
                     style="width: 90px; display: inline-block"
-                    >缓存</a
+                    >{{ t('projectItem.cache') }}</a
                   >
                 </jm-dropdown-item>
                 <jm-dropdown-item :disabled="abling" @click="able(project.id)">
@@ -302,12 +347,15 @@
                     href="javascript: void(0)"
                     :class="enabled ? 'jm-icon-button-disable' : 'jm-icon-button-off'"
                     style="width: 90px; display: inline-block"
-                    >{{ enabled ? '禁用' : '启用' }}</a
+                    >{{ enabled ? t('projectItem.disable') : t('projectItem.enable') }}</a
                   >
                 </jm-dropdown-item>
                 <jm-dropdown-item :disabled="deleting" @click="del(project.id)">
-                  <a href="javascript: void(0)" class="jm-icon-button-delete" style="width: 90px; display: inline-block"
-                    >删除</a
+                  <a
+                    href="javascript: void(0)"
+                    class="jm-icon-button-delete"
+                    style="width: 90px; display: inline-block"
+                    >{{ t('projectItem.delete') }}</a
                   >
                 </jm-dropdown-item>
               </jm-dropdown-menu>
@@ -352,6 +400,7 @@ import { useRouter } from 'vue-router';
 import { terminate } from '@/api/workflow-execution-record';
 import dayjs from 'dayjs';
 import WebhookSettingDialog from '@/views/common/webhook-setting-dialog.vue';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   components: { WebhookSettingDialog, ProjectPreviewDialog, WebhookDrawer, CacheDrawer },
@@ -378,6 +427,7 @@ export default defineComponent({
   },
   emits: ['triggered', 'synchronized', 'deleted', 'terminated'],
   setup(props: any, { emit }: SetupContext) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const isMove = computed<boolean>(() => props.move);
@@ -408,20 +458,20 @@ export default defineComponent({
     const statusDesc = computed<string>(() => {
       switch (props.project.status) {
         case ProjectStatusEnum.SUSPENDED:
-          return '挂起';
+          return t('projectItem.suspended');
         case ProjectStatusEnum.FAILED:
-          return '失败';
+          return t('projectItem.failed');
         case ProjectStatusEnum.RUNNING:
-          return '执行中';
+          return t('projectItem.Running');
         case ProjectStatusEnum.SUCCEEDED:
-          return '成功';
+          return t('projectItem.succeeded');
         default:
-          return props.project.serialNo === 0 ? '未启动' : '待启动';
+          return props.project.serialNo === 0 ? t('projectItem.notStarted') : t('projectItem.pending');
       }
     });
     // alarm 提示
     const alarmTip = computed<string>(
-      () => `定时项目：下次执行时间 ${dayjs(props.project.nextTime).format('MM-DD HH:mm')}`,
+      () => `${t('projectItem.nextTimeTip')} ${dayjs(props.project.nextTime).format('MM-DD HH:mm')}`,
     );
     // 控制是否显示下一次执行时间
     const isShowNextTime = computed<boolean>(() => {
@@ -435,15 +485,15 @@ export default defineComponent({
     });
     const stopProcess = (id: string) => {
       proxy
-        .$confirm('确定要终止吗?', '终止项目执行', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+        .$confirm(t('projectItem.confirmTerminate'), t('projectItem.terminateTitle'), {
+          confirmButtonText: t('projectItem.confirm'),
+          cancelButtonText: t('projectItem.cancel'),
           type: 'info',
         })
         .then(() => {
           terminate(id)
             .then(() => {
-              proxy.$success('终止成功');
+              proxy.$success(t('projectItem.terminateSuccess'));
               // 终止项目
               emit('terminated', id);
             })
@@ -459,7 +509,7 @@ export default defineComponent({
       try {
         executing.value = true;
         await executeImmediately(props.project.id, payload);
-        proxy.$success('操作成功');
+        proxy.$success(t('projectItem.operationSuccess'));
         visible.value = false;
         emit('triggered', props.project.id);
       } catch (err) {
@@ -469,6 +519,7 @@ export default defineComponent({
       }
     };
     return {
+      t,
       visible,
       webhookDefinition,
       executeCount,
@@ -503,16 +554,16 @@ export default defineComponent({
         const { triggerType } = props.project;
         const isWarning = triggerType === TriggerTypeEnum.WEBHOOK;
 
-        const msg = '<div>确定要触发吗?</div>';
+        const msg = `<div>${t('projectItem.confirmTrigger')}</div>`;
         if (isWarning) {
           // 获取webhook触发器定义
           webhookDefinition.value = await fetchWebhookDefinition(id);
           // 如果没有webhook触发器参数定义则可直接触发
           if (!webhookDefinition.value.params) {
             proxy
-              .$confirm(msg, '触发项目执行', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
+              .$confirm(msg, t('projectItem.triggerTitle'), {
+                confirmButtonText: t('projectItem.confirm'),
+                cancelButtonText: t('projectItem.cancel'),
                 type: 'info',
                 dangerouslyUseHTMLString: true,
               })
@@ -521,7 +572,7 @@ export default defineComponent({
 
                 executeImmediately(id)
                   .then(() => {
-                    proxy.$success('操作成功');
+                    proxy.$success(t('projectItem.operationSuccess'));
                     executing.value = false;
                     emit('triggered', id);
                   })
@@ -536,9 +587,9 @@ export default defineComponent({
           }
         } else {
           proxy
-            .$confirm(msg, '触发项目执行', {
-              confirmButtonText: '确定',
-              cancelButtonText: '取消',
+            .$confirm(msg, t('projectItem.triggerTitle'), {
+              confirmButtonText: t('projectItem.confirm'),
+              cancelButtonText: t('projectItem.cancel'),
               type: isWarning ? 'warning' : 'info',
               dangerouslyUseHTMLString: true,
             })
@@ -547,7 +598,7 @@ export default defineComponent({
 
               executeImmediately(id)
                 .then(() => {
-                  proxy.$success('操作成功');
+                  proxy.$success(t('projectItem.operationSuccess'));
                   executing.value = false;
                   emit('triggered', id);
                 })
@@ -563,27 +614,31 @@ export default defineComponent({
           return;
         }
 
-        const str = enabled.value ? '禁用' : '启用';
+        const str = enabled.value ? t('projectItem.disable') : t('projectItem.enable');
         const msg = props.project.mutable
           ? `
           <div>
-            <span>确定要${str}吗?</span>
+            <span>${t('projectItem.confirm')}${str}?</span>
             <a href="https://v2.jianmu.dev/guide/global.html" target="_blank" class="jm-icon-button-help"></a>
           </div>
         `
           : `
           <div>
-            <span>${enabled.value ? '已启用' : '已禁用'}，不可修改</span>
+            <span>${enabled.value ? t('projectItem.enabled') : t('projectItem.Disabled')}，${t(
+  'projectItem.notModifiable',
+)}</span>
             <a href="https://v2.jianmu.dev/guide/global.html" target="_blank" class="jm-icon-button-help"></a>
           </div>
-          <div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">若要修改，请通过DSL更新</div>
+          <div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">${t(
+    'projectItem.dslUpdateTip',
+  )}</div>
         `;
 
         proxy
-          .$confirm(msg, `${str}项目`, {
+          .$confirm(msg, `${str}${t('projectItem.project')}`, {
             showConfirmButton: props.project.mutable,
-            confirmButtonText: '确定',
-            cancelButtonText: props.project.mutable ? '取消' : '关闭',
+            confirmButtonText: t('projectItem.confirm'),
+            cancelButtonText: props.project.mutable ? t('projectItem.cancel') : t('projectItem.close'),
             type: 'info',
             dangerouslyUseHTMLString: true,
           })
@@ -593,7 +648,7 @@ export default defineComponent({
               await active(id, !enabled.value);
               enabled.value = !enabled.value;
 
-              proxy.$success(enabled.value ? '已启用' : '已禁用');
+              proxy.$success(enabled.value ? t('projectItem.enabled') : t('projectItem.Disabled'));
             } catch (err) {
               proxy.$throw(err, proxy);
             } finally {
@@ -610,9 +665,9 @@ export default defineComponent({
         }
 
         proxy
-          .$confirm('确定要同步吗?', '同步DSL', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+          .$confirm(t('projectItem.confirmSync'), t('projectItem.syncTitle'), {
+            confirmButtonText: t('projectItem.confirm'),
+            cancelButtonText: t('projectItem.cancel'),
             type: 'info',
           })
           .then(() => {
@@ -620,7 +675,7 @@ export default defineComponent({
 
             synchronize(id)
               .then(() => {
-                proxy.$success('同步成功');
+                proxy.$success(t('projectItem.syncSuccess'));
                 synchronizing.value = false;
 
                 emit('synchronized', id);
@@ -638,13 +693,12 @@ export default defineComponent({
 
         const { name } = props.project;
 
-        let msg = '<div>确定要删除项目吗?</div>';
-        msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
-
+        let msg = `<div>${t('projectItem.confirmDelete')}</div>`;
+        msg += `<div style="...">${t('projectItem.name')}${name}</div>`;
         proxy
-          .$confirm(msg, '删除项目', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+          .$confirm(msg, t('projectItem.deleteTitle'), {
+            confirmButtonText: t('projectItem.confirm'),
+            cancelButtonText: t('projectItem.cancel'),
             type: 'warning',
             dangerouslyUseHTMLString: true,
           })
@@ -653,7 +707,7 @@ export default defineComponent({
 
             del(id)
               .then(() => {
-                proxy.$success('删除成功');
+                proxy.$success(t('projectItem.deleteSuccess'));
                 deleting.value = false;
 
                 emit('deleted', id);

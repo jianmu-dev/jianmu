@@ -1,12 +1,12 @@
 <template>
-  <div :class="{'http-status-error': true, [`_${status}`]: true}">
+  <div :class="{ 'http-status-error': true, [`_${status}`]: true }">
     <div class="desc">{{ message }}</div>
     <div class="back">
       <router-link to="/">
-        <jm-button type="primary" class="jm-icon-button-back" size="small">返回首页</jm-button>
+        <jm-button type="primary" class="jm-icon-button-back" size="small"> {{ $t('httpStatus.backHome') }}</jm-button>
       </router-link>
     </div>
-    <bottom-nav/>
+    <bottom-nav />
   </div>
   <div class="right-bottom">
     <div class="bg-graph"></div>
@@ -16,7 +16,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import BottomNav from '@/views/nav/bottom.vue';
-
+import { useLocale } from '@/utils/i18n';
 export default defineComponent({
   components: { BottomNav },
   props: {
@@ -26,17 +26,18 @@ export default defineComponent({
     },
     errMessage: {
       type: String,
-      default: '没有权限访问该页面',
+      default: '',
     },
   },
   setup(props) {
+    const { t } = useLocale();
     let status = +props.value;
     const messages: {
       [key: number]: string;
     } = {
-      404: '找不到页面',
-      500: '服务器出错',
-      403: props.errMessage,
+      404: t('httpStatus.pageNotFound'),
+      500: t('httpStatus.serverError'),
+      403: props.errMessage || t('httpStatus.noPermission'),
       // TODO 待完善其他错误码
     };
     if (isNaN(status)) {
@@ -100,7 +101,7 @@ export default defineComponent({
     width: 500px;
     height: 280px;
     position: absolute;
-    background-color: #D9EBFF;
+    background-color: #d9ebff;
     border-top-left-radius: 111px;
     transform: rotate(-67deg);
   }

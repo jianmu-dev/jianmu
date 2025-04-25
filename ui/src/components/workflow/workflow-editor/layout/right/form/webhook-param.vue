@@ -1,22 +1,27 @@
 <template>
   <div :class="{ 'webhook-param': true, 'switch-bgc': switchBackgroundFlag }">
     <i class="jm-icon-button-delete" @click="deleteParam" />
-    <jm-form-item label="名称" :prop="`${formModelName}.${index}.name`" :rules="rules.name" class="webhook-param-name">
+    <jm-form-item
+      :label="$t('webhookParam.name')"
+      :prop="`${formModelName}.${index}.name`"
+      :rules="rules.name"
+      class="webhook-param-name"
+    >
       <jm-input
         v-model="nameVal"
-        placeholder="请输入参数名称"
+        :placeholder="$t('webhookParam.namePlaceholder')"
         :maxlength="30"
         @change="changeName"
         @focus="switchBackgroundFlag = true"
         @blur="switchBackgroundFlag = false"
       />
-      <div class="webhook-param-description">以英文字母或下划线开头，支持下划线、数字、英文字母</div>
+      <div class="webhook-param-description">{{ $t('webhookParam.nameRule') }}</div>
     </jm-form-item>
-    <jm-form-item label="类型" :prop="`${formModelName}.${index}.type`" :rules="rules.type">
+    <jm-form-item :label="$t('webhookParam.type')" :prop="`${formModelName}.${index}.type`" :rules="rules.type">
       <jm-select
         v-model="typeVal"
         @change="changeType"
-        placeholder="请选择参数类型"
+        :placeholder="$t('webhookParam.typePlaceholder')"
         @focus="switchBackgroundFlag = true"
         @blur="switchBackgroundFlag = false"
       >
@@ -25,14 +30,15 @@
     </jm-form-item>
     <jm-form-item :prop="`${formModelName}.${index}.exp`" :rules="rules.exp">
       <template #label>
-        表达式
+        {{ $t('webhookParam.expression') }}
         <jm-tooltip placement="top">
           <template #content>
-            详见<a
+            {{ $t('webhookParam.expressionTip')
+            }}<a
               href="https://v2.jianmu.dev/guide/webhook.html#%E8%A7%A6%E5%8F%91%E5%99%A8%E5%8F%82%E6%95%B0%E6%8F%90%E5%8F%96%E8%A7%84%E5%88%99"
               target="_blank"
               style="color: #fff; text-decoration: underline"
-              >提取规则</a
+              >{{ $t('webhookParam.extractionRule') }}</a
             >
           </template>
           <i class="jm-icon-button-help"></i>
@@ -40,7 +46,7 @@
       </template>
       <jm-input
         v-model="expVal"
-        placeholder="请输入参数表达式"
+        :placeholder="$t('webhookParam.expressionPlaceholder')"
         @change="changeExp"
         class="exp"
         @focus="switchBackgroundFlag = true"
@@ -48,17 +54,21 @@
       />
     </jm-form-item>
     <!--  是否必填  -->
-    <jm-form-item :prop="`${formModelName}.${index}.required`" :rules="rules.required" label="是否必填">
+    <jm-form-item
+      :prop="`${formModelName}.${index}.required`"
+      :rules="rules.required"
+      :label="$t('webhookParam.required')"
+    >
       <jm-radio-group :model-value="requiredVal" @update:model-value="changeRequired">
-        <jm-radio :label="false">否</jm-radio>
-        <jm-radio :label="true">是</jm-radio>
+        <jm-radio :label="false">{{ $t('webhookParam.no') }}</jm-radio>
+        <jm-radio :label="true">{{ $t('webhookParam.yes') }}</jm-radio>
       </jm-radio-group>
     </jm-form-item>
     <jm-form-item
       v-if="!requiredVal && isReload"
       :prop="`${formModelName}.${index}.default`"
       :rules="rules.default"
-      label="默认值"
+      :label="$t('webhookParam.default')"
     >
       <jm-radio-group :model-value="defaultVal" v-if="type === ParamTypeEnum.BOOL" @update:model-value="changeDefault">
         <jm-radio :label="true">true</jm-radio>
@@ -69,7 +79,7 @@
         v-model="defaultVal"
         type="number"
         @change="changeDefault"
-        placeholder="请输入默认值"
+        :placeholder="$t('webhookParam.defaultPlaceholder')"
         @focus="switchBackgroundFlag = true"
         @blur="switchBackgroundFlag = false"
       />
@@ -77,7 +87,7 @@
         v-else
         v-model="defaultVal"
         @change="changeDefault"
-        placeholder="请输入默认值"
+        :placeholder="$t('webhookParam.defaultPlaceholder')"
         @focus="switchBackgroundFlag = true"
         @blur="switchBackgroundFlag = false"
       />
@@ -211,6 +221,7 @@ export default defineComponent({
       line-height: 18px;
       color: #79879c;
       margin-top: 4px;
+      margin-bottom: 8px;
     }
   }
 

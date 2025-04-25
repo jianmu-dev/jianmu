@@ -14,6 +14,7 @@ import yaml from 'yaml';
 import { namespace } from '@/store/modules/session';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import LoginVerify from '@/views/login/dialog.vue';
+import { useLocale } from '@/utils/i18n';
 
 const { mapMutations, mapActions } = createNamespacedHelpers(namespace);
 export default defineComponent({
@@ -23,6 +24,7 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const { t } = useLocale();
     const { proxy, appContext } = getCurrentInstance() as any;
     const router = useRouter();
     const route = useRoute();
@@ -35,7 +37,7 @@ export default defineComponent({
     const reloadMain = inject('reloadMain') as () => void;
     const editMode = !!props.id;
     const workflow = ref<IWorkflow>({
-      name: '未命名项目',
+      name: t('pipelineEditor.unnamedProject'),
       groupId: '1',
       description: '',
       global: {
@@ -102,7 +104,7 @@ export default defineComponent({
             dslText: dsl,
             id: editMode ? props.id : '',
           });
-          proxy.$success(editMode ? '保存成功' : '新增成功');
+          proxy.$success(editMode ? t('pipelineEditor.saveSuccess') : t('pipelineEditor.createSuccess'));
           if (!back) {
             // 新增项目，再次点击保存进入项目编辑模式
             if (!editMode) {

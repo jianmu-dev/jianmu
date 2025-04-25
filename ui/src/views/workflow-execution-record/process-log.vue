@@ -2,38 +2,40 @@
   <div class="workflow-execution-record-process-log">
     <div class="basic-section">
       <div class="item">
-        <div class="param-key">流程名称</div>
+        <div class="param-key">{{ t('processLog.processName') }}</div>
         <div class="param-value">
           <jm-text-viewer :value="workflowName" :tip-append-to-body="false" />
         </div>
       </div>
       <div class="item">
-        <div class="param-key">启动时间</div>
+        <div class="param-key">{{ t('processLog.startTime') }}</div>
         <div class="param-value">
           <jm-text-viewer :value="datetimeFormatter(process.startTime)" :tip-append-to-body="false" />
         </div>
       </div>
       <div class="item">
-        <div class="param-key">完成时间</div>
+        <div class="param-key">{{ t('processLog.endTime') }}</div>
         <div class="param-value">
           <jm-text-viewer :value="datetimeFormatter(process.endTime)" :tip-append-to-body="false" />
         </div>
       </div>
       <div class="item">
-        <div class="param-key">{{ isSuspended ? '挂起时长' : '执行时长' }}</div>
+        <div class="param-key">
+          {{ isSuspended ? t('processLog.suspendedDuration') : t('processLog.executionDuration') }}
+        </div>
         <div class="param-value">
           <jm-timer v-if="isSuspended" :start-time="process.suspendedTime" :tip-append-to-body="false" />
           <jm-timer v-else :start-time="process.startTime" :end-time="process.endTime" :tip-append-to-body="false" />
         </div>
       </div>
       <div class="item">
-        <div class="param-key">流程实例ID</div>
+        <div class="param-key">{{ t('processLog.instanceId') }}</div>
         <div class="param-value">
           <jm-text-viewer :value="process.id" :tip-append-to-body="false" />
         </div>
       </div>
       <div class="item">
-        <div class="param-key">流程版本号</div>
+        <div class="param-key">{{ t('processLog.version') }}</div>
         <div class="param-value">
           <jm-text-viewer :value="process.workflowVersion" :tip-append-to-body="false" />
         </div>
@@ -43,7 +45,7 @@
     <div class="process-log">
       <div class="log">
         <div class="loading" v-if="executing">
-          <jm-button type="text" size="small" :loading="executing"> 加载中... </jm-button>
+          <jm-button type="text" size="small" :loading="executing">{{ t('processLog.loading') }}</jm-button>
         </div>
         <jm-log-viewer
           :filename="`${process.name}.txt`"
@@ -66,9 +68,11 @@ import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record'
 import { datetimeFormatter } from '@/utils/formatter';
 import { TriggerTypeEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 import { downloadWorkflowLogs, randomWorkflowLogs } from '@/api/workflow-execution-record';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   setup() {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const state = useStore().state[namespace] as IState;
     const process = computed<IWorkflowExecutionRecordVo>(
@@ -104,6 +108,7 @@ export default defineComponent({
     };
 
     return {
+      t,
       workflowName: state.recordDetail.record?.name,
       process,
       executing,

@@ -3,20 +3,20 @@
     v-model="dialogVisible"
     width="800px">
     <template v-slot:title>
-      <div class="editor-title">新增本地节点</div>
+      <div class="editor-title">{{ $t('nodeLibrary.addLocalNode') }}</div>
     </template>
     <jm-form :model="editorForm" :rules="editorRule" ref="editorFormRef" @submit.prevent>
-      <jm-form-item label="名称" label-position="top" prop="name">
-        <jm-input v-model="editorForm.name" clearable placeholder="请输入名称"/>
+      <jm-form-item :label="$t('nodeLibrary.name')" label-position="top" prop="name">
+        <jm-input v-model="editorForm.name" clearable :placeholder="$t('nodeLibrary.inputName')"/>
       </jm-form-item>
-      <jm-form-item label="描述" label-position="top" prop="description">
+      <jm-form-item :label="$t('nodeLibrary.description')" label-position="top" prop="description">
         <jm-input
           type="textarea"
           v-model="editorForm.description"
           clearable
           maxlength="200"
           show-word-limit
-          placeholder="请输入描述"
+          :placeholder="$t('nodeLibrary.inputDescription')"
           :autosize="{minRows: 3, maxRows: 3}"
           resize="none"/>
       </jm-form-item>
@@ -24,11 +24,11 @@
         <jm-dsl-editor class="dsl-editor" v-model:value="editorForm.dsl"/>
       </jm-form-item>
     </jm-form>
-    <div>注意事项：ref为xxx/xxx或xxx时，统一处理成local/xxx，在流程或管道dsl中以local/xxx:xxx方式引用。</div>
+    <div>{{$t('nodeLibrary.note')}}</div>
     <template #footer>
         <span class="dialog-footer">
-          <jm-button size="small" @click="dialogVisible = false">取消</jm-button>
-          <jm-button size="small" type="primary" @click="create" :loading="loading">确定</jm-button>
+          <jm-button size="small" @click="dialogVisible = false">{{ $t('nodeLibrary.cancel') }}</jm-button>
+          <jm-button size="small" type="primary" @click="create" :loading="loading">{{ $t('nodeLibrary.confirm') }}</jm-button>
         </span>
     </template>
   </jm-dialog>
@@ -38,10 +38,11 @@
 import { defineComponent, getCurrentInstance, ref, SetupContext } from 'vue';
 import { ICreateNodeForm } from '@/model/modules/node-library';
 import { createNode } from '@/api/node-library';
-
+import { useLocale } from '@/utils/i18n';
 export default defineComponent({
   emits: ['completed'],
   setup(_, { emit }: SetupContext) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const dialogVisible = ref<boolean>(true);
 
@@ -52,10 +53,10 @@ export default defineComponent({
     });
     const editorRule = ref<object>({
       name: [
-        { required: true, message: '名称不能为空', trigger: 'blur' },
+        { required: true, message: t('nodeLibrary.nameRequired'), trigger: 'blur' },
       ],
       dsl: [
-        { required: true, message: 'DSL不能为空', trigger: 'blur' },
+        { required: true, message: t('nodeLibrary.dslRequired'), trigger: 'blur' },
       ],
     });
     const loading = ref<boolean>(false);
@@ -83,7 +84,7 @@ export default defineComponent({
               // 发已完成事件，用于后续处理
               emit('completed');
 
-              proxy.$success('新增成功');
+              proxy.$success(t('nodeLibrary.createSuccess'));
 
               dialogVisible.value = false;
             })

@@ -7,18 +7,18 @@
       :destroy-on-close="true"
       @close="closeDialog"
     >
-      <template #title>触发执行</template>
+      <template #title>{{ t('webhookSettingDialog.title') }}</template>
       <div class="content-wrapper" v-loading="loading">
         <div class="operator" v-if="paramsTableData.length > 0">
-          <span class="tips">项目已配置webhook，手动触发请填写参数</span>
+          <span class="tips">{{ t('webhookSettingDialog.tip') }}</span>
           <div class="btns">
             <div class="import" v-if="latestWebhook" @click.stop="importWebhookDefinition">
               <i class="icon jm-font jm-icon-button-import" />
-              <span>填入上次参数</span>
+              <span>{{ t('webhookSettingDialog.importLast') }}</span>
             </div>
             <div class="clear" @click="clearFields">
               <i class="icon jm-font jm-icon-button-clear" />
-              <span>清空表单</span>
+              <span>{{ t('webhookSettingDialog.clear') }}</span>
             </div>
           </div>
         </div>
@@ -31,7 +31,12 @@
                 :height="paramsTableHeight"
                 class="params-table"
               >
-                <jm-table-column prop="name" label="参数名" class-name="webhook-param-name" width="256px">
+                <jm-table-column
+                  prop="name"
+                  :label="t('webhookSettingDialog.paramName')"
+                  class-name="webhook-param-name"
+                  width="256px"
+                >
                   <template #default="scope">
                     <div class="param-name">
                       <i v-if="scope.row.required" />
@@ -39,12 +44,16 @@
                     </div>
                   </template>
                 </jm-table-column>
-                <jm-table-column prop="type" label="类型" width="160px">
+                <jm-table-column prop="type" :label="t('webhookSettingDialog.type')" width="160px">
                   <template #default="scope">
                     {{ scope.row.type }}
                   </template>
                 </jm-table-column>
-                <jm-table-column prop="exp" label="参数值" class-name="webhook-param-value">
+                <jm-table-column
+                  prop="exp"
+                  :label="t('webhookSettingDialog.paramValue')"
+                  class-name="webhook-param-value"
+                >
                   <template #default="scope">
                     <jm-form-item v-if="scope.row.type === ParamTypeEnum.BOOL" :prop="scope.row.name">
                       <jm-radio-group v-model="ruleForm[scope.row.name]">
@@ -53,13 +62,17 @@
                       </jm-radio-group>
                     </jm-form-item>
                     <jm-form-item v-if="scope.row.type === ParamTypeEnum.NUMBER" :prop="scope.row.name">
-                      <jm-input v-model.number="ruleForm[scope.row.name]" type="number" placeholder="请输入参数值" />
+                      <jm-input
+                        v-model.number="ruleForm[scope.row.name]"
+                        type="number"
+                        :placeholder="t('webhookSettingDialog.placeholder')"
+                      />
                     </jm-form-item>
                     <jm-form-item v-if="scope.row.type === ParamTypeEnum.STRING" :prop="scope.row.name">
                       <jm-input
                         v-model="ruleForm[scope.row.name]"
                         type="textarea"
-                        placeholder="请输入参数值"
+                        :placeholder="t('webhookSettingDialog.placeholder')"
                         :autosize="{
                           minRows: 1,
                           maxRows: 3,
@@ -74,7 +87,7 @@
                     >
                       <jm-input
                         v-model="ruleForm[scope.row.name]"
-                        placeholder="请输入参数值"
+                        :placeholder="t('webhookSettingDialog.placeholder')"
                         type="password"
                         show-password
                       ></jm-input>
@@ -85,7 +98,7 @@
             </div>
           </jm-form>
           <div class="auth-wrapper" v-if="authTableData.length > 0">
-            <div class="title">认证规则</div>
+            <div class="title">{{ t('webhookSettingDialog.authRule') }}</div>
             <jm-table class="auth-table" :data="authTableData" :header-row-class-name="'header-row'">
               <jm-table-column prop="token" label="token" />
               <jm-table-column prop="value" label="value" />
@@ -99,8 +112,8 @@
       </div>
       <template #footer>
         <span>
-          <jm-button size="small" @click="closeDialog">取消</jm-button>
-          <jm-button size="small" type="primary" @click="confirm">确定</jm-button>
+          <jm-button size="small" @click="closeDialog">{{ t('webhookSettingDialog.cancel') }}</jm-button>
+          <jm-button size="small" type="primary" @click="confirm">{{ t('webhookSettingDialog.confirm') }}</jm-button>
         </span>
       </template>
     </jm-dialog>
@@ -114,6 +127,7 @@ import { IProjectTriggeringDto, ITriggerDefinitionVo, IWebhookAuth, IWebhookPara
 import { ParamTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
 import { IWebhookParameterVo, IWebRequestVo } from '@/api/dto/trigger';
 import { getWebhookList, getWebhookParams } from '@/api/trigger';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   emits: ['update:model-value', 'submit'],
@@ -132,6 +146,7 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const dialogVisible = computed<boolean>(() => props.modelValue);
     const formRef = ref<InstanceType<typeof ElForm>>();
@@ -176,7 +191,9 @@ export default defineComponent({
             const rule = [
               {
                 required: true,
-                message: isBoolean ? '请选择参数值' : '请输入参数值',
+                message: isBoolean
+                  ? t('webhookSettingDialog.selectPlaceholder')
+                  : t('webhookSettingDialog.placeholder'),
                 trigger: isBoolean ? 'change' : 'blur',
               },
             ];
@@ -257,6 +274,7 @@ export default defineComponent({
         });
     };
     return {
+      t,
       paramTableRef,
       paramsTableHeight,
       ruleForm,

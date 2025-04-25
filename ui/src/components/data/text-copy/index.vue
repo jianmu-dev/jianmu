@@ -2,9 +2,9 @@
   <span class="jm-text-copy">
     <jm-tooltip v-if="tip" placement="top" :append-to-body="false">
       <template #content>
-        <div class="tip-content" v-html="tipContent"/>
+        <div class="tip-content" v-html="tipContent" />
       </template>
-      <span :class="{'jm-icon-button-copy': true, 'doing': copying}" @click="copy"></span>
+      <span :class="{ 'jm-icon-button-copy': true, doing: copying }" @click="copy"></span>
     </jm-tooltip>
   </span>
 </template>
@@ -12,6 +12,7 @@
 <script lang="ts">
 import { defineComponent, getCurrentInstance, nextTick, PropType, ref } from 'vue';
 import useClipboard from 'vue-clipboard3';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   name: 'jm-text-copy',
@@ -26,10 +27,11 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const { toClipboard } = useClipboard();
     const tip = ref<boolean>(true);
-    const tipContent = ref<string>('复制');
+    const tipContent = ref<string>(t('textCopy.copy'));
     const copying = ref<boolean>(false);
 
     const reloadTip = async (msg: string) => {
@@ -44,7 +46,7 @@ export default defineComponent({
 
       setTimeout(async () => {
         copying.value = false;
-        await reloadTip('复制');
+        await reloadTip(t('textCopy.copy'));
       }, 2000);
     };
 
@@ -65,13 +67,13 @@ export default defineComponent({
           }
 
           if (!value) {
-            throw new Error('值为空');
+            throw new Error(t('textCopy.valueEmpty'));
           }
 
           await toClipboard(value, proxy.$el);
-          await reset('已复制');
+          await reset(t('textCopy.copied'));
         } catch (err) {
-          await reset(`复制失败<br/>原因：${err.message}`);
+          await reset(`${t('textCopy.copyFailed')}<br/>${t('textCopy.cause')}${err.message}`);
           console.error(err);
         }
       },
@@ -96,7 +98,7 @@ export default defineComponent({
 
   .jm-icon-button-copy {
     display: inline;
-    color: #6B7B8D;
+    color: #6b7b8d;
     cursor: pointer;
     opacity: 0.5;
     user-select: none;

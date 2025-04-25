@@ -1,11 +1,11 @@
 <template>
   <div class="workflow-execution-record-webhook-log">
     <div class="basic-section">
-      <div class="param-key">流程名称：</div>
+      <div class="param-key">{{ t('webhookLog.processName') }}</div>
       <jm-text-viewer :value="workflowName" :tip-append-to-body="false" class="param-value" />
-      <div class="param-key">节点名称：</div>
+      <div class="param-key">{{ t('webhookLog.nodeName') }}</div>
       <jm-text-viewer :value="nodeName" :tip-append-to-body="false" class="param-value node-name" />
-      <div class="param-key">启动时间：</div>
+      <div class="param-key">{{ t('webhookLog.startTime') }}</div>
       <jm-text-viewer :value="startTime" :tip-append-to-body="false" class="param-value" />
     </div>
 
@@ -13,7 +13,7 @@
       <jm-tabs v-model="tabActiveName">
         <jm-tab-pane name="log" lazy>
           <template #label>
-            <div class="tab">日志</div>
+            <div class="tab">{{ t('webhookLog.log') }}</div>
           </template>
           <div class="tab-content">
             <div class="log">
@@ -23,26 +23,26 @@
         </jm-tab-pane>
         <jm-tab-pane name="params" lazy>
           <template #label>
-            <div class="tab">业务参数</div>
+            <div class="tab">{{ t('webhookLog.businessParams') }}</div>
           </template>
           <div class="tab-content">
             <div class="params">
               <jm-scrollbar>
                 <div class="content">
                   <jm-table :data="webhookParams" border>
-                    <jm-table-column label="参数唯一标识" align="center">
+                    <jm-table-column :label="t('webhookLog.paramKey')" align="center">
                       <template #default="scope">
                         <jm-text-viewer :value="scope.row.name" :tip-append-to-body="false" class="params-name" />
                       </template>
                     </jm-table-column>
-                    <jm-table-column label="参数类型" align="center" prop="type">
+                    <jm-table-column :label="t('webhookLog.paramType')" align="center" prop="type">
                       <template #default="scope">
                         <div class="text-viewer">
                           <jm-text-viewer :value="scope.row.type" :tip-append-to-body="false" class="params-name" />
                         </div>
                       </template>
                     </jm-table-column>
-                    <jm-table-column label="参数值" align="center">
+                    <jm-table-column :label="t('webhookLog.paramValue')" align="center">
                       <template #default="scope">
                         <param-value :value="scope.row.value" :tip-append-to-body="false" :type="scope.row.valueType" />
                       </template>
@@ -69,6 +69,7 @@ import { IEventParameterVo } from '@/api/dto/trigger';
 import { ParamTypeEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import JmTextViewer from '@/components/text-viewer/index.vue';
 import ParamValue from '@/views/common/param-value.vue';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   components: { JmTextViewer, ParamValue },
@@ -85,6 +86,7 @@ export default defineComponent({
     },
   },
   setup(props: any) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const state = useStore().state[namespace] as IState;
     const tabActiveName = ref<string>(props.tabType);
@@ -95,7 +97,7 @@ export default defineComponent({
     onMounted(async () => {
       if (!props.triggerId) {
         // 尚未触发
-        webhookLog.value = '尚未触发\n';
+        webhookLog.value = `${t('webhookLog.notTriggered')}\n`;
         return;
       }
 
@@ -105,7 +107,7 @@ export default defineComponent({
         webhookLog.value = payload
           ? 'Webhook:\n' + `payload: ${JSON.stringify(JSON.parse(payload), null, 2)}\n`
           : props.triggerType === TriggerTypeEnum.MANUAL
-            ? '此次为手动触发，无webhook日志'
+            ? t('webhookLog.manualTriggerLog')
             : '';
         webhookParams.value = parameters.sort((p1, p2) => p1.name.localeCompare(p2.name));
       } catch (err) {
@@ -113,6 +115,7 @@ export default defineComponent({
       }
     });
     return {
+      t,
       workflowName: state.recordDetail.record?.name,
       startTime: datetimeFormatter(state.recordDetail.record?.startTime),
       tabActiveName,

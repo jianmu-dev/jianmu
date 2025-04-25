@@ -16,11 +16,13 @@
             <router-link :to="{ path: `/project-group/detail/${projectGroup?.id}` }"
               >{{ projectGroup?.name }}
             </router-link>
-            <span class="desc">（共有 {{ projectPage.total >= 0 ? projectPage.total : 0 }} 个项目）</span>
+            <span class="desc">{{
+              $t('projectGroup.totalProjects', { count: projectPage.total >= 0 ? projectPage.total : 0 })
+            }}</span>
           </div>
           <div class="more-container" v-if="!pageable && projectPage.total > 10">
             <router-link :to="{ path: `/project-group/detail/${projectGroup?.id}` }">
-              查看更多
+              {{ $t('projectGroup.viewMore') }}
               <i class="more-icon"></i>
             </router-link>
           </div>
@@ -29,10 +31,14 @@
       <template #default>
         <div>
           <div class="projects" ref="projectsRef">
-            <jm-empty description="暂无项目" :image-size="98" v-if="projects.length === 0 && pageable && isDetail" />
+            <jm-empty
+              :description="$t('projectGroup.noProjects')"
+              :image-size="98"
+              v-if="projects.length === 0 && pageable && isDetail"
+            />
             <jm-empty
               :image="noDataImg"
-              description="没有搜到相关结果"
+              :description="$t('projectGroup.noResult')"
               :image-size="98"
               v-else-if="projects.length === 0 && pageable"
             />

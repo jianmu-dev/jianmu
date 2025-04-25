@@ -2,7 +2,7 @@
   <div class="dialog">
     <jm-dialog :model-value="show" :width="350" top="calc((100vh - 344px) / 2)">
       <login @logined="logined" type="dialog" @cancel="show = false">
-        <template #tip> 未登录状态下，操作内容将会丢失 </template>
+        <template #tip> {{ $t('dialog.needLoginTip') }} </template>
       </login>
     </jm-dialog>
   </div>

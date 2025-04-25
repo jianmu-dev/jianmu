@@ -1,16 +1,16 @@
 <template>
   <div class="main">
     <div>
-      <router-link to="/component-lib">组件库</router-link>
+      <router-link to="/component-lib">{{ $t('main.componentLib') }}</router-link>
     </div>
     <div>
-      <router-link to="/login">登录页</router-link>
+      <router-link to="/login">{{ $t('main.loginPage') }}</router-link>
     </div>
     <div class="error">
-      <div>错误页：</div>
+      <div>{{ $t('main.errorPage') }}</div>
       <div>
         <div>
-          <router-link to="/error/browser-version">浏览器版本</router-link>
+          <router-link to="/error/browser-version">{{ $t('main.browserVersion') }}</router-link>
         </div>
         <div>
           <router-link to="/error/http-status/404">404</router-link>
@@ -19,7 +19,7 @@
           <router-link to="/error/http-status/500">500</router-link>
         </div>
         <div>
-          <router-link to="/error/network">网络</router-link>
+          <router-link to="/error/network">{{ $t('main.network') }}</router-link>
         </div>
       </div>
     </div>

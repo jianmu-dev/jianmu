@@ -3,6 +3,7 @@ import { BaseNode } from './base-node';
 import { NodeRefEnum, NodeTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/cron.svg';
 import { CustomRule } from '../common';
+import { globalT as t } from '@/utils/i18n';
 
 export class Cron extends BaseNode {
   schedule: string;
@@ -22,11 +23,11 @@ export class Cron extends BaseNode {
     return {
       ...rules,
       schedule: [
-        { required: true, message: 'schedule不能为空', trigger: 'blur' },
+        { required: true, message: t('cron.scheduleNotEmpty'), trigger: 'blur' },
         {
           validator: (rule: any, value: any, callback: any) => {
             if (!isValidCronExpression(value)) {
-              callback(new Error('请输入正确的cron表达式'));
+              callback(new Error(t('cron.invalidCronExpression')));
               return;
             }
             callback();

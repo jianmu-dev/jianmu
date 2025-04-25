@@ -1,67 +1,54 @@
 <template>
-  <div :class="{'import-step-one': true, authe}">
+  <div :class="{ 'import-step-one': true, authe }">
     <div class="right-top-btn">
-      <router-link :to="{name: 'index'}">
-        <jm-button class="jm-icon-button-cancel" size="small" :loading="loading">取消</jm-button>
+      <router-link :to="{ name: 'index' }">
+        <jm-button class="jm-icon-button-cancel" size="small" :loading="loading">{{ t('importStepOne.cancel')
+          }}</jm-button>
       </router-link>
-      <jm-button type="primary" class="jm-icon-button-next" size="small"
-                 :loading="loading" @click="next">下一步
+      <jm-button type="primary" class="jm-icon-button-next" size="small" :loading="loading" @click="next">{{
+        t('importStepOne.next') }}
       </jm-button>
     </div>
-    <jm-form
-      :model="gitCloneForm"
-      :rules="gitCloneFormRule"
-      ref="gitCloneFormRef"
-      @submit.prevent
-    >
-      <jm-form-item label="分组" prop="projectGroupId">
-        <jm-select
-          v-model="gitCloneForm.projectGroupId"
-          placeholder="请选择项目组"
-        >
-          <jm-option
-            v-for="item in projectGroupList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          >
+    <jm-form :model="gitCloneForm" :rules="gitCloneFormRule" ref="gitCloneFormRef" @submit.prevent>
+      <jm-form-item :label="t('importStepOne.subgroups')" prop="projectGroupId">
+        <jm-select v-model="gitCloneForm.projectGroupId" :placeholder="t('importStepOne.selectGroup')">
+          <jm-option v-for="item in projectGroupList" :key="item.id" :label="item.name" :value="item.id">
           </jm-option>
         </jm-select>
       </jm-form-item>
       <jm-form-item label="URL" prop="uri">
-        <jm-input v-model="gitCloneForm.uri" clearable
-                  placeholder="请输入URL，例如：https://gitee.com/jianmu-dev/jianmu.git"/>
+        <jm-input v-model="gitCloneForm.uri" clearable :placeholder="t('importStepOne.enterUrl')" />
       </jm-form-item>
-      <jm-form-item label="分支" prop="branch">
-        <jm-input v-model="gitCloneForm.branch" clearable placeholder="请输入分支"/>
+      <jm-form-item :label="t('importStepOne.branch')" prop="branch">
+        <jm-input v-model="gitCloneForm.branch" clearable :placeholder="t('importStepOne.enterBranch')" />
       </jm-form-item>
-      <jm-form-item label="认证:">
-        <jm-switch v-model="authe" @change="handleAutheChange"/>
+      <jm-form-item :label="t('importStepOne.auth')">
+        <jm-switch v-model="authe" @change="handleAutheChange" />
       </jm-form-item>
       <div v-if="authe" class="authentication">
         <div>
-          <jm-form-item label="类型" prop="credential.type">
+          <jm-form-item :label="t('importStepOne.type')" prop="credential.type">
             <jm-select v-model="gitCloneForm.credential.type" clearable disabled
-                       placeholder="请选择类型" @change="handleCredentialTypeChange">
+              :placeholder="t('importStepOne.selectType')" @change="handleCredentialTypeChange">
               <jm-option v-for="type in types" :key="type" :label="type" :value="type"></jm-option>
             </jm-select>
           </jm-form-item>
           <template v-if="gitCloneForm.credential.type === ProjectImporterTypeEnum.HTTPS">
-            <jm-form-item label="用户名" prop="credential.userKey">
-              <jm-cascader :props="cascaderProps" clearable placeholder="请选择用户名"
-                           @change="handleUserKeyChange"/>
+            <jm-form-item :label="t('importStepOne.username')" prop="credential.userKey">
+              <jm-cascader :props="cascaderProps" clearable :placeholder="t('importStepOne.selectUsername')"
+                @change="handleUserKeyChange" />
             </jm-form-item>
-            <jm-form-item label="密码" prop="credential.passKey">
+            <jm-form-item :label="t('importStepOne.password')" prop="credential.passKey">
               <jm-select v-model="gitCloneForm.credential.passKey" clearable
-                         placeholder="请选择密码" no-data-text="请选择用户名">
+                :placeholder="t('importStepOne.selectPassword')" :no-data-text="t('importStepOne.selectUsernameAgain')">
                 <jm-option v-for="item in passKeys" :key="item" :label="item" :value="item"></jm-option>
               </jm-select>
             </jm-form-item>
           </template>
-          <jm-form-item v-else-if="gitCloneForm.credential.type === ProjectImporterTypeEnum.SSH" label="私钥"
-                        prop="credential.privateKey">
-            <jm-cascader :props="cascaderProps" clearable placeholder="请选择私钥"
-                         @change="handlePrivateKeyChange"/>
+          <jm-form-item v-else-if="gitCloneForm.credential.type === ProjectImporterTypeEnum.SSH"
+            :label="t('importStepOne.privateKey')" prop="credential.privateKey">
+            <jm-cascader :props="cascaderProps" clearable :placeholder="t('importStepOne.selectPrivateKey')"
+              @change="handlePrivateKeyChange" />
           </jm-form-item>
         </div>
       </div>
@@ -87,9 +74,12 @@ import {
 import { cloneGit } from '@/api/project';
 import { IGitVo } from '@/api/dto/project';
 import { IProjectGroupVo } from '@/api/dto/project-group';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   setup() {
+    const { t } = useLocale();
+
     const { proxy } = getCurrentInstance() as any;
 
     const gitCloneFormRef = ref();
@@ -107,20 +97,20 @@ export default defineComponent({
       projectGroupList.value = await listProjectGroup();
     });
     const gitCloneFormRule = ref<object>({
-      uri: [{ required: true, message: 'URI不能为空', trigger: 'blur' }],
+      uri: [{ required: true, message: t('importStepOne.uriRequired'), trigger: 'blur' }],
       projectGroupId: [
-        { required: true, message: '项目分组不能为空', trigger: 'change' },
+        { required: true, message: t('importStepOne.groupRequired'), trigger: 'change' },
       ],
-      branch: [{ required: true, message: '分支不能为空', trigger: 'blur' }],
+      branch: [{ required: true, message: t('importStepOne.branchRequired'), trigger: 'blur' }],
       credential: {
         type: [
-          { required: true, message: '请选择类型', trigger: 'change' },
+          { required: true, message: t('importStepOne.mustSelectType'), trigger: 'change' },
         ],
         userKey: [
-          { required: true, message: '请选择用户名', trigger: 'change' },
+          { required: true, message: t('importStepOne.mustSelectUsername'), trigger: 'change' },
         ],
         passKey: [
-          { required: true, message: '请选择密码', trigger: 'change' },
+          { required: true, message: t('importStepOne.mustSelectPassword'), trigger: 'change' },
         ],
       }
       ,
@@ -131,6 +121,7 @@ export default defineComponent({
     const nextStep = inject('nextStep') as (git: IGitVo, gitCloneForm: IGitCloneForm) => void;
 
     return {
+      t,
       projectGroupList,
       gitCloneFormRef,
       gitCloneForm,
@@ -249,16 +240,19 @@ export default defineComponent({
     &.is-required {
       display: flex;
       flex-direction: column;
+
       .el-form-item__label {
         text-align: left;
       }
     }
+
     .el-form-item__content {
       .el-select {
         width: 100%;
       }
     }
   }
+
   width: 500px;
   margin: 0 auto;
   padding: 16px 0;
@@ -291,7 +285,7 @@ export default defineComponent({
     border-radius: 2px;
     padding: 20px;
 
-    > div {
+    >div {
       padding: 0 24px;
       display: flex;
       justify-content: space-between;

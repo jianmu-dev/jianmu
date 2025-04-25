@@ -1,13 +1,17 @@
 <template>
-  <span :class="{
-    'jm-task-state':true,
-     [value.toLowerCase()]:true,
-  }">{{ text }}</span>
+  <span
+    :class="{
+      'jm-task-state': true,
+      [value.toLowerCase()]: true,
+    }"
+    >{{ text }}</span
+  >
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   name: 'jm-task-state',
@@ -18,6 +22,7 @@ export default defineComponent({
     },
   },
   setup(props: any) {
+    const { t } = useLocale();
     return {
       TaskStatusEnum,
       text: computed<string>(() => {
@@ -48,7 +53,7 @@ export default defineComponent({
             stateText = '排队中';
             break;
         }
-        return stateText;
+        return t(`taskState.${props.value}`);
       }),
     };
   },
@@ -59,17 +64,17 @@ export default defineComponent({
 .jm-task-state {
   //  待启动
   &.init {
-    color: #096DD9;
+    color: #096dd9;
   }
 
   //  排队中
   &&.waiting {
-    color: #FF862B;
+    color: #ff862b;
   }
 
   //  执行中
   &.running {
-    color: #11C2C2;
+    color: #11c2c2;
   }
 
   //  已跳过
@@ -79,22 +84,22 @@ export default defineComponent({
 
   //  执行失败
   &.failed {
-    color: #FF4D4F;
+    color: #ff4d4f;
   }
 
   //  执行成功
   &.succeeded {
-    color: #51C41B;
+    color: #51c41b;
   }
 
   //  已挂起
   &.suspended {
-    color: #7986CB;
+    color: #7986cb;
   }
 
   //  已忽略
   &.ignored {
-    color: #9847FC;
+    color: #9847fc;
   }
 }
 </style>

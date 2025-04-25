@@ -1,10 +1,15 @@
 <template>
   <div class="jm-workflow-editor-shell-panel">
     <jm-form :model="form" ref="formRef" label-position="top" @submit.prevent>
-      <jm-form-item label="节点名称" prop="name" :rules="nodeData.getFormRules().name" class="node-name">
+      <jm-form-item :label="$t('shellPanel.name')" prop="name" :rules="nodeData.getFormRules().name" class="node-name">
         <jm-input v-model="form.name" show-word-limit :maxlength="36" />
       </jm-form-item>
-      <jm-form-item label="docker镜像" prop="image" :rules="nodeData.getFormRules().image" class="node-item">
+      <jm-form-item
+        :label="$t('shellPanel.image')"
+        prop="image"
+        :rules="nodeData.getFormRules().image"
+        class="node-item"
+      >
         <jm-select
           ref="imageSelectRef"
           @keyup.enter="enterSelect"
@@ -12,24 +17,24 @@
           filterable
           allow-create
           clearable
-          placeholder="请选择或输入镜像"
+          :placeholder="$t('shellPanel.imagePlaceholder')"
         >
           <jm-option v-for="item in defaultImages" :key="item.id" :label="item.imageName" :value="item.imageName" />
         </jm-select>
       </jm-form-item>
       <jm-form-item class="shell-env node-item">
         <template #label>
-          环境变量
+          {{ $t('shellPanel.env') }}
           <jm-tooltip placement="top">
             <template #content>
-              <div>可以使用表达式，引用全局参数、事件参</div>
+              <div>{{ $t('shellPanel.envTooltip1') }}</div>
               <div>
-                <span>数或上游节点的输出参数，详见</span>
+                <span>{{ $t('shellPanel.envTooltip2') }}</span>
                 <a
                   href="https://v2.jianmu.dev/guide/expression.html"
                   target="_blank"
                   style="color: #fff; text-decoration: underline"
-                  >参数章节</a
+                  >{{ $t('shellPanel.envTooltipLink') }}</a
                 >
               </div>
             </template>
@@ -50,17 +55,17 @@
           />
           <div class="add-shell-env" @click="addShellEnv">
             <i class="jm-icon-button-add" />
-            添加环境变量
+            {{ $t('shellPanel.addEnv') }}
           </div>
         </div>
       </jm-form-item>
-      <jm-form-item label="脚本" class="script-container">
-        <jm-input type="textarea" placeholder="请输入shell脚本" v-model="form.script" />
+      <jm-form-item :label="$t('shellPanel.script')" class="script-container">
+        <jm-input type="textarea" :placeholder="$t('shellPanel.scriptPlaceholder')" v-model="form.script" />
       </jm-form-item>
       <div class="cache-item">
         <div class="cache-label">
-          缓存挂载
-          <jm-tooltip placement="top" :append-to-body="false" content="在顶部缓存模块中添加缓存后，在此挂载">
+          {{ $t('shellPanel.cache') }}
+          <jm-tooltip placement="top" :append-to-body="false" :content="$t('shellPanel.cacheTooltip')">
             <i class="jm-icon-button-help"></i>
           </jm-tooltip>
         </div>
@@ -81,20 +86,20 @@
         <div class="add-select-cache-btn">
           <span class="add-link" @click="addSelector">
             <i class="jm-icon-button-add" />
-            <span>添加</span>
+            <span>{{ $t('shellPanel.addCache') }}</span>
           </span>
         </div>
       </div>
       <jm-form-item
-        label="执行失败时"
+        :label="$t('shellPanel.failureMode')"
         class="node-item"
         prop="failureMode"
         :rules="nodeData.getFormRules().failureMode"
         v-if="failureVisible"
       >
         <jm-radio-group v-model="form.failureMode">
-          <jm-radio :label="'suspend'">挂起</jm-radio>
-          <jm-radio :label="'ignore'">忽略</jm-radio>
+          <jm-radio :label="'suspend'">{{ $t('shellPanel.suspend') }}</jm-radio>
+          <jm-radio :label="'ignore'">{{ $t('shellPanel.ignore') }}</jm-radio>
         </jm-radio-group>
       </jm-form-item>
     </jm-form>

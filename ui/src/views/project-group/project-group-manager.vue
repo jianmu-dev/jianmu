@@ -5,28 +5,28 @@
       <div class="right-top-btn">
         <router-link :to="{ name: 'index' }">
           <jm-button type="primary" class="jm-icon-button-cancel" size="small"
-          >关闭
+          >{{ t('projectGroupManager.close') }}
           </jm-button
           >
         </router-link>
       </div>
       <div class="menu-bar">
         <button class="add" @click="add">
-          <div class="label">新建分组</div>
+          <div class="label">{{ t('projectGroupManager.newGroup') }}</div>
         </button>
       </div>
       <div class="title">
         <div>
-          <span>项目分组</span>
-          <span class="desc">（共有 {{ projectGroupList.length }} 个组）</span>
+          <span>{{ t('projectGroupManager.projectGroup') }}</span>
+          <span class="desc">{{ t('projectGroupManager.totalGroups', { total: projectGroupList.length }) }}</span>
         </div>
-        <jm-tooltip content="关闭排序" placement="top" v-if="isActive">
+        <jm-tooltip :content="t('projectGroupManager.closeSorting')" placement="top" v-if="isActive">
           <div
             :class="['move', isActive ? 'active' : '']"
             @click="() => (isActive = !isActive)"
           ></div>
         </jm-tooltip>
-        <jm-tooltip content="排序" placement="top" v-else>
+        <jm-tooltip :content="t('projectGroupManager.sorting')" placement="top" v-else>
           <div class="move" @click="() => (isActive = !isActive)"></div>
         </jm-tooltip>
       </div>
@@ -55,14 +55,14 @@
                 </router-link>
               </div>
               <div class="description">
-                <jm-text-viewer class="text-viewer" :value="(i.description || '无')"/>
+                <jm-text-viewer class="text-viewer" :value="(i.description || t('projectGroupManager.none'))"/>
               </div>
               <div class="update-time">
-                  <span>最后修改时间：</span
-                  ><span>{{ datetimeFormatter(i.lastModifiedTime) }}</span>
+                  <span>{{ t('projectGroupManager.lastModified') }}</span>
+                  <span>{{ datetimeFormatter(i.lastModifiedTime) }}</span>
               </div>
               <div class="total">
-                共<span class="count"> {{ i.projectCount }} </span>条项目
+                {{ t('projectGroupManager.total') }}<span class="count"> {{ i.projectCount }} </span>{{ t('projectGroupManager.items') }}
               </div>
               <div class="cover">
                 <div class="drag-icon"></div>
@@ -98,11 +98,11 @@
               </div>
             </div>
             <div class="description">
-              <jm-text-viewer class="text-viewer" :value="(i.description || '无')"/>
+              <jm-text-viewer class="text-viewer" :value="(i.description || t('projectGroupManager.none'))"/>
             </div>
             <div class="update-time">
-              <span>最后修改时间：</span
-              ><span>{{ datetimeFormatter(i.lastModifiedTime) }}</span>
+              <span>{{ t('projectGroupManager.lastModified') }}</span>
+              <span>{{ datetimeFormatter(i.lastModifiedTime) }}</span>
             </div>
             <div class="switch">
               <jm-switch
@@ -110,10 +110,10 @@
                 @change="showChange($event, i.id)"
                 active-color="#096DD9"
               ></jm-switch>
-              <span>首页展示</span>
+              <span>{{ t('projectGroupManager.homeShow') }}</span>
             </div>
             <div class="total">
-              共<span class="count"> {{ i.projectCount }} </span>条项目
+              {{ t('projectGroupManager.total') }}<span class="count"> {{ i.projectCount }} </span>{{ t('projectGroupManager.items') }}
             </div>
           </div>
         </div>
@@ -164,6 +164,7 @@ import {
   useRoute,
 } from 'vue-router';
 import sleep from '@/utils/sleep';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   components: {
@@ -171,6 +172,7 @@ export default defineComponent({
     GroupEditor,
   },
   setup() {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const isShow = ref<boolean>(false);
     const loading = ref<boolean>();
@@ -260,20 +262,20 @@ export default defineComponent({
       showInHomePage.value = isShow;
     };
     const toDelete = async (name: string, projectGroupId: string) => {
-      let msg = '<div>确定要删除分组吗?</div>';
-      msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
+      let msg = `<div>${t('projectGroupManager.confirmDeleteGroup')}</div>`;
+      msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">${t('projectGroupManager.name')}${name}</div>`;
 
       proxy
-        .$confirm(msg, '删除分组', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+        .$confirm(msg, t('projectGroupManager.deleteGroup'), {
+          confirmButtonText: t('projectGroupManager.confirm'),
+          cancelButtonText: t('projectGroupManager.cancel'),
           type: 'warning',
           dangerouslyUseHTMLString: true,
         })
         .then(async () => {
           try {
             await deleteProjectGroup(projectGroupId);
-            proxy.$success('项目分组删除成功');
+            proxy.$success(t('projectGroupManager.deleteSuccess'));
             await fetchProjectGroup();
           } catch (err) {
             proxy.$throw(err, proxy);
@@ -303,6 +305,7 @@ export default defineComponent({
     changeView(childRoute, useRoute());
     onBeforeRouteUpdate(to => changeView(childRoute, to));
     return {
+      t,
       spacing,
       contentRef,
       childRoute,

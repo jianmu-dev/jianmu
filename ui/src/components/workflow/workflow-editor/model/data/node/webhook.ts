@@ -5,7 +5,7 @@ import icon from '../../../svgs/shape/webhook.svg';
 import { extractReferences, getParam } from '../../../../workflow-expression-editor/model/util';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 import { checkDuplicate } from '@/components/workflow/workflow-editor/model/util/reference';
-
+import { globalT as t } from '@/utils/i18n';
 export const WEBHOOK_PARAM_SCOPE = 'trigger';
 
 export interface IWebhookParam {
@@ -72,11 +72,11 @@ export class Webhook extends BaseNode {
         required: true,
         fields: {
           name: [
-            { required: true, message: '请输入参数名称', trigger: 'blur' },
+            { required: true, message: t('webhook.enterParamName'), trigger: 'blur' },
             {
               required: true,
               pattern: /^[a-zA-Z_]([a-zA-Z0-9_]+)?$/,
-              message: '以英文字母或下划线开头，支持下划线、数字、英文字母',
+              message: t('webhook.paramNamePattern'),
               trigger: 'blur',
             },
             {
@@ -101,8 +101,8 @@ export class Webhook extends BaseNode {
               trigger: 'blur',
             },
           ],
-          type: [{ required: true, message: '请选择参数类型', trigger: 'change' }],
-          exp: [{ required: true, message: '请输入参数表达式', trigger: 'blur' }],
+          type: [{ required: true, message: t('webhook.selectParamType'), trigger: 'change' }],
+          exp: [{ required: true, message: t('webhook.enterParamExpression'), trigger: 'blur' }],
           required: [{ required: true, type: 'boolean' }],
           default: [
             {
@@ -119,13 +119,13 @@ export class Webhook extends BaseNode {
                 switch (param.type) {
                   case ParamTypeEnum.BOOL:
                     if (![true, false].includes(defaultVal as boolean)) {
-                      callback('请选择参数默认值');
+                      callback(t('webhook.selectParamDefaultValue'));
                       return;
                     }
                     break;
                   case ParamTypeEnum.NUMBER:
                     if (isNaN(defaultVal as number)) {
-                      callback('请输入参数默认值');
+                      callback(t('webhook.enterParamDefaultValue'));
                       return;
                     }
                     break;
@@ -155,7 +155,7 @@ export class Webhook extends BaseNode {
             // 检查引用的触发器参数是否存在
             getParam(reference, selectableParams);
           } catch ({ message }) {
-            callback(new Error(`${reference.raw}触发器参数不存在`));
+            callback(new Error(`${reference.raw}${t('webhook.triggerParamNotExist')}`));
             return;
           }
         }
@@ -177,10 +177,10 @@ export class Webhook extends BaseNode {
         required: false,
         fields: {
           token: [
-            { required: true, message: '请输入token值', trigger: 'blur' },
+            { required: true, message: t('webhook.enterTokenValue'), trigger: 'blur' },
             { validator, trigger: 'blur' },
           ],
-          value: [{ required: true, message: '请选择密钥', trigger: 'change' }],
+          value: [{ required: true, message: t('webhook.selectKey'), trigger: 'change' }],
         } as Record<string, CustomRule>,
       },
       only: [{ validator, trigger: 'blur' }],

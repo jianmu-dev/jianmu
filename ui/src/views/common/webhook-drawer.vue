@@ -12,7 +12,7 @@
         <!-- 项目名称 -->
         <div class="project-name">{{ currentProject }}</div>
         <div class="webhook-link-container">
-          <div class="link-tips">可以通过调用以下Webhook地址来触发流程执行</div>
+          <div class="link-tips">{{ t('webhookDrawer.triggerTip') }}</div>
           <div class="link-container">
             <div class="link-address">
               <!-- 左侧图标 -->
@@ -21,22 +21,22 @@
               <jm-text-viewer :value="link" class="webhook-link" />
             </div>
             <div class="copy-link-address">
-              <jm-button type="primary" @click="copy">复制链接</jm-button>
+              <jm-button type="primary" @click="copy">{{ t('webhookDrawer.copyLink') }}</jm-button>
             </div>
           </div>
         </div>
         <div class="table-title">
           <div class="title-container">
-            <div class="title">请求列表</div>
+            <div class="title">{{ t('webhookDrawer.requestList') }}</div>
             <jm-tooltip placement="top">
               <template #content>
-                若无对应的触发记录，可到上游webhook管理中，<br />
-                查看请求是否发送成功
+                {{ t('webhookDrawer.noRecordLine1') }}<br />
+                {{ t('webhookDrawer.noRecordLine2') }}
               </template>
               <i class="jm-icon-button-help"></i>
             </jm-tooltip>
           </div>
-          <jm-tooltip content="刷新" placement="bottom">
+          <jm-tooltip :content="t('webhookDrawer.refresh')" placement="bottom">
             <jm-button
               :class="{ 'jm-icon-button-refresh': true, doing: refreshFlag }"
               :disabled="refreshFlag"
@@ -57,28 +57,30 @@
               }"
             >
               <jm-table :data="webhookRequestList" :row-key="rowkey">
-                <jm-table-column prop="userAgent" label="来源"></jm-table-column>
-                <jm-table-column prop="timed" label="请求时间" align="center">
+                <jm-table-column prop="userAgent" :label="t('webhookDrawer.source')"></jm-table-column>
+                <jm-table-column prop="timed" :label="t('webhookDrawer.requestTime')" align="center">
                   <template #default="scope">
                     <div>{{ datetimeFormatter(scope.row.requestTime) }}</div>
                   </template>
                 </jm-table-column>
-                <jm-table-column prop="statusCode" label="状态" align="center">
+                <jm-table-column prop="statusCode" :label="t('webhookDrawer.status')" align="center">
                   <template #default="scope">
-                    <div v-if="scope.row.statusCode === 'OK'" style="color: #10c2c2">成功</div>
-                    <div v-else style="color: red">失败</div>
+                    <div v-if="scope.row.statusCode === 'OK'" style="color: #10c2c2">
+                      {{ t('webhookDrawer.success') }}
+                    </div>
+                    <div v-else style="color: red">{{ t('webhookDrawer.failure') }}</div>
                   </template>
                 </jm-table-column>
-                <jm-table-column label="错误信息">
+                <jm-table-column :label="t('webhookDrawer.errorMessage')">
                   <template #default="scope">
                     <jm-text-viewer :value="scope.row.errorMsg || ''" />
                   </template>
                 </jm-table-column>
-                <jm-table-column label="操作" align="center">
+                <jm-table-column :label="t('webhookDrawer.action')" align="center">
                   <template #default="scope">
                     <div class="table-button">
-                      <div class="retry" @click="retry(scope.row.id)">重试</div>
-                      <div class="see-payload" @click="seePayload(scope.row.id)">详情</div>
+                      <div class="retry" @click="retry(scope.row.id)">{{ t('webhookDrawer.retry') }}</div>
+                      <div class="see-payload" @click="seePayload(scope.row.id)">{{ t('webhookDrawer.details') }}</div>
                     </div>
                   </template>
                 </jm-table-column>
@@ -94,14 +96,16 @@
       <!-- 查看payload -->
       <jm-dialog
         v-model="payloadDialogVisible"
-        title="查看详情"
+        :title="t('webhookDrawer.viewDetails')"
         @closed="dialogClose"
         destroy-on-close
         width="1000px"
         top="5vh"
       >
         <div class="tab-container">
-          <div :class="{ active: payloadTab === TabState.TRIGGER }" @click="toPayload">触发器</div>
+          <div :class="{ active: payloadTab === TabState.TRIGGER }" @click="toPayload">
+            {{ t('webhookDrawer.trigger') }}
+          </div>
           <div :class="{ active: payloadTab === TabState.PAYLOAD }" @click="toTrigger">Payload</div>
           <div :class="{ active: payloadTab === TabState.JSONVIEW }" @click="toJsonView">JsonView</div>
         </div>
@@ -111,7 +115,7 @@
         </div>
         <!-- 查看JsonView -->
         <div class="path-bar" v-if="payloadTab === TabState.JSONVIEW">
-          <div id="path-bar-item-label" class="path-bar-item">Json路径:</div>
+          <div id="path-bar-item-label" class="path-bar-item">{{ t('webhookDrawer.jsonPath') }}</div>
           <input id="path-bar-item-input" class="path-bar-item" :value="jsonPath" readonly />
           <jm-text-copy :value="jsonPath" />
         </div>
@@ -123,15 +127,15 @@
           <jm-scrollbar>
             <div style="padding: 20px">
               <!-- 参数列表 -->
-              <div class="trigger-title">参数列表</div>
+              <div class="trigger-title">{{ t('webhookDrawer.paramList') }}</div>
               <jm-table class="trigger-table" :data="webhookParamsDetail?.param">
-                <jm-table-column label="参数唯一标识">
+                <jm-table-column :label="t('webhookDrawer.paramName')">
                   <template #default="scope">
                     <jm-text-viewer :value="scope.row.name" />
                   </template>
                 </jm-table-column>
-                <jm-table-column label="参数类型" width="200px" prop="type"></jm-table-column>
-                <jm-table-column label="参数值" prop="value">
+                <jm-table-column :label="t('webhookDrawer.paramType')" width="200px" prop="type"></jm-table-column>
+                <jm-table-column :label="t('webhookDrawer.paramValue')" prop="value">
                   <template #default="scope">
                     <div v-if="scope.row.type === ParamTypeEnum.SECRET">
                       <!-- 密钥类型切换 -->
@@ -171,7 +175,7 @@
                 </jm-table-column>
               </jm-table>
               <!-- 认证 -->
-              <div class="verify-title">认证规则</div>
+              <div class="verify-title">{{ t('webhookDrawer.authRule') }}</div>
               <jm-table class="verify-table" :data="webhookAuth">
                 <jm-table-column label="token" prop="token"></jm-table-column>
                 <jm-table-column label="value" prop="value"></jm-table-column>
@@ -181,7 +185,7 @@
               <div class="matching-container" v-if="webhookParamsDetail?.only">
                 {{ webhookParamsDetail?.only }}
               </div>
-              <div class="matching-container matching-null" v-else>暂无数据</div>
+              <div class="matching-container matching-null" v-else>{{ t('webhookDrawer.noData') }}</div>
             </div>
           </jm-scrollbar>
         </div>
@@ -204,6 +208,7 @@ import { StateEnum } from '@/components/load-more/enumeration';
 import { ParamTypeEnum } from '@/api/dto/enumeration';
 import JmTextViewer from '@/components/text-viewer/index.vue';
 import ParamValue from '@/views/common/param-value.vue';
+import { useLocale } from '@/utils/i18n';
 
 enum TabState {
   TRIGGER = 'TRIGGER',
@@ -226,6 +231,7 @@ export default defineComponent({
   },
   emits: ['update:webhookVisible'],
   setup(props, { emit }) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const { toClipboard } = useClipboard();
 
@@ -378,9 +384,9 @@ export default defineComponent({
       }
       try {
         await toClipboard(link.value);
-        proxy.$success('复制成功');
+        proxy.$success(t('webhookDrawer.copySuccess'));
       } catch (err) {
-        proxy.$error('复制失败，请手动复制');
+        proxy.$error(t('webhookDrawer.copyFailed'));
         console.error(err);
       }
     };
@@ -397,7 +403,7 @@ export default defineComponent({
       try {
         webhookRequestParams.value.pageNum = START_PAGE_NUM;
         await retryWebRequest(id);
-        proxy.$success('重试成功');
+        proxy.$success(t('webhookDrawer.retrySuccess'));
         // 旧数据覆盖新数据
         await getWebhookRequestList('cover');
       } catch (err) {
@@ -405,12 +411,13 @@ export default defineComponent({
       }
     };
     // 重试
-    let msg = '<div>确定要重试吗?</div>';
+    let msg = `<div>${t('webhookDrawer.confirmRetry')}</div>`;
     const retry = (id: string) => {
+      proxy;
       proxy
-        .$confirm(msg, '重试', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+        .$confirm(msg, t('webhookDrawer.retry'), {
+          confirmButtonText: t('webhookDrawer.confirm'),
+          cancelButtonText: t('webhookDrawer.cancel'),
           type: 'info',
           dangerouslyUseHTMLString: true,
         })
@@ -498,9 +505,9 @@ export default defineComponent({
       }
       try {
         await toClipboard(value);
-        proxy.$success('复制成功');
+        proxy.$success(t('webhookDrawer.copySuccess'));
       } catch (err) {
-        proxy.$error('复制失败，请手动复制');
+        proxy.$error(t('webhookDrawer.copyFailed'));
         console.error(err);
       }
     };
@@ -516,6 +523,7 @@ export default defineComponent({
       refreshFlag.value = false;
     };
     return {
+      t,
       loadState,
       height,
       scrollableEl,

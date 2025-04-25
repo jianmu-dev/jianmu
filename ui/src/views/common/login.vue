@@ -2,7 +2,7 @@
   <div class="login">
     <div class="number-login" v-if="!loginType">
       <div class="desc">
-        <span>欢迎登录</span>
+        <span>{{ t('login.welcome') }}</span>
         <div class="tip">
           <slot name="tip"></slot>
         </div>
@@ -14,7 +14,7 @@
               v-model="loginForm.username"
               prefix-icon="jm-icon-input-user"
               clearable
-              placeholder="请输入用户名"
+              :placeholder="t('login.usernamePlaceholder')"
               @keyup.enter="login"
             />
           </jm-form-item>
@@ -27,18 +27,18 @@
               type="password"
               clearable
               show-password
-              placeholder="请输入密码"
+              :placeholder="t('login.passwordPlaceholder')"
               @keyup.enter="login"
             />
           </jm-form-item>
         </div>
         <div class="item">
           <jm-checkbox v-model="loginForm.remember" @keyup.enter="login">
-            <span class="label">记住用户名</span>
+            <span class="label">{{ t('login.remember') }}</span>
           </jm-checkbox>
         </div>
         <div class="btn">
-          <jm-button type="primary" @click="login" :loading="loading">登录 </jm-button>
+          <jm-button type="primary" @click="login" :loading="loading">{{ t('login.login') }}</jm-button>
         </div>
       </jm-form>
     </div>
@@ -46,10 +46,10 @@
       <div class="logo">
         <div class="img"></div>
       </div>
-      <div class="tip">登录遇到问题，请尝试重新登录</div>
+      <div class="tip">{{ t('login.loginProblem') }}</div>
       <div class="operations">
-        <jm-button class="btn cancel" @click="$emit('cancel')">取消</jm-button>
-        <jm-button type="primary" class="btn" @click="fetchThirdAuthUrl">重新登录</jm-button>
+        <jm-button class="btn cancel" @click="$emit('cancel')">{{ t('login.cancel') }}</jm-button>
+        <jm-button type="primary" class="btn" @click="fetchThirdAuthUrl">{{ t('login.reLogin') }}</jm-button>
       </div>
     </div>
     <div :class="[`${loginType.toLowerCase()}-login`, loading ? 'loading' : '']" @click="fetchThirdAuthUrl" v-else>
@@ -57,7 +57,9 @@
         <div class="img" v-if="!loading"></div>
         <div class="loading" v-else></div>
       </div>
-      <span class="tip">{{ loading ? `${Type} 账号登录中…` : `使用 ${Type} 账号登录` }}</span>
+      <span class="tip">{{
+        loading ? t('login.loggingInWith', { type: Type }) : t('login.loginWith', { type: Type })
+      }}</span>
     </div>
   </div>
 </template>
@@ -71,6 +73,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { AUTHORIZE_INDEX, PLATFORM_INDEX } from '@/router/path-def';
 import { fetchAuthUrl } from '@/api/session';
 import { getRedirectUri } from '@/utils/redirect-uri';
+import { useLocale } from '@/utils/i18n';
 
 const { mapActions: mapSessionActions, mapMutations } = createNamespacedHelpers(namespace);
 
@@ -87,6 +90,7 @@ export default defineComponent({
     },
   },
   setup(props: any, { emit }) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const route = useRoute();
@@ -149,7 +153,7 @@ export default defineComponent({
         // 登录成功
         loading.value = false;
         authError.value = false;
-        proxy.$success('登录成功');
+        proxy.$success(t('login.success'));
         setTimeout(() => {
           emit('logined');
         }, 500);
@@ -210,6 +214,7 @@ export default defineComponent({
       window.onstorage = null;
     });
     return {
+      t,
       authError,
       loginType,
       Type,
@@ -218,8 +223,8 @@ export default defineComponent({
       loginFormRef,
       loginForm,
       loginRule: ref<Record<string, any>>({
-        username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
-        password: [{ required: true, message: '密码不能为空', trigger: 'blur' }],
+        username: [{ required: true, message: t('login.usernameEmpty'), trigger: 'blur' }],
+        password: [{ required: true, message: t('login.passwordEmpty'), trigger: 'blur' }],
       }),
       login: () => {
         // 开启loading

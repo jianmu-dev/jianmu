@@ -2,15 +2,15 @@
   <div class="group" v-if="isShow">
     <div class="fold-switch" @click="toggle">
       <i :class="['jm-icon-button-right',collapsed?'':'rotate']"></i>
-      <span class="group-name">{{ groupName }}</span>
+      <span class="group-name">{{ t(groupName) }}</span>
       <div class="loading" v-loading="loading"></div>
     </div>
     <div class="nodes" v-show="!collapsed">
       <!-- 网络异常 -->
       <div class="network-anomaly" v-if="networkAnomaly">
         <div class="anomaly-img"></div>
-        <span class="anomaly-tip">网络开小差啦</span>
-        <div class="reload-btn" @click="loadNodes(keyword,true,initialPageSize)">重新加载</div>
+        <span class="anomaly-tip">{{ t('nodeGroup.networkError') }}</span>
+        <div class="reload-btn" @click="loadNodes(keyword,true,initialPageSize)">{{ t('nodeGroup.reload') }}</div>
       </div>
       <template v-else-if="nodes.length>0">
         <div class="nodes-wrapper">
@@ -37,6 +37,7 @@ import { WorkflowNode } from '../../model/workflow-node';
 import { TimeoutError } from '@/utils/rest/error';
 import { StateEnum } from '@/components/load-more/enumeration';
 import { WorkflowDnd } from '../../model/workflow-dnd';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   emits: ['getNodeCount'],
@@ -54,17 +55,18 @@ export default defineComponent({
     X6VueShape,
   },
   setup(props, { emit }) {
+    const { t } = useLocale();
     const groupName = computed<string>(() => {
       if (props.type === NodeGroupEnum.TRIGGER) {
-        return '触发器';
+        return 'nodeGroup.trigger';
       } else if (props.type === NodeGroupEnum.INNER) {
-        return '内置节点';
+        return 'nodeGroup.builtIn';
       } else if (props.type === NodeGroupEnum.LOCAL) {
-        return '本地节点';
+        return 'nodeGroup.local';
       } else if (props.type === NodeGroupEnum.OFFICIAL) {
-        return '官方节点';
+        return 'nodeGroup.official';
       } else if (props.type === NodeGroupEnum.COMMUNITY) {
-        return '社区节点';
+        return 'nodeGroup.community';
       } else {
         return '';
       }
@@ -182,6 +184,7 @@ export default defineComponent({
       currentPage.value = 1;
     });
     return {
+      t,
       initialPageSize,
       isShow,
       groupName,

@@ -15,9 +15,11 @@
                 justify-content: center;
                 font-size: 14px;
                 color: #79879c;
+                padding: 0 16px; /* 增加左右内边距 */
+                text-align: center; /* 保证多行居中 */
               "
             >
-              暂无缓存，请先到顶部缓存模块添加缓存
+              {{ $t('cacheSelector.empty') }}
             </div>
           </template>
           <jm-option
@@ -36,7 +38,7 @@
           @input="updateCache"
           @change="changeDir"
           class="dir-val"
-          placeholder="请输入缓存要挂载的目录,以/开头"
+          :placeholder="$t('cacheSelector.placeholder')"
         />
       </jm-form-item>
     </div>

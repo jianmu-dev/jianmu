@@ -1,17 +1,19 @@
 <template>
   <div class="browser-version-error">
-    <div class="desc">抱歉，不支持此浏览器</div>
+    <div class="desc">{{ $t('browserVersion.unsupported') }}</div>
     <div class="back">
       <router-link to="/">
-        <jm-button type="primary" class="jm-icon-button-back" size="small">返回首页</jm-button>
+        <jm-button type="primary" class="jm-icon-button-back" size="small">{{
+          $t('browserVersion.backHome')
+        }}</jm-button>
       </router-link>
     </div>
     <div class="versions">
-      <div v-for="{name, minVersion} in browsers" :key="name" :class="{version: true, [name]: true}">
+      <div v-for="{ name, minVersion } in browsers" :key="name" :class="{ version: true, [name]: true }">
         {{ minVersion }}
       </div>
     </div>
-    <bottom-nav/>
+    <bottom-nav />
   </div>
   <div class="right-bottom">
     <div class="bg-graph"></div>
@@ -27,22 +29,28 @@ import BottomNav from '@/views/nav/bottom.vue';
 const browsers: {
   name: string;
   minVersion: string;
-}[] = [{
-  name: 'chrome',
-  minVersion: '26.0',
-}, {
-  name: 'edge',
-  minVersion: '45.0',
-}, {
-  name: 'firefox',
-  minVersion: '16.0',
-}, {
-  name: 'safari',
-  minVersion: '6.1',
-}, {
-  name: 'opera',
-  minVersion: '12.1',
-}];
+}[] = [
+  {
+    name: 'chrome',
+    minVersion: '26.0',
+  },
+  {
+    name: 'edge',
+    minVersion: '45.0',
+  },
+  {
+    name: 'firefox',
+    minVersion: '16.0',
+  },
+  {
+    name: 'safari',
+    minVersion: '6.1',
+  },
+  {
+    name: 'opera',
+    minVersion: '12.1',
+  },
+];
 
 export default defineComponent({
   components: { BottomNav },
@@ -91,7 +99,7 @@ export default defineComponent({
       width: 150px;
       text-align: center;
       font-size: 14px;
-      color: #FFFFFF;
+      color: #ffffff;
       background-repeat: no-repeat;
       background-position: center top;
 
@@ -129,7 +137,7 @@ export default defineComponent({
     width: 500px;
     height: 280px;
     position: absolute;
-    background-color: #D9EBFF;
+    background-color: #d9ebff;
     border-top-left-radius: 111px;
     opacity: 0.14;
     transform: rotate(23deg);

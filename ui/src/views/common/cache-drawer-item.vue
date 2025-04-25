@@ -3,12 +3,14 @@
     <div class="top">
       <div class="cache-name">
         <div class="identify" v-if="!originData.available">
-          <span>不可用</span>
+          <span>{{ t('cacheDrawerItem.unavailable') }}</span>
           <i class="jm-icon-button-warning icon"></i>
         </div>
         <jm-text-viewer :value="originData.name" />
       </div>
-      <div class="clear-btn" @click="toClear"><i class="jm-icon-button-clear icon"></i>清理</div>
+      <div class="clear-btn" @click="toClear">
+        <i class="jm-icon-button-clear icon"></i>{{ t('cacheDrawerItem.clear') }}
+      </div>
     </div>
     <div class="worker" v-if="originData.workerId">
       {{ originData.workerId }}
@@ -16,16 +18,16 @@
     <div class="divider"></div>
     <div class="mount-point-wrapper">
       <div class="head" @click="toggle = !toggle" v-if="originData.nodeCaches.length > 0">
-        <span>查看挂载点</span>
+        <span>{{ t('cacheDrawerItem.viewMount') }}</span>
         <i :class="['jm-icon-button-collapse icon', toggle ? 'reverse' : '']"></i>
       </div>
       <div class="head none" v-else>
-        <span>未设置挂载点</span>
+        <span>{{ t('cacheDrawerItem.noMount') }}</span>
       </div>
       <div class="content" v-if="toggle && originData.nodeCaches.length > 0">
         <div class="header">
-          <div class="cell">节点</div>
-          <div class="cell">挂载目录</div>
+          <div class="cell">{{ t('cacheDrawerItem.node') }}</div>
+          <div class="cell">{{ t('cacheDrawerItem.mountDir') }}</div>
         </div>
         <div class="row" v-for="(node, i) in originData.nodeCaches" :key="i">
           <div class="cell">
@@ -42,12 +44,20 @@
         </div>
       </div>
     </div>
-    <jm-dialog v-model="dialogVisible" custom-class="center" title="确定清理当前缓存？" destroy-on-close width="428px">
-      旧的缓存数据将被清空
+    <jm-dialog
+      v-model="dialogVisible"
+      custom-class="center"
+      :title="t('cacheDrawerItem.confirmClearTitle')"
+      destroy-on-close
+      width="428px"
+    >
+      {{ t('cacheDrawerItem.confirmClearTip') }}
       <template #footer>
         <span>
-          <jm-button size="small" @click="dialogVisible = false">取消</jm-button>
-          <jm-button size="small" type="primary" :loading="loading" @click="clear">确定</jm-button>
+          <jm-button size="small" @click="dialogVisible = false">{{ t('cacheDrawerItem.cancel') }}</jm-button>
+          <jm-button size="small" type="primary" :loading="loading" @click="clear">{{
+            t('cacheDrawerItem.confirm')
+          }}</jm-button>
         </span>
       </template>
     </jm-dialog>
@@ -61,6 +71,7 @@ import yaml from 'yaml';
 import { clearCache } from '@/api/cache';
 import defaultIcon from '@/components/workflow/workflow-editor/svgs/shape/async-task.svg';
 import shellIcon from '@/components/workflow/workflow-editor/svgs/shape/shell.svg';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   props: {
@@ -70,6 +81,7 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const toggle = ref<boolean>(false);
     const dialogVisible = ref<boolean>(false);
@@ -94,7 +106,7 @@ export default defineComponent({
       try {
         loading.value = true;
         await clearCache(originData.value.id);
-        proxy.$success('清理成功');
+        proxy.$success(t('cacheDrawerItem.clearSuccess'));
         dialogVisible.value = false;
       } catch (err) {
         proxy.$throw(err, proxy);
@@ -103,6 +115,7 @@ export default defineComponent({
       }
     };
     return {
+      t,
       loading,
       toggle,
       dialogVisible,

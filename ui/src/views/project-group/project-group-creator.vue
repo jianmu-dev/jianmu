@@ -1,7 +1,7 @@
 <template>
   <jm-dialog v-model="dialogVisible" width="776px" :destroy-on-close="true">
     <template #title>
-      <div class="creator-title">新建项目分组</div>
+      <div class="creator-title">{{ t('projectGroupCreator.title') }}</div>
     </template>
     <jm-form
       :model="createForm"
@@ -9,32 +9,32 @@
       ref="createFormRef"
       @submit.prevent
     >
-      <jm-form-item label="分组名称" label-position="top" prop="name">
+      <jm-form-item :label="t('projectGroupCreator.name')" label-position="top" prop="name">
         <jm-input
           v-model="createForm.name"
           clearable
-          placeholder="请输入分组名称"
+          :placeholder="t('projectGroupCreator.namePlaceholder')"
         />
       </jm-form-item>
       <jm-form-item
-        label="首页展示"
+        :label="t('projectGroupCreator.isShow')"
         label-position="top"
         prop="isShow"
         class="is-show"
       >
         <jm-switch v-model="createForm.isShow" active-color="#096DD9"/>
       </jm-form-item>
-      <jm-form-item label="描述" label-position="top" prop="description">
+      <jm-form-item :label="t('projectGroupCreator.description')" label-position="top" prop="description">
         <jm-input
           type="textarea"
           v-model="createForm.description"
           clearable
           maxlength="256"
           show-word-limit
-          placeholder="请输入描述"
+          :placeholder="t('projectGroupCreator.descriptionPlaceholder')"
           :autosize="{ minRows: 6, maxRows: 10 }"
         />
-        <div class="tips">描述信息不超过 256个字符</div>
+        <div class="tips">{{ t('projectGroupCreator.descriptionTips') }}</div>
       </jm-form-item>
     </jm-form>
     <template #footer>
@@ -42,14 +42,14 @@
         <jm-button
           size="small"
           @click="dialogVisible = false"
-        >取消</jm-button
+        >{{ t('projectGroupCreator.cancel') }}</jm-button
         >
         <jm-button
           size="small"
           type="primary"
           @click="create"
           :loading="loading"
-        >确定</jm-button
+        >{{ t('projectGroupCreator.confirm') }}</jm-button
         >
       </span>
     </template>
@@ -60,10 +60,12 @@
 import { defineComponent, getCurrentInstance, ref, SetupContext } from 'vue';
 import { IProjectGroupCreateFrom } from '@/model/modules/project-group';
 import { createProjectGroup } from '@/api/project-group';
+import { useLocale } from '@/utils/i18n';
 
 export default defineComponent({
   emits: ['completed'],
   setup(_, { emit }: SetupContext) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const dialogVisible = ref<boolean>(true);
     const createFormRef = ref<any>(null);
@@ -72,7 +74,7 @@ export default defineComponent({
       isShow: true,
     });
     const editorRule = ref<object>({
-      name: [{ required: true, message: '分组名称不能为空', trigger: 'blur' }],
+      name: [{ required: true, message: t('projectGroupCreator.nameRequired'), trigger: 'blur' }],
     });
     const loading = ref<boolean>(false);
     const create = async () => {
@@ -88,7 +90,7 @@ export default defineComponent({
             description,
             isShow,
           });
-          proxy.$success('项目分组创建成功');
+          proxy.$success(t('projectGroupCreator.success'));
           emit('completed');
           dialogVisible.value = false;
         } catch (err) {
@@ -99,6 +101,7 @@ export default defineComponent({
       });
     };
     return {
+      t,
       dialogVisible,
       createFormRef,
       createForm,

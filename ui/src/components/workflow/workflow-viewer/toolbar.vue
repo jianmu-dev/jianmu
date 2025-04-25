@@ -2,53 +2,61 @@
   <div class="jm-workflow-viewer-toolbar">
     <div class="group" v-if="!dslMode">
       <template v-if="fullscreenEnabled">
-        <jm-tooltip :content="isFullscreen? '退出全屏' : '全屏'" placement="top" :appendToBody="false">
-          <div :class="isFullscreen? 'screen-normal-icon' : 'screen-full-icon'"
-               @click="handleFullScreen(!isFullscreen)"></div>
+        <jm-tooltip
+          :content="isFullscreen ? $t('toolbar.exitFullScreen') : $t('toolbar.fullScreen')"
+          placement="top"
+          :appendToBody="false"
+        >
+          <div
+            :class="isFullscreen ? 'screen-normal-icon' : 'screen-full-icon'"
+            @click="handleFullScreen(!isFullscreen)"
+          ></div>
         </jm-tooltip>
         <div class="separator"></div>
       </template>
-      <jm-tooltip v-if="zoom !== ORIGINAL_ZOOM" content="原始大小" placement="top" :appendToBody="false">
+      <jm-tooltip
+        v-if="zoom !== ORIGINAL_ZOOM"
+        :content="$t('toolbar.originalSize')"
+        placement="top"
+        :appendToBody="false"
+      >
         <div class="full-icon" @click="normalize"></div>
       </jm-tooltip>
-      <jm-tooltip v-else content="适屏" placement="top" :appendToBody="false">
+      <jm-tooltip v-else :content="$t('toolbar.fitToScreen')" placement="top" :appendToBody="false">
         <div class="normal-icon" @click="fitViewer"></div>
       </jm-tooltip>
       <template v-if="isWorkflow">
         <div class="separator"></div>
-        <jm-tooltip content="旋转" placement="top" :appendToBody="false">
+        <jm-tooltip :content="$t('toolbar.rotate')" placement="top" :appendToBody="false">
           <div class="rotate-icon" @click="rotate"></div>
         </jm-tooltip>
       </template>
     </div>
     <div class="group" v-if="!dslMode">
-      <jm-tooltip content="缩小" placement="top" :appendToBody="false">
-        <div :class="{'narrow-icon': true, disabled: zoom === MIN_ZOOM}"
-             @click="changeZoom(false)"></div>
+      <jm-tooltip :content="$t('toolbar.zoomOut')" placement="top" :appendToBody="false">
+        <div :class="{ 'narrow-icon': true, disabled: zoom === MIN_ZOOM }" @click="changeZoom(false)"></div>
       </jm-tooltip>
       <div class="percentage">{{ zoom }}%</div>
-      <jm-tooltip content="放大" placement="top" :appendToBody="false">
-        <div :class="{'enlarge-icon': true, disabled: zoom === MAX_ZOOM}"
-             @click="changeZoom(true)"></div>
+      <jm-tooltip :content="$t('toolbar.zoomIn')" placement="top" :appendToBody="false">
+        <div :class="{ 'enlarge-icon': true, disabled: zoom === MAX_ZOOM }" @click="changeZoom(true)"></div>
       </jm-tooltip>
     </div>
     <div class="group" v-if="!readonly && !dslMode">
-      <jm-tooltip content="流程日志" placement="top" :appendToBody="false">
-        <div class="process-log-icon"
-             @click="processLog"></div>
+      <jm-tooltip :content="$t('toolbar.workflowLog')" placement="top" :appendToBody="false">
+        <div class="process-log-icon" @click="processLog"></div>
       </jm-tooltip>
     </div>
-    <div :class="{group: true, dsl: dslMode}">
-      <jm-tooltip content="查看DSL" placement="top" :appendToBody="false" v-if="!dslMode">
-        <div class="dsl-icon"
-             @click="viewDsl(true)"></div>
+    <div :class="{ group: true, dsl: dslMode }">
+      <jm-tooltip :content="$t('toolbar.viewDsl')" placement="top" :appendToBody="false" v-if="!dslMode">
+        <div class="dsl-icon" @click="viewDsl(true)"></div>
       </jm-tooltip>
       <jm-tooltip placement="top" :appendToBody="false" v-else>
         <template #content>
-          <div style="white-space: nowrap;">{{ `返回${isWorkflow ? '流程' : '管道'}` }}</div>
+          <div style="white-space: nowrap">
+            {{ $t('toolbar.return') }}{{ isWorkflow ? $t('toolbar.workflow') : $t('toolbar.pipeline') }}
+          </div>
         </template>
-        <div :class="isWorkflow ? 'workflow-icon' : 'pipeline-icon'"
-             @click="viewDsl(false)"></div>
+        <div :class="isWorkflow ? 'workflow-icon' : 'pipeline-icon'" @click="viewDsl(false)"></div>
       </jm-tooltip>
     </div>
   </div>
@@ -170,14 +178,14 @@ export default defineComponent({
     padding: 10px 15px;
     box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
     border-radius: 2px;
-    border: 1px solid #CAD6EE;
+    border: 1px solid #cad6ee;
     background-color: rgba(255, 255, 255, 0.6);
     display: flex;
     align-items: center;
 
     &.dsl {
       background-color: #818894;
-      border: 1px solid #767F91;
+      border: 1px solid #767f91;
       box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
     }
 
@@ -253,7 +261,7 @@ export default defineComponent({
       margin: 0 16px;
       width: 1px;
       height: 15px;
-      background-color: #CDD1E3;
+      background-color: #cdd1e3;
       overflow: hidden;
     }
 
@@ -279,7 +287,7 @@ export default defineComponent({
       line-height: 20px;
       font-size: 14px;
       font-weight: 500;
-      color: #4A4A4A;
+      color: #4a4a4a;
       text-align: center;
     }
   }

@@ -8,11 +8,11 @@
         :class="[clicked ? 'clicked' : '']"
         @keypress.enter.prevent
       >
-        终止全部
+        {{ t('detail.terminateAll') }}
       </button>
       <!-- <jm-tooltip :content="clicked ? '暂无法点击' : '终止全部'" placement="left">
       </jm-tooltip> -->
-      <jm-tooltip content="触发" placement="left">
+      <jm-tooltip :content="t('detail.trigger')" placement="left">
         <button class="trigger-btn jm-icon-button-on" @click="execute" @keypress.enter.prevent></button>
       </jm-tooltip>
       <div class="info">
@@ -63,30 +63,30 @@
           <div class="value">
             {{ datetimeFormatter(data.record?.startTime) }}
           </div>
-          <div>启动时间</div>
+          <div>{{ t('detail.startTime') }}</div>
         </div>
         <div class="item">
           <div class="value">{{ datetimeFormatter(data.record?.endTime) }}</div>
-          <div>完成时间</div>
+          <div>{{ t('detail.endTime') }}</div>
         </div>
         <div class="item" v-if="data.record?.status === WorkflowExecutionRecordStatusEnum.SUSPENDED">
           <jm-timer class="value" :start-time="data.record?.suspendedTime" />
-          <div>挂起时长</div>
+          <div>{{ t('detail.suspendedDuration') }}</div>
         </div>
         <div class="item" v-else>
           <jm-timer class="value" :start-time="data.record?.startTime" :end-time="data.record?.endTime" />
-          <div>执行时长</div>
+          <div>{{ t('detail.executionDuration') }}</div>
         </div>
         <div class="item">
-          <div v-if="!data.record?.id" class="value">无</div>
+          <div v-if="!data.record?.id" class="value">{{ t('detail.none') }}</div>
           <jm-text-viewer v-else :value="data.record?.id" class="value" />
-          <div>流程实例ID</div>
+          <div>{{ t('detail.instanceId') }}</div>
         </div>
         <div class="item">
-          <jm-text-viewer :value="data.record?.workflowVersion || '无'" class="value" />
-          <div>流程版本号</div>
+          <jm-text-viewer :value="data.record?.workflowVersion || t('detail.none')" class="value" />
+          <div>{{ t('detail.version') }}</div>
         </div>
-        <jm-tooltip v-if="checkWorkflowRunning(data.record?.status)" content="终止" placement="left">
+        <jm-tooltip v-if="checkWorkflowRunning(data.record?.status)" :content="t('detail.terminate')" placement="left">
           <button
             :class="{
               'terminate-btn': true,
@@ -131,6 +131,7 @@ import { terminate, terminateAll } from '@/api/workflow-execution-record';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { IProjectDetailVo, IProjectTriggeringDto, ITriggerDefinitionVo } from '@/api/dto/project';
 import { IRootState } from '@/model';
+import { useLocale } from '@/utils/i18n';
 
 const { mapActions, mapMutations } = createNamespacedHelpers(namespace);
 
@@ -144,6 +145,7 @@ export default defineComponent({
     workflowExecutionRecordId: String,
   },
   setup(props: any) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const store = useStore();
@@ -293,7 +295,7 @@ export default defineComponent({
       try {
         await executeImmediately(props.projectId, payload);
         visible.value = false;
-        proxy.$success('操作成功');
+        proxy.$success(t('detail.success'));
 
         // 清除滚动偏移量
         proxy.mutateNavScrollLeft(0);
@@ -312,6 +314,7 @@ export default defineComponent({
       }
     };
     return {
+      t,
       visible,
       webhookDefinition,
       navScrollBar,
@@ -355,23 +358,23 @@ export default defineComponent({
 
       execute: async () => {
         const isWarning = data.value.project?.triggerType === TriggerTypeEnum.WEBHOOK;
-        const msg = '<div>确定要触发吗?</div>';
+        const msg = `<div>${t('detail.confirmTrigger')}</div>`;
         if (isWarning) {
           // 获取webhook触发器定义
           webhookDefinition.value = await fetchWebhookDefinition(props.projectId);
           // 如果没有webhook触发器参数定义则可直接触发
           if (!webhookDefinition.value.params) {
             proxy
-              .$confirm(msg, '触发项目执行', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
+              .$confirm(msg, t('detail.triggerExecution'), {
+                confirmButtonText: t('detail.confirm'),
+                cancelButtonText: t('detail.cancel'),
                 type: 'info',
                 dangerouslyUseHTMLString: true,
               })
               .then(() => {
                 executeImmediately(props.projectId)
                   .then(async () => {
-                    proxy.$success('操作成功');
+                    proxy.$success(t('detail.success'));
 
                     // 清除滚动偏移量
                     proxy.mutateNavScrollLeft(0);
@@ -394,16 +397,16 @@ export default defineComponent({
           }
         } else {
           proxy
-            .$confirm(msg, '触发项目执行', {
-              confirmButtonText: '确定',
-              cancelButtonText: '取消',
+            .$confirm(msg, t('detail.triggerExecution'), {
+              confirmButtonText: t('detail.confirm'),
+              cancelButtonText: t('detail.cancel'),
               type: isWarning ? 'warning' : 'info',
               dangerouslyUseHTMLString: true,
             })
             .then(() => {
               executeImmediately(props.projectId)
                 .then(async () => {
-                  proxy.$success('操作成功');
+                  proxy.$success(t('detail.success'));
 
                   // 清除滚动偏移量
                   proxy.mutateNavScrollLeft(0);
@@ -424,9 +427,9 @@ export default defineComponent({
       },
       terminateAllRecord: () => {
         proxy
-          .$confirm('确定要终止执行中/挂起的全部实例吗？', '终止全部', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+          .$confirm(t('detail.confirmTerminateAll'), t('detail.terminateAll'), {
+            confirmButtonText: t('detail.confirm'),
+            cancelButtonText: t('detail.cancel'),
             type: 'info',
           })
           .then((type: any) => {
@@ -439,7 +442,7 @@ export default defineComponent({
             }
             terminateAll(data.value.record.workflowRef)
               .then(() => {
-                proxy.$success('操作成功，正在终止，请稍后');
+                proxy.$success(t('detail.terminatingSuccess'));
                 // 刷新详情
                 reloadMain();
               })
@@ -453,9 +456,9 @@ export default defineComponent({
       },
       terminate: () => {
         proxy
-          .$confirm('确定要终止吗?', '终止项目执行', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+          .$confirm(t('detail.confirmTerminate'), t('detail.terminateExecution'), {
+            confirmButtonText: t('detail.confirm'),
+            cancelButtonText: t('detail.cancel'),
             type: 'info',
           })
           .then(() => {
@@ -465,7 +468,7 @@ export default defineComponent({
 
             terminate(data.value.record.id)
               .then(() => {
-                proxy.$success('终止成功');
+                proxy.$success(t('detail.terminateSuccess'));
 
                 // 刷新详情
                 reloadMain();

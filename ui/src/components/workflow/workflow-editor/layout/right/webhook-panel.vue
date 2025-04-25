@@ -7,14 +7,15 @@
           <span :class="{ fold: true, folded: foldParamFlag }" @click="foldParam">
             <i class="jm-icon-button-right"></i>
           </span>
-          <span class="title-text">触发器参数</span>
+          <span class="title-text">{{ $t('webhookPanel.triggerParam') }}</span>
           <jm-tooltip placement="top">
             <template #content>
-              引用触发器参数参考<a
+              {{ $t('webhookPanel.triggerParamTip')
+              }}<a
                 href="https://v2.jianmu.dev/guide/vars.html#%E8%A7%A6%E5%8F%91%E5%99%A8%E5%8F%82%E6%95%B0"
                 target="_blank"
                 style="color: #fff; text-decoration: underline"
-                >参数章节</a
+                >{{ $t('webhookPanel.paramSection') }}</a
               >
             </template>
             <i class="jm-icon-button-help"></i>
@@ -38,7 +39,7 @@
           />
           <div class="add-param" @click="addParam">
             <i class="jm-icon-button-add" />
-            添加触发器参数
+            {{ $t('webhookPanel.addTriggerParam') }}
           </div>
         </div>
       </div>
@@ -48,17 +49,17 @@
           <span :class="{ fold: true, folded: foldSettingFlag }" @click="foldSetting">
             <i class="jm-icon-button-right"></i>
           </span>
-          <span class="title-text">高级设置</span>
+          <span class="title-text">{{ $t('webhookPanel.advancedSetting') }}</span>
         </div>
         <div class="setting-content" v-if="foldSettingFlag">
           <i class="line"></i>
           <div class="rules">
             <div class="rules-title">
-              认证规则
+              {{ $t('webhookPanel.authRule') }}
               <jm-tooltip placement="top">
                 <template #content>
-                  <div>若关闭认证规则，任何人皆可通过</div>
-                  <div>webhook触发此流程</div>
+                  <div>{{ $t('webhookPanel.authRuleTip1') }}</div>
+                  <div>{{ $t('webhookPanel.authRuleTip2') }}</div>
                 </template>
                 <i class="jm-icon-button-help"></i>
               </jm-tooltip>
@@ -69,14 +70,14 @@
             <jm-form-item prop="auth.token" :rules="nodeData.getFormRules().auth.fields.token">
               <template #label>
                 token
-                <jm-tooltip content="Webhook请求携带的认证鉴权数据" placement="top">
+                <jm-tooltip :content="$t('webhookPanel.tokenTip')" placement="top">
                   <i class="jm-icon-button-help"></i>
                 </jm-tooltip>
               </template>
               <expression-editor
                 v-model="form.auth.token"
                 :node-id="nodeId"
-                placeholder="请输入token值"
+                :placeholder="$t('webhookPanel.tokenPlaceholder')"
                 @editor-created="handleEditorCreated"
               />
             </jm-form-item>
@@ -84,11 +85,13 @@
               <template #label>
                 value
                 <jm-tooltip placement="top">
-                  <template #content> 用于校验token值，相同则验证成<br />功，必须是密钥类型 </template>
+                  <template #content>
+                    {{ $t('webhookPanel.valueTip1') }}<br />{{ $t('webhookPanel.valueTip2') }}</template
+                  >
                   <i class="jm-icon-button-help"></i>
                 </jm-tooltip>
               </template>
-              <secret-key-selector v-model="form.auth.value" :placeholder="'请选择value值'" />
+              <secret-key-selector v-model="form.auth.value" :placeholder="$t('webhookPanel.valuePlaceholder')" />
             </jm-form-item>
           </div>
           <jm-form-item class="only-container" prop="only" :rules="nodeData.getFormRules().only">
@@ -96,14 +99,14 @@
               only
               <jm-tooltip placement="top">
                 <template #content>
-                  <div>匹配规则，结果为 true 时触发流程，当</div>
+                  <div>{{ $t('webhookPanel.onlyRule') }}</div>
                   <div>
-                    <span>前只可引用触发器参数。详见</span>
+                    <span>{{ $t('webhookPanel.onlyTip') }}</span>
                     <a
                       href="https://v2.jianmu.dev/guide/expression.html"
                       target="_blank"
                       style="color: #fff; text-decoration: underline"
-                      >运算表达式</a
+                      >{{ $t('webhookPanel.onlyLink') }}</a
                     >
                   </div>
                 </template>
@@ -113,7 +116,7 @@
             <div class="only-content">
               <expression-editor
                 v-model="form.only"
-                placeholder="请输入匹配规则"
+                :placeholder="$t('webhookPanel.onlyPlaceholder')"
                 :node-id="nodeId"
                 @editor-created="handleEditorCreated"
               />

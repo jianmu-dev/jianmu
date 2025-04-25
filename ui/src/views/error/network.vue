@@ -1,13 +1,13 @@
 <template>
   <div class="network-error">
-    <div class="title">你的设备没有接入互联网</div>
-    <div class="desc">无法显示此页面，因为你的电脑目前已离线</div>
+    <div class="title">{{ $t('network.title') }}</div>
+    <div class="desc">{{ $t('network.desc') }}</div>
     <div class="back">
       <router-link to="/">
-        <jm-button type="primary" class="jm-icon-button-back" size="small">返回首页</jm-button>
+        <jm-button type="primary" class="jm-icon-button-back" size="small">{{ $t('network.backHome') }}</jm-button>
       </router-link>
     </div>
-    <bottom-nav/>
+    <bottom-nav />
   </div>
   <div class="right-bottom">
     <div class="bg-graph"></div>
@@ -63,7 +63,7 @@ export default defineComponent({
     width: 500px;
     height: 280px;
     position: absolute;
-    background-color: #D9EBFF;
+    background-color: #d9ebff;
     border-top-left-radius: 111px;
     transform: rotate(-67deg);
   }

@@ -1,16 +1,23 @@
 <template>
-  <jm-drawer title="缓存" :size="410" direction="rtl" destroy-on-close @close="closeDrawer" @opened="dialogOpended">
+  <jm-drawer
+    :title="t('cachePanel.title')"
+    :size="410"
+    direction="rtl"
+    destroy-on-close
+    @close="closeDrawer"
+    @opened="dialogOpended"
+  >
     <template #title>
       <div class="title-content">
-        <div class="title">缓存</div>
-        <div class="description">添加缓存后可在节点中挂载，避免下次执行节点时重复下载依赖，提高执行速度。</div>
+        <div class="title">{{ t('cachePanel.title') }}</div>
+        <div class="description">{{ t('cachePanel.description') }}</div>
       </div>
     </template>
     <jm-scrollbar class="cache-scrollbar">
       <div class="panel-container">
         <div class="cache-label">
-          <div class="label-title">唯一标识</div>
-          <div class="label-description">以英文字母或下划线开头，支持下划线、数字、英文字母</div>
+          <div class="label-title">{{ t('cachePanel.unique') }}</div>
+          <div class="label-description">{{ t('cachePanel.uniqueRule') }}</div>
         </div>
         <jm-form @submit.prevent ref="cacheFormRef" :model="globalForm.caches" label-position="top">
           <cache-editor
@@ -27,19 +34,19 @@
         <div class="add-cache-btn">
           <span class="add-link" @click="addCache">
             <i class="jm-icon-button-add" />
-            <span>添加缓存</span>
+            <span>{{ t('cachePanel.addCache') }}</span>
           </span>
         </div>
       </div>
     </jm-scrollbar>
     <jm-dialog v-model="delDialogVisible" width="428px">
       <template #title>
-        <span class="dialog-title">确定删除当前缓存？</span>
+        <span class="dialog-title">{{ t('cachePanel.deleteTitle') }}</span>
       </template>
-      删除后已引用该缓存的节点将会报错
+      {{ t('cachePanel.deleteTip') }}
       <template #footer>
-        <jm-button @click="delDialogVisible = false">取消</jm-button>
-        <jm-button type="primary" @click="delCache">确定</jm-button>
+        <jm-button @click="delDialogVisible = false">{{ t('cachePanel.cancel') }}</jm-button>
+        <jm-button type="primary" @click="delCache">{{ t('cachePanel.confirm') }}</jm-button>
       </template>
     </jm-dialog>
   </jm-drawer>
@@ -51,7 +58,7 @@ import CacheEditor from './form/cache-editor.vue';
 import { v4 as uuidv4 } from 'uuid';
 import { IWorkflow } from '../../model/data/common';
 import { Global } from '../../model/data/global';
-
+import { useLocale } from '@/utils/i18n';
 // 缓存类型，用于区分渲染
 export enum CacheTypeEnum {
   // 编辑，回显已有的
@@ -70,6 +77,7 @@ export default defineComponent({
   },
   emits: ['closed'],
   setup(props, { emit }) {
+    const { t } = useLocale();
     const workflowForm = ref<IWorkflow>(props.workflowData);
     const globalForm = ref<Global>(new Global(props.workflowData.global));
     const cacheFormRef = ref<HTMLFormElement>();
@@ -95,6 +103,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       globalForm,
       cacheFormRef,
       delDialogVisible,
@@ -168,7 +177,7 @@ export default defineComponent({
     .cache-label {
       box-sizing: border-box;
       padding: 8px;
-      height: 56px;
+      height: 80px;
       background: rgba(236, 242, 248, 0.4);
       border-radius: 4px;
       margin-bottom: 20px;

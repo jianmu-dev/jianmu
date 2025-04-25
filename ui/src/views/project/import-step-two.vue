@@ -3,7 +3,7 @@
     <div class="right-top-btn">
       <router-link :to="{ name: 'index' }">
         <jm-button class="jm-icon-button-cancel" size="small" :loading="loading"
-          >取消</jm-button
+          >{{ t('importStepTwo.cancel') }}</jm-button
         >
       </router-link>
       <jm-button
@@ -12,7 +12,7 @@
         size="small"
         :loading="loading"
         @click="previous"
-        >上一步
+        >{{ t('importStepTwo.previous') }}
       </jm-button>
       <jm-button
         type="primary"
@@ -20,7 +20,7 @@
         size="small"
         :loading="loading"
         @click="save"
-        >保存
+        >{{ t('importStepTwo.save') }}
       </jm-button>
     </div>
     <div class="content">
@@ -42,7 +42,7 @@ import { defineComponent, getCurrentInstance, inject, ref } from 'vue';
 import { _import, listGit } from '@/api/project';
 import { IImportForm } from '@/model/modules/project';
 import { useRouter } from 'vue-router';
-
+import { useLocale } from '@/utils/i18n';
 /**
  * 计算节点目录
  * @param node
@@ -66,6 +66,7 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const { t } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
 
@@ -79,6 +80,7 @@ export default defineComponent({
     const reloadMain = inject('reloadMain') as () => void;
 
     return {
+      t,
       importForm,
       loading,
       treeProps: {
@@ -106,7 +108,7 @@ export default defineComponent({
       },
       save: () => {
         if (!importForm.value.dslPath) {
-          proxy.$info('请选择DSL文件');
+          proxy.$info(t('importStepTwo.selectDsl'));
 
           return;
         }
@@ -118,7 +120,7 @@ export default defineComponent({
             // 刷新流程定义列表
             reloadMain();
 
-            proxy.$success('导入成功');
+            proxy.$success(t('importStepTwo.importSuccess'));
 
             router.push({ name: 'index' });
           })

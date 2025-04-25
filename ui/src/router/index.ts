@@ -5,7 +5,7 @@ import { namespace as sessionNs } from '@/store/modules/session';
 import { IState as ISessionState } from '@/model/modules/session';
 import LoginVerify from '@/views/login/dialog.vue';
 import { AppContext } from 'vue';
-
+import { globalT as t } from '@/utils/i18n';
 /**
  * 加载业务模块路由
  * @param path
@@ -66,7 +66,7 @@ export default (appContext: AppContext) => {
       // platform模块
       loadModuleRoute(
         PLATFORM_INDEX,
-        '首页',
+        t('breadcrumb.home'),
         false,
         import('@/layout/platform.vue'),
         import.meta.globEager('./modules/platform.ts'),

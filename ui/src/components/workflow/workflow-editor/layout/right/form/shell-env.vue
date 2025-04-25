@@ -1,24 +1,24 @@
 <template>
   <div :class="{ 'shell-env': true, 'switch-bgc': switchBackgroundFlag }">
-    <jm-form-item :prop="`${formModelName}.${index}.name`" :rules="rules.name" label="变量名称">
+    <jm-form-item :prop="`${formModelName}.${index}.name`" :rules="rules.name" :label="$t('shellEnv.name')">
       <jm-input
         v-model="envName"
         @input="upperCase"
         @change="changeEnv"
         class="change-env"
-        placeholder="请输入变量名称"
+        :placeholder="$t('shellEnv.placeholderName')"
         @focus="switchBackgroundFlag = true"
         @blur="switchBackgroundFlag = false"
       />
     </jm-form-item>
 
-    <jm-form-item :prop="`${formModelName}.${index}.value`" :rules="rules.value" label="变量值">
+    <jm-form-item :prop="`${formModelName}.${index}.value`" :rules="rules.value" :label="$t('shellEnv.value')">
       <expression-editor
         v-model="envVal"
         :node-id="nodeId"
         @change="changeVal"
         class="shell-env-val"
-        placeholder="请输入变量值"
+        :placeholder="$t('shellEnv.placeholderValue')"
         @focus="switchBackgroundFlag = true"
         @blur="switchBackgroundFlag = false"
       />

@@ -1,31 +1,30 @@
 <template>
   <div :class="{ 'jm-workflow-editor-node-panel': true, collapsed }" ref="container">
-    <div class="collapse-btn jm-icon-button-left" @click="collapse"/>
+    <div class="collapse-btn jm-icon-button-left" @click="collapse" />
     <div class="search">
-      <jm-input placeholder="搜索" v-model="keyword" @change="changeKeyword" :clearable="true">
+      <jm-input :placeholder="$t('nodePanel.search')" v-model="keyword" @change="changeKeyword" :clearable="true">
         <template #prefix>
           <i class="jm-icon-button-search"></i>
         </template>
       </jm-input>
     </div>
     <jm-scrollbar>
-      <div class="groups" v-show="nodeCount>0">
+      <div class="groups" v-show="nodeCount > 0">
         <node-group
-          class="trigger" :type="NodeGroupEnum.TRIGGER" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
-        <node-group
-          class="inner" :type="NodeGroupEnum.INNER" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
-        <node-group
-          :type="NodeGroupEnum.LOCAL" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
-        <node-group
-          :type="NodeGroupEnum.OFFICIAL" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
-        <node-group
-          :type="NodeGroupEnum.COMMUNITY" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
+          class="trigger"
+          :type="NodeGroupEnum.TRIGGER"
+          :keyword="tempKeyword"
+          @get-node-count="getNodeCount"
+        />
+        <node-group class="inner" :type="NodeGroupEnum.INNER" :keyword="tempKeyword" @get-node-count="getNodeCount" />
+        <node-group :type="NodeGroupEnum.LOCAL" :keyword="tempKeyword" @get-node-count="getNodeCount" />
+        <node-group :type="NodeGroupEnum.OFFICIAL" :keyword="tempKeyword" @get-node-count="getNodeCount" />
+        <node-group :type="NodeGroupEnum.COMMUNITY" :keyword="tempKeyword" @get-node-count="getNodeCount" />
       </div>
-      <div class="empty" v-if="nodeCount<=0">
-        <jm-empty description="没有搜到相关结果" :image="noDataImage">
-        </jm-empty>
+      <div class="empty" v-if="nodeCount <= 0">
+        <jm-empty :description="$t('nodePanel.noResult')" :image="noDataImage"> </jm-empty>
         <div class="submit-issue" @click="submitIssue">
-          欢迎提交节点需求
+          {{ $t('nodePanel.submitRequest') }}
         </div>
       </div>
     </jm-scrollbar>
@@ -74,7 +73,8 @@ export default defineComponent({
         getGraph(),
         getWorkflowValidator(),
         container.value! as HTMLElement,
-        (nodeId: string) => emit('node-selected', nodeId));
+        (nodeId: string) => emit('node-selected', nodeId),
+      );
     });
     return {
       submitIssue,
@@ -112,8 +112,8 @@ export default defineComponent({
   transition: width 0.3s ease-in-out;
   width: @node-panel-width;
   height: calc(100% - @node-panel-top);
-  border: 1px solid #E6EBF2;
-  background: #FFFFFF;
+  border: 1px solid #e6ebf2;
+  background: #ffffff;
   position: absolute;
   left: 0;
   top: @node-panel-top;
@@ -143,7 +143,7 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-    border: 1px solid #EBEEFB;
+    border: 1px solid #ebeefb;
     z-index: 3;
     position: absolute;
     top: 78px;
@@ -153,9 +153,9 @@ export default defineComponent({
     height: 36px;
     line-height: 36px;
     text-align: center;
-    color: #6B7B8D;
+    color: #6b7b8d;
     font-size: 16px;
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     border-radius: 50%;
     cursor: pointer;
 
@@ -173,17 +173,17 @@ export default defineComponent({
     display: flex;
     justify-content: center;
     z-index: 2;
-    background-color: #FFFFFF;
+    background-color: #ffffff;
 
     ::v-deep(.el-input) {
       width: calc(100% - 40px);
     }
 
-    border-bottom: 1px solid #EBEEFB;
+    border-bottom: 1px solid #ebeefb;
 
     .jm-icon-button-search {
       font-size: 16px;
-      color: #7B8C9C;
+      color: #7b8c9c;
     }
   }
 

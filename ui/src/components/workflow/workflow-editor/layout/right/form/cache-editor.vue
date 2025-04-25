@@ -4,7 +4,7 @@
       <div class="form-content">
         <jm-input
           v-model="cacheVal"
-          placeholder="请输入缓存唯一标识"
+          :placeholder="$t('cacheEditor.placeholder')"
           maxlength="30"
           @change="changeCacheVal"
           v-if="type === CacheTypeEnum.ADD"
@@ -19,7 +19,7 @@
           <jm-input
             v-model="cacheVal"
             maxlength="30"
-            placeholder="请输入缓存唯一标识"
+            :placeholder="$t('cacheEditor.placeholder')"
             @change="changeCacheVal"
             v-else
           />

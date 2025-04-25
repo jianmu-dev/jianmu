@@ -3,7 +3,7 @@
   <div class="all-project" v-loading="allProjectLoading">
     <div class="project-operator">
       <div class="project-list">
-        <div class="text">项目列表</div>
+        <div class="text">{{ $t('allProject.projectList') }}</div>
         <jm-select @change="sortChange" :modelValue="sortType" popper-class="project-list-drop-down">
           <jm-option
             v-for="(item, index) in sortTypeList"
@@ -15,7 +15,7 @@
       </div>
       <div class="search">
         <i class="jm-icon-button-search" @click="searchProject"></i>
-        <jm-input placeholder="请输入项目名称" v-model="projectName" @change="searchProject" />
+        <jm-input :placeholder="$t('allProject.inputPlaceholder')" v-model="projectName" @change="searchProject" />
       </div>
     </div>
     <div class="divider-line"></div>
@@ -31,7 +31,7 @@
           />
         </template>
         <div class="project-empty" v-else>
-          <jm-empty description="暂无项目" :image-size="98" />
+          <jm-empty :description="$t('allProject.empty')" :image-size="98" />
         </div>
       </template>
     </div>
@@ -47,11 +47,12 @@ import { onBeforeRouteLeave, useRouter } from 'vue-router';
 import { namespace } from '@/store/modules/project';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { SortTypeEnum } from '@/api/dto/enumeration';
-
+import { useI18n } from 'vue-i18n';
 const { mapMutations } = createNamespacedHelpers(namespace);
 export default defineComponent({
   components: { ProjectGroup },
   setup() {
+    const { t } = useI18n();
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const store = useStore();
@@ -66,10 +67,10 @@ export default defineComponent({
     // 改变项目组排序后强制数据及时刷新
     const groupListRefresh = ref<boolean>(true);
     // 项目组排序类型
-    const sortTypeList = ref<Array<{ label: string; value: SortTypeEnum }>>([
-      { label: '默认排序', value: SortTypeEnum.DEFAULT_SORT },
-      { label: '最近触发', value: SortTypeEnum.LAST_EXECUTION_TIME },
-      { label: '最近修改', value: SortTypeEnum.LAST_MODIFIED_TIME },
+    const sortTypeList = computed<Array<{ label: string; value: SortTypeEnum }>>(() => [
+      { label: t('allProject.default'), value: SortTypeEnum.DEFAULT_SORT },
+      { label: t('allProject.lastExecute'), value: SortTypeEnum.LAST_EXECUTION_TIME },
+      { label: t('allProject.lastModify'), value: SortTypeEnum.LAST_MODIFIED_TIME },
     ]);
     // 所有项目组在vuex中保存的排序类型
     const sortType = computed<SortTypeEnum>(() => store.state[namespace].sortType);
@@ -115,6 +116,7 @@ export default defineComponent({
     });
 
     return {
+      t,
       projectGroups,
       projectName,
       searchProject,
@@ -131,6 +133,10 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
+//下拉菜单选项居中对齐
+.project-list-drop-down .el-select-dropdown__item {
+  text-align: center;
+}
 // 所有项目
 .all-project {
   background: #fff;
@@ -168,7 +174,7 @@ export default defineComponent({
       }
 
       ::v-deep(.el-input) {
-        width: 106px;
+        width: 170px;
       }
     }
 

@@ -1,20 +1,14 @@
 <template>
   <div class="param-button" v-if="!hidden">
-    <jm-cascader
-      placement="top"
-      :options="selectableParams"
-      @change="insertParam"
-      v-model="selectValue"
-      :offset="5"
-    />
+    <jm-cascader placement="top" :options="selectableParams" @change="insertParam" v-model="selectValue" :offset="5" />
     <div class="insert-param">
       <i class="jm-icon-link-add"></i>
-      <span class="text">参数</span>
+      <span class="text">{{ $t('paramButton.label') }}</span>
     </div>
   </div>
 </template>
 
-<script lang='ts'>
+<script lang="ts">
 import { computed, defineComponent, PropType, ref } from 'vue';
 import { ISelectableParam } from './model/data';
 
@@ -41,11 +35,11 @@ export default defineComponent({
 });
 </script>
 
-<style scoped lang='less'>
-@import "../workflow-editor/vars";
+<style scoped lang="less">
+@import '../workflow-editor/vars';
 
 .param-button {
-  color: #6B7B8D;
+  color: #6b7b8d;
   position: relative;
 
   &:hover {

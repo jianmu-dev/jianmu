@@ -47,7 +47,30 @@
         </span>
         <template #dropdown>
           <jm-dropdown-menu>
-            <jm-dropdown-item @click="logout">退出</jm-dropdown-item>
+            <jm-dropdown trigger="click" placement="bottom-start">
+              <jm-dropdown-item>
+                <span>
+                  {{ t('top.language') }}
+                  <span style="margin-left: 10px">{{ locale === 'zh' ? '简体中文' : 'English' }}</span>
+                </span>
+                <i class="el-icon-arrow-down el-icon--right"></i>
+              </jm-dropdown-item>
+              <template #dropdown>
+                <jm-dropdown-menu>
+                  <jm-dropdown-item
+                    @click="handleLocaleChange('zh')"
+                    :style="locale === 'zh' ? 'color: #3A8AE1; background: #ECF5FF' : ''"
+                    >简体中文</jm-dropdown-item
+                  >
+                  <jm-dropdown-item
+                    @click="handleLocaleChange('en')"
+                    :style="locale === 'en' ? 'color: #3A8AE1; background: #ECF5FF' : ''"
+                    >English</jm-dropdown-item
+                  >
+                </jm-dropdown-menu>
+              </template>
+            </jm-dropdown>
+            <jm-dropdown-item @click="logout">{{ t('top.logout') }}</jm-dropdown-item>
           </jm-dropdown-menu>
         </template>
       </jm-dropdown>
@@ -56,7 +79,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, ref, watch } from 'vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { namespace } from '@/store/modules/session';
@@ -66,11 +89,12 @@ import { ISessionVo } from '@/api/dto/session';
 import { version as v } from '@/../package.json';
 import { IRootState } from '@/model';
 import { IVersionVo } from '@/api/dto/common';
-
+import { useLocale } from '@/utils/i18n';
 const { mapMutations } = createNamespacedHelpers(namespace);
 
 export default defineComponent({
   setup() {
+    const { t, locale, handleLocaleChange } = useLocale();
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const store = useStore();
@@ -92,8 +116,14 @@ export default defineComponent({
 
       return rootState.versions[0];
     });
+    watch(locale, () => {
+      window.location.reload(); // 切换语言强制刷新
+    });
 
     return {
+      t,
+      locale,
+      handleLocaleChange,
       authMode,
       loaded,
       loginType,
@@ -117,7 +147,7 @@ export default defineComponent({
           proxy.deleteSession();
           // 退出登录时，将临时登录模式内容清空
           localStorage.removeItem('temp-login-mode');
-          proxy.$success('退出成功');
+          proxy.$success(t('top.LogoutSuccessful'));
 
           router.push(LOGIN_INDEX);
         } catch (err) {

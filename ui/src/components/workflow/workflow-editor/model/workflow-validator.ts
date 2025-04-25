@@ -3,6 +3,7 @@ import { NodeTypeEnum } from './data/enumeration';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import nodeWarningIcon from '../svgs/node-warning.svg';
 import { IWorkflow } from './data/common';
+import { globalT as t } from '@/utils/i18n';
 
 export type ClickNodeWarningCallbackFnType = (nodeId: string) => void;
 
@@ -65,7 +66,7 @@ export class WorkflowValidator {
     const nodes = this.graph.getNodes();
 
     if (nodes.length === 0) {
-      throw new Error('未存在任何节点');
+      throw new Error(t('workflowValidator.noNodes'));
     }
 
     if (
@@ -73,7 +74,7 @@ export class WorkflowValidator {
         [NodeTypeEnum.SHELL, NodeTypeEnum.ASYNC_TASK].includes(new CustomX6NodeProxy(node).getData().getType()),
       )
     ) {
-      throw new Error('至少有一个shell或任务节点');
+      throw new Error(t('workflowValidator.atLeastOneShellOrTaskNode'));
     }
 
     if (nodes.length > 1) {
@@ -87,7 +88,7 @@ export class WorkflowValidator {
       if (unconnectedNodes.length > 0) {
         const nodeName = new CustomX6NodeProxy(unconnectedNodes[0]).getData().getName();
         // 存在未连接的节点
-        throw new Error(`${nodeName}节点：尚未连接任何其他节点`);
+        throw new Error(`${nodeName}${t('workflowValidator.nodeNotConnected')}`);
       }
     }
 
@@ -96,7 +97,7 @@ export class WorkflowValidator {
       try {
         await workflowNode.validate();
       } catch ({ errors }) {
-        throw new Error(`${workflowNode.getName()}节点：${errors[0].message}`);
+        throw new Error(`${workflowNode.getName()}${t('workflowValidator.node')}${errors[0].message}`);
       }
     }
   }
@@ -137,7 +138,7 @@ export class WorkflowValidator {
     const currentTrigger = this.graph.getNodes().find(node => new CustomX6NodeProxy(node).isTrigger());
 
     if (currentTrigger) {
-      this.proxy.$warning('只能有一个触发器');
+      this.proxy.$warning(t('workflowValidator.onlyOneTrigger'));
       return false;
     }
 

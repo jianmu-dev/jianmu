@@ -2,31 +2,16 @@
   <!-- 搜索结果 -->
   <div class="search-project">
     <div class="search">
-      <jm-select v-model="selectValue" placeholder="请选择项目组" @change="selectOption">
-        <jm-option
-          v-for="item in groupOptions"
-          :key="item.value"
-          :value="item.value"
-          :label="item.label"
-        >
-        </jm-option>
+      <jm-select v-model="selectValue" :placeholder="$t('searchProject.selectGroup')" @change="selectOption">
+        <jm-option v-for="item in groupOptions" :key="item.value" :value="item.value" :label="item.label"> </jm-option>
       </jm-select>
       <div class="search-container">
-        <jm-input
-          v-model="projectName"
-          @change="searchProject"
-          placeholder="请输入项目名称"
-        />
+        <jm-input v-model="projectName" @change="searchProject" :placeholder="$t('searchProject.inputName')" />
         <i class="jm-icon-button-search"></i>
       </div>
     </div>
     <div class="project">
-      <project-group
-        v-if="initialized"
-        :project-group="currentGroup"
-        :name="currentSearchName"
-        :pageable="true"
-      />
+      <project-group v-if="initialized" :project-group="currentGroup" :name="currentSearchName" :pageable="true" />
     </div>
   </div>
 </template>

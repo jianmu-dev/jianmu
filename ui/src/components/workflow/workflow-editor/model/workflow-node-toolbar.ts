@@ -4,6 +4,7 @@ import listen from 'good-listener';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import { NodeTypeEnum } from './data/enumeration';
 import { NODE, PORT } from '../shape/gengral-config';
+import { globalT as t } from '@/utils/i18n';
 
 const { toolbarDistance, icon: { width: iconW, marginBottom: iconMarginBottom }, textMaxHeight } = NODE;
 const { fill: circleBgColor } = PORT;
@@ -101,23 +102,23 @@ export class WorkflowNodeToolbar {
     const nodeProxy = new CustomX6NodeProxy(node);
     const nodeData = nodeProxy.getData();
 
-    let msg = '<div>确定要删除吗?</div>';
-    msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${nodeData.getName()}</div>`;
-    let title = '删除';
+    let msg = `<div>${t('workflowNodeToolbar.confirmDelete')}</div>`;
+    msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">${t('workflowNodeToolbar.name')}${nodeData.getName()}</div>`;
+    let title = t('workflowNodeToolbar.delete');
     switch (nodeData.getType()) {
       case NodeTypeEnum.ASYNC_TASK:
       case NodeTypeEnum.SHELL:
-        title += '节点';
+        title += `${t('workflowNodeToolbar.node')}`;
         break;
       case NodeTypeEnum.CRON:
       case NodeTypeEnum.WEBHOOK:
-        title += '触发器';
+        title += `${t('workflowNodeToolbar.trigger')}`;
         break;
     }
 
     this.proxy.$confirm(msg, title, {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+      confirmButtonText: t('workflowNodeToolbar.confirm'),
+      cancelButtonText: t('workflowNodeToolbar.cancel'),
       type: 'warning',
       dangerouslyUseHTMLString: true,
     }).then(async () => {
