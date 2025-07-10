@@ -97,7 +97,7 @@
             </div>
           </div>
           <jm-form-item
-            label="执行失败时"
+            :label="$t('asyncTaskPanel.failureMode')"
             class="node-item"
             prop="failureMode"
             :rules="nodeData.getFormRules().failureMode"
@@ -187,7 +187,19 @@ export default defineComponent({
     const versionLoading = ref<boolean>(false);
     const failureVisible = ref<boolean>(false);
     const tabFlag = ref<boolean>(true);
+    const mergeParams = (oldParams: any[], newParams: any[]) => {
+      return newParams.map(newItem => {
+        const oldItem = oldParams.find(
+          item => (item.ref === newItem.ref || item.name === newItem.name) && item.type === newItem.type,
+        ); // 同一节点的不同版本的某个输入参数项可能出现ref相同name不同或ref不同name相同
+        if (oldItem) {
+          return { ...newItem, value: oldItem.value };
+        }
+        return newItem;
+      });
+    };
     const changeVersion = async () => {
+      const oldInputs = [...form.value.inputs]; // 备份旧 inputs
       form.value.inputs.length = 0;
       form.value.outputs.length = 0;
       try {
@@ -204,6 +216,8 @@ export default defineComponent({
           const { inputParams: inputs, outputParams: outputs, description: versionDescription } = list;
           pushParams(form.value as AsyncTask, inputs, outputs, versionDescription);
         }
+        // 保留旧输入值,pushParams 后合并
+        form.value.inputs.splice(0, form.value.inputs.length, ...mergeParams(oldInputs, form.value.inputs));
       } catch (err) {
         proxy.$throw(err, proxy);
       } finally {
